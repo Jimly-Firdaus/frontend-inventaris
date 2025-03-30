@@ -10,9 +10,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import type { Todo, Meta } from 'components/models';
 import ExampleComponent from 'components/ExampleComponent.vue';
+
+import { useStore } from 'src/stores';
+
+const store = useStore();
 
 const todos = ref<Todo[]>([
   {
@@ -40,4 +43,9 @@ const todos = ref<Todo[]>([
 const meta = ref<Meta>({
   totalCount: 1200
 });
+
+
+onMounted(() => {
+  store.auth.login();
+})
 </script>

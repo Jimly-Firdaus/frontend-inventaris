@@ -73,7 +73,66 @@ export default defineConfig((/* ctx */) => {
             lintCommand: 'eslint -c ./eslint.config.js "./src*/**/*.{ts,js,mjs,cjs,vue}"',
             useFlatConfig: true
           }
-        }, { server: false }]
+        }, { server: false }],
+        [
+          "unplugin-auto-import/vite",
+          {
+            // targets to transform
+            include: [
+              /\.[tj]sx?$/, // .ts, .tsx, .js, .jsx
+              /\.vue$/,
+              /\.vue\?vue/, // .vue
+              /\.md$/, // .md
+            ],
+
+            // global imports to register
+            imports: [
+              // presets
+              "vue",
+              "vue-router",
+              "@vueuse/core",
+              // custom
+              {
+                axios: [
+                  // default imports
+                  ["default", "axios"], // import { default as axios } from 'axios',
+                ],
+                quasar: ["useQuasar"],
+                // "[package-name]": [
+                //   "[import-names]",
+                //   // alias
+                //   ["[from]", "[alias]"],
+                // ],
+              },
+            ],
+            // Enable auto import by filename for default module exports under directories
+            defaultExportByFilename: false,
+
+            // Filepath to generate corresponding .d.ts file.
+            // Defaults to './auto-imports.d.ts' when `typescript` is installed locally.
+            // Set `false` to disable.
+            // dts: "./auto-imports.d.ts",
+            dts: true,
+
+            // Auto import inside Vue template
+            // see https://github.com/unjs/unimport/pull/15 and https://github.com/unjs/unimport/pull/72
+            vueTemplate: false,
+
+            // Custom resolvers, compatible with `unplugin-vue-components`
+            // see https://github.com/antfu/unplugin-auto-import/pull/23/
+            resolvers: [
+              /* ... */
+            ],
+
+            // Generate corresponding .eslintrc-auto-import.json file.
+            // eslint globals Docs - https://eslint.org/docs/user-guide/configuring/language-options#specifying-globals
+            eslintrc: {
+              enabled: false, // Default `false`
+              filepath: "./.eslintrc-auto-import.json", // Default `./.eslintrc-auto-import.json`
+              globalsPropValue: true, // Default `true`, (true | false | 'readonly' | 'readable' | 'writable' | 'writeable')
+            },
+          },
+        ],
       ]
     },
 
