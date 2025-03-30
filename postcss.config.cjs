@@ -1,12 +1,11 @@
 // https://github.com/michael-ciniawsky/postcss-load-config
 
-import autoprefixer from 'autoprefixer'
 // import rtlcss from 'postcss-rtlcss'
 
-export default {
+module.exports = {
   plugins: [
     // https://github.com/postcss/autoprefixer
-    autoprefixer({
+    require("autoprefixer")({
       overrideBrowserslist: [
         'last 4 Chrome versions',
         'last 4 Firefox versions',
@@ -18,6 +17,7 @@ export default {
         'last 4 iOS versions'
       ]
     }),
+    require("tailwindcss"),
 
     // https://github.com/elchininet/postcss-rtlcss
     // If you want to support RTL css, then
