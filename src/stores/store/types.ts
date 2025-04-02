@@ -29,15 +29,17 @@ export interface GetAllStoresFilter {
   sort?: Sort;
 }
 
-// export interface GetAllStoresResponseData {
-//   id: string;
-//   name: string;
-//   user_id: string;
-//   username: string;
-//   updatedAt: string;
-// }
+export interface GetAllStoresResponseData {
+  id: string;
+  name: string;
+  updated_at: string;
+}
 
-// export interface GetAllStoresResponse {
-//   data: GetAllStoresResponseData[];
-//   meta?: PaginationMeta;
-// }
+export interface GetAllStoresResponse {
+  data: GetAllStoresResponseData[];
+  meta?: PaginationMeta;
+}
+
+export interface CreateStoreRequest {
+  name: string;
+}

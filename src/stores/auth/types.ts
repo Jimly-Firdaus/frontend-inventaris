@@ -1,4 +1,4 @@
-import { USER_ROLE } from "src/constants/user";
+import type { USER_ROLE } from "src/constants/user";
 
 export interface User {
   username: string;

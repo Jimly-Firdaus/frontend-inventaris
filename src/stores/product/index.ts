@@ -1,37 +1,52 @@
-import { Pagination, Sort, PaginationMeta } from "../store/types";
+// import { api } from "boot/axios";
+import { defineStore } from "pinia";
+import type {
+  GetAllProductsResponseData,
+  GetAllProductsQuery,
+  CreateProductRequest,
+} from "./types";
 
-export interface GetAllProductsQuery {
-	name?: string;
-	page?: number;
-	limit?: number;
-	order_by?: string;
-	asc?: boolean;
-}
+export const useProductsStore = defineStore("products", () => {
+  const products = ref<GetAllProductsResponseData[]>([]);
 
-export interface GetAllProductsFilter {
-	name?: string;
-	pagination?: Pagination;
-	sort?: Sort;
-}
+  const getAllProducts = (payload: GetAllProductsQuery) => {
+    console.log(payload)
+    products.value = [
+      {
+        id: "asdad",
+        name: "Sabun A",
+        buy_price: 12000,
+        wholesale_sell_price: 12500,
+        retail_sell_price: 14000,
+        stock: 500,
+        updated_at: "2025-04-02T10:00:00Z",
+      },
+      {
+        id: "asdada",
+        name: "Sikat Gigi",
+        buy_price: 7500,
+        wholesale_sell_price: 8000,
+        retail_sell_price: 9000,
+        stock: 100,
+        updated_at: "2025-04-02T10:00:00Z",
+      },
+    ];
+  };
 
-export interface GetAllProductsResponseData {
-	id: string;
-  name: string;
-  buy_price: number;
-  wholesale_sell_price: number;
-  retail_sell_price: number;
-  stock: number;
-  updated_at: string;
-}
+  const createNewProduct = (req: CreateProductRequest) => {
+    const newProduct: GetAllProductsResponseData = {
+      id: "axaxa",
+      name: req.name,
+      updated_at: "2025-04-02T10:00:00Z",
+    }
 
-export interface GetAllProductsResponse {
-	data: GetAllProductsResponseData
-	meta?: PaginationMeta;
-}
+    products.value.push(newProduct);
+  };
 
-export interface CreateProductRequest {
-	name: string;
-	buy_price: number;
-	wholesale_sell_price: number;
-	retail_sell_price: number;
-}
+  return {
+    products,
+
+    getAllProducts,
+    createNewProduct,
+  };
+});
