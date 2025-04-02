@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useStore } from "src/stores";
+import { USER_ROLE } from "src/constants/user";
 
 const store = useStore();
 const router = useRouter();
@@ -12,7 +13,18 @@ const isPwd = ref(true);
 
 const onLogin = async () => {
   store.auth.login(formData.value);
-  await router.push({ name: "OwnerDashboardPage" });
+
+  if (store.auth.user) {
+    switch (store.auth.user.role) {
+      case USER_ROLE.OWNER:
+      case USER_ROLE.STORE_MANAGER:
+        await router.push({ name: "TransactionsPage" });
+        break;
+      case USER_ROLE.WAREHOUSE_MANAGER:
+        await router.push({ name: "ManageProductsPage" });
+        break;
+    }
+  }
 };
 </script>
 <template>
@@ -22,8 +34,8 @@ const onLogin = async () => {
     >
       <q-card-section>
         <p
-          class="text-card-title text-center"
-          :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+          class="text-card-title text-center text-grey-10 tw-font-bold tw-mb-0"
+          :class="$q.screen.lt.sm ? '' : ''"
         >
           Login
         </p>
@@ -34,7 +46,8 @@ const onLogin = async () => {
             outlined
             v-model="formData.username"
             label="Username"
-            class="tw-mb-2"
+            class="tw-mb-2 text-body-medium"
+            :class="$q.screen.lt.sm ? 'text-mobile' : ''"
             lazy-rules
             :rules="[
               (val) => (val && val.length > 0) || 'Field tidak boleh kosong!',
@@ -50,6 +63,8 @@ const onLogin = async () => {
             :rules="[
               (val) => (val && val.length > 0) || 'Field tidak boleh kosong!',
             ]"
+            class="text-body-medium"
+            :class="$q.screen.lt.sm ? 'text-mobile' : ''"
           >
             <template v-slot:append>
               <q-icon
@@ -68,6 +83,7 @@ const onLogin = async () => {
             class="tw-w-full"
             color="primary"
             icon="login"
+            rounded
           />
         </q-form>
       </q-card-section>

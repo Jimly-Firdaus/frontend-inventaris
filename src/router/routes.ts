@@ -26,14 +26,14 @@ const routes: RouteRecordRaw[] = [
       {
         name: "ManageProductsPage",
         path: "/manage/products",
-        component: () => import("pages/Owner/ManageProductsPage.vue"),
+        component: () => import("pages/ManageProductsPage.vue"),
       },
 
       // store manager route
       {
         name: "ManagePurchasePage",
         path: "/manage/purchase",
-        component: () => import("pages/Owner/ManagePurchasePage.vue"),
+        component: () => import("pages/StoreManager/ManagePurchasePage.vue"),
       },
     ],
   },

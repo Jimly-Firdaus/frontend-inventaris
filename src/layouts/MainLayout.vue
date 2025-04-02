@@ -1,3 +1,38 @@
+<script setup lang="ts">
+import { ref } from "vue";
+import { TABS_AVAILABLE_BY_USER_ROLE } from "src/constants/user";
+import { useStore } from "src/stores";
+import { useRouter } from "vue-router";
+
+const store = useStore();
+const router = useRouter();
+const leftDrawerOpen = ref(false);
+const currentActiveTab = ref(0);
+
+const currentTabs = computed(() =>
+  store.auth.user ? TABS_AVAILABLE_BY_USER_ROLE[store.auth.user.role] : [],
+);
+
+const onGoToPage = async (pageName: string, activeTab: number) => {
+  currentActiveTab.value = activeTab;
+  await router.push({ name: pageName });
+};
+
+function toggleLeftDrawer() {
+  leftDrawerOpen.value = !leftDrawerOpen.value;
+}
+
+const logout = async () => {
+  store.auth.logout();
+  await router.push({ name: "LoginPage" });
+};
+
+// TODO: watch for route change, need to update currentActiveTab so it render appropriately
+
+onMounted(async () => {
+  if (!store.auth.user) await router.push({ name: "LoginPage" });
+});
+</script>
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
@@ -9,74 +44,57 @@
           icon="menu"
           aria-label="Menu"
           @click="toggleLeftDrawer"
+          color="primary"
         />
-
-        <q-tabs
-          v-model="tab"
+        <q-space />
+        <q-btn
+          flat
           dense
-          class="text-grey"
-          active-color="primary"
-          indicator-color="primary"
-          align="justify"
-          narrow-indicator
-        >
-          <q-tab
-            v-for="tabData in tabs"
-            :key="tabData.id"
-            :name="tabData.id"
-            :label="tabData.label"
-          />
-        </q-tabs>
+          no-caps
+          icon="logout"
+          aria-label="logout"
+          @click="logout"
+          label="Log Out"
+          color="primary"
+        />
       </q-toolbar>
     </q-header>
 
-    <!-- <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
-      <q-list>
+    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
+      <q-list class="tw-mt-24">
         <q-item-label
+          v-for="(tabData, idx) in currentTabs"
           header
+          :key="tabData.id"
+          @click="onGoToPage(tabData.routeName, idx)"
+          class="tw-cursor-pointer"
+          :class="
+            currentActiveTab == idx ? 'bg-primary text-white' : 'text-grey-10'
+          "
         >
-          Essential Links
+          <p class="tw-mb-0 text-body-large" :class="$q.screen.lt.sm ? 'text-mobile' : ''">
+            {{ tabData.tabLabel }}
+          </p>
         </q-item-label>
-
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
-        />
       </q-list>
-    </q-drawer> -->
+    </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <router-view v-slot="{ Component }">
+        <transition name="fade" mode="out-in" appear>
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </q-page-container>
   </q-layout>
 </template>
-
-<script setup lang="ts">
-import { ref } from "vue";
-
-const tabs = [
-  {
-    id: 1,
-    label: "Barang",
-  },
-  {
-    id: 2,
-    label: "Transaksi",
-  },
-  {
-    id: 3,
-    label: "Toko",
-  },
-];
-const tab = ref(tabs[0]?.id);
-const leftDrawerOpen = ref(false);
-
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
+<style scoped lang="scss">
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease;
 }
-</script>
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
