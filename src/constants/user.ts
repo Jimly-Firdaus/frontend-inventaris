@@ -3,3 +3,37 @@ export enum USER_ROLE {
   WAREHOUSE_MANAGER = "warehouse",
   STORE_MANAGER = "store"
 }
+
+export const TABS_AVAILABLE_BY_USER_ROLE = {
+  [USER_ROLE.OWNER]: [
+    {
+      id: 1,
+      tabLabel: "Transaksi",
+      routeName: "TransactionsPage",
+    },
+    {
+      id: 2,
+      tabLabel: "Toko",
+      routeName: "ManageStoresPage",
+    },
+    {
+      id: 3,
+      tabLabel: "Barang",
+      routeName: "ManageProductsPage",
+    },
+  ],
+  [USER_ROLE.WAREHOUSE_MANAGER]: [
+    {
+      id: 1,
+      tabLabel: "Barang",
+      routeName: "ManageProductsPage",
+    },
+  ],
+  [USER_ROLE.STORE_MANAGER]: [
+    {
+      id: 1,
+      tabLabel: "Transaksi",
+      routeName: "TransactionsPage",
+    },
+  ]
+}
