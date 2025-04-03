@@ -3,15 +3,16 @@ import type { QTableProps } from "quasar";
 import { useStore } from "src/stores";
 import type { GetAllProductsQuery } from "src/stores/product/types";
 import { useRouter, useRoute } from "vue-router";
-import BackButton from "src/components/Button/BackButton.vue";
-import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
+import AddNewProductModal from "src/components/Modal/AddNewProductModal.vue";
+import ManageProductDetails from "src/components/Product/ManageProductDetails.vue";
 
+const $q = useQuasar();
 const store = useStore();
 const router = useRouter();
 const route = useRoute();
+const selectedProductId = computed(() => route.query.productId as string);
 
 const showAddNewProductModal = ref(false);
-const showConfirmationModal = ref(false);
 
 const nameFilter = ref("");
 
@@ -20,16 +21,6 @@ const filteredProducts = computed(() => {
   if (nameFilter.value.length > 0)
     return allProducts.value.filter((p) => p.name.includes(nameFilter.value));
   else return allProducts.value;
-});
-
-const selectedProductId = computed(() => route.query.productId as string);
-const selectedProduct = computed(() =>
-  allProducts.value.find((p) => p.id == selectedProductId.value),
-);
-const productPrice = ref({
-  buyPrice: ref(selectedProduct.value?.buy_price),
-  wholesaleSellPrice: ref(selectedProduct.value?.wholesale_sell_price),
-  retailSellPrice: ref(selectedProduct.value?.retail_sell_price),
 });
 
 const columns: QTableProps["columns"] = [
@@ -71,22 +62,13 @@ const onClickProduct = async (productId: string) => {
       productId: productId,
     },
   });
-  productPrice.value = {
-    buyPrice: selectedProduct.value?.buy_price,
-    wholesaleSellPrice: selectedProduct.value?.wholesale_sell_price,
-    retailSellPrice: selectedProduct.value?.retail_sell_price,
-  };
-  console.log(productPrice.value);
-};
-
-// TODO: implement this
-const onSaveProductChanges = () => {
-  console.log(productPrice.value);
 };
 
 onMounted(() => {
-  const req: GetAllProductsQuery = {};
-  store.products.getAllProducts(req);
+  if (!allProducts.value.length) {
+    const req: GetAllProductsQuery = {};
+    store.products.getAllProducts(req);
+  }
 });
 </script>
 <template>
@@ -94,7 +76,7 @@ onMounted(() => {
     <template v-if="!selectedProductId">
       <div class="tw-flex tw-w-full tw-items-center">
         <span
-          class="text-grey-10"
+          class="text-grey-10 tw-font-bold"
           :class="$q.screen.lt.sm ? 'text-h6' : 'text-h4'"
           >Daftar Barang</span
         >
@@ -109,6 +91,7 @@ onMounted(() => {
           color="primary"
         />
       </div>
+      <q-separator size="1px" class="tw-mb-10 tw-mt-2" color="primary" />
 
       <q-input
         v-model="nameFilter"
@@ -127,7 +110,11 @@ onMounted(() => {
         :rows-per-page-options="[0]"
       >
         <template v-slot:body="props">
-          <q-tr :props="props" @click="onClickProduct(props.row.id)">
+          <q-tr
+            :props="props"
+            @click="onClickProduct(props.row.id)"
+            class="tw-cursor-pointer"
+          >
             <q-td key="name" :props="props">
               {{ props.row.name }}
             </q-td>
@@ -154,75 +141,13 @@ onMounted(() => {
       </q-table>
     </template>
     <template v-else>
-      <BackButton is-remove-route-query />
-      <p class="text-grey-10 tw-mt-4" :class="$q.screen.lt.sm ? 'text-h6' : 'text-h4'">Detail Informasi Barang</p>
-      <q-card>
-        <q-card-section>
-          <p class="text-body-medium tw-mb-0" :class="$q.screen.lt.sm ? 'text-mobile' : ''">
-            Nama Barang: {{ selectedProduct?.name }}
-          </p>
-        </q-card-section>
-        <q-card-section>
-          <p class="text-body-medium tw-mb-0" :class="$q.screen.lt.sm ? 'text-mobile' : ''">
-            Total Stock Barang: {{ selectedProduct?.stock }}
-          </p>
-        </q-card-section>
-        <q-card-section>
-          <div class="tw-flex tw-items-center text-body-medium" :class="$q.screen.lt.sm ? 'text-mobile' : ''">
-            Modal Barang:
-            <q-input
-              dense
-              outlined
-              v-model="productPrice.buyPrice"
-              class="tw-ml-2 text-body-medium"
-              :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-              type="number"
-            />
-          </div>
-        </q-card-section>
-        <q-card-section>
-          <div class="tw-flex tw-items-center text-body-medium" :class="$q.screen.lt.sm ? 'text-mobile' : ''">
-            Harga Grosir Barang:
-            <q-input
-              dense
-              outlined
-              v-model="productPrice.wholesaleSellPrice"
-              class="tw-ml-2 text-body-medium"
-              :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-              type="number"
-            />
-          </div>
-        </q-card-section>
-        <q-card-section>
-          <div class="tw-flex tw-items-center text-body-medium" :class="$q.screen.lt.sm ? 'text-mobile' : ''">
-            Harga Eceran Barang:
-            <q-input
-              dense
-              outlined
-              v-model="productPrice.retailSellPrice"
-              class="tw-ml-2 text-body-medium"
-              :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-              type="number"
-            />
-          </div>
-        </q-card-section>
-      </q-card>
-
-      <div class="tw-mt-4">
-        <q-btn
-          outline
-          no-caps
-          label="Simpan"
-          @click="showConfirmationModal = true"
-          :size="$q.screen.lt.sm ? 'md' : 'lg'"
-        />
-      </div>
-      <ConfirmationModal
-        copy-text="Apakah Anda yakin ingin memperbarui harga produk ini?"
-        v-model="showConfirmationModal"
-        @continue="onSaveProductChanges"
-      />
+      <ManageProductDetails :product-id="selectedProductId" />
     </template>
+
+    <AddNewProductModal
+      v-if="showAddNewProductModal"
+      v-model="showAddNewProductModal"
+    />
   </q-page>
 </template>
 <style scoped lang="scss">

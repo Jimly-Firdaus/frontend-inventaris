@@ -17,9 +17,9 @@ export interface GetAllProductsFilter {
 export interface GetAllProductsResponseData {
 	id: string;
   name: string;
-  buy_price?: number;
-  wholesale_sell_price?: number;
-  retail_sell_price?: number;
+  buy_price?: string | undefined;
+  wholesale_sell_price?: string | undefined;
+  retail_sell_price?: string | undefined;
   stock?: number;
   updated_at: string;
 }
@@ -31,7 +31,15 @@ export interface GetAllProductsResponse {
 
 export interface CreateProductRequest {
 	name: string;
-	buy_price?: number;
-	wholesale_sell_price?: number;
-	retail_sell_price?: number;
+  stock: number;
+	buy_price?: string | undefined;
+	wholesale_sell_price?: string | undefined;
+	retail_sell_price?: string | undefined;
+}
+
+export interface UpdateProductRequest {
+  name?: string;
+	buy_price?: string;
+  wholesale_sell_price?: string;
+  retail_sell_price?: string;
 }

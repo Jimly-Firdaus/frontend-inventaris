@@ -1,50 +1,57 @@
 <script setup lang="ts">
 import { useQuasar } from "quasar";
-import { useStore } from "src/stores";
-import type { CreateStoreRequest } from "src/stores/store/types";
+// import { useStore } from "src/stores";
+// import type { CreateStoreRequest } from "src/stores/store/types";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
 
+const props = defineProps({
+  userId: {
+    type: String,
+    required: true,
+  }
+})
+
 const $q = useQuasar();
-const store = useStore();
+// const store = useStore();
 const modelValue = defineModel<boolean>({ required: true, default: false });
 
-const newStoreName = ref("");
+const newPassword = ref("");
 const showConfirmationModal = ref(false);
 
 // TODO: integrate with API
 const onAddNewStore = () => {
-  console.log("Added new store", newStoreName.value);
-  const req: CreateStoreRequest = {
-    name: newStoreName.value,
-  };
-  store.stores.createNewStore(req);
+  console.log("New password", newPassword.value, props.userId);
+  // const req: CreateStoreRequest = {
+  //   name: newStoreName.value,
+  // };
+  // store.stores.createNewStore(req);
 
   modelValue.value = false;
 
   $q.notify({
-    message: "Berhasil menambahkan toko baru!",
+    message: "Berhasil mengupdate password!",
     color: "primary",
   });
 };
 </script>
 <template>
-  <q-dialog v-model="modelValue">
+<q-dialog v-model="modelValue">
     <q-card class="tw-w-full tw-p-8 !tw-rounded-3xl">
       <q-card-section class="tw-p-0">
         <p
           class="tw-mb-0 text-body-large tw-font-bold text-center text-grey-10"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
         >
-          Tambah Toko Baru
+          Ubah Password
         </p>
       </q-card-section>
       <q-card-section>
         <q-input
-          v-model="newStoreName"
+          v-model="newPassword"
           outlined
-          label="Nama Toko"
+          label="Password Baru"
           lazy-rules
-          :rules="[(val: string) => !!val || 'Nama toko tidak boleh kosong!']"
+          :rules="[(val: string) => !!val || 'Password tidak boleh kosong!']"
           class="text-body-medium"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
         />
@@ -60,7 +67,7 @@ const onAddNewStore = () => {
         />
         <q-btn
           no-caps
-          :label="$q.screen.lt.sm ? 'Tambah' : 'Tambah Toko'"
+          :label="$q.screen.lt.sm ? 'Ubah' : 'Ubah Password'"
           @click="showConfirmationModal = true"
           color="primary"
           :size="$q.screen.lt.sm ? 'md' : 'lg'"
@@ -70,10 +77,12 @@ const onAddNewStore = () => {
     </q-card>
 
     <ConfirmationModal
-      :copy-text="`Apakah Anda yakin ingin menambahkan toko ${newStoreName}?`"
+      :copy-text="`Apakah Anda yakin ingin mengubah password?`"
       v-model="showConfirmationModal"
       @continue="onAddNewStore"
     />
   </q-dialog>
 </template>
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+
+</style>

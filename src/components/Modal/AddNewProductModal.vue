@@ -1,30 +1,35 @@
 <script setup lang="ts">
 import { useQuasar } from "quasar";
 import { useStore } from "src/stores";
-import type { CreateStoreRequest } from "src/stores/store/types";
+import type { CreateProductRequest } from "src/stores/product/types";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
 
 const $q = useQuasar();
 const store = useStore();
 const modelValue = defineModel<boolean>({ required: true, default: false });
 
-const newStoreName = ref("");
+const newProduct = ref<CreateProductRequest>({
+  name: "",
+  stock: 0,
+  buy_price: undefined,
+  wholesale_sell_price: undefined,
+  retail_sell_price: undefined,
+});
 const showConfirmationModal = ref(false);
 
 // TODO: integrate with API
-const onAddNewStore = () => {
-  console.log("Added new store", newStoreName.value);
-  const req: CreateStoreRequest = {
-    name: newStoreName.value,
-  };
-  store.stores.createNewStore(req);
+const onAddNewProduct = () => {
+  console.log("Added new product", newProduct.value);
+  if (newProduct.value) {
+    store.products.createNewProduct(newProduct.value);
 
-  modelValue.value = false;
+    modelValue.value = false;
 
-  $q.notify({
-    message: "Berhasil menambahkan toko baru!",
-    color: "primary",
-  });
+    $q.notify({
+      message: "Berhasil menambahkan barang baru!",
+      color: "primary",
+    });
+  }
 };
 </script>
 <template>
@@ -35,18 +40,43 @@ const onAddNewStore = () => {
           class="tw-mb-0 text-body-large tw-font-bold text-center text-grey-10"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
         >
-          Tambah Toko Baru
+          Tambah Barang Baru
         </p>
       </q-card-section>
-      <q-card-section>
+      <q-card-section class="tw-flex tw-flex-col tw-gap-y-4">
         <q-input
-          v-model="newStoreName"
+          hide-bottom-space
+          v-model="newProduct.name"
           outlined
-          label="Nama Toko"
+          label="Nama Barang"
           lazy-rules
-          :rules="[(val: string) => !!val || 'Nama toko tidak boleh kosong!']"
+          :rules="[(val: string) => !!val || 'Nama barang tidak boleh kosong!']"
           class="text-body-medium"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+        />
+        <q-input
+          v-model="newProduct.stock"
+          outlined
+          label="Jumlah Stock"
+          type="number"
+        />
+        <q-input
+          v-model="newProduct.buy_price"
+          outlined
+          label="Modal"
+          type="number"
+        />
+        <q-input
+          v-model="newProduct.wholesale_sell_price"
+          outlined
+          label="Harga Grosir"
+          type="number"
+        />
+        <q-input
+          v-model="newProduct.retail_sell_price"
+          outlined
+          label="Harga Eceran"
+          type="number"
         />
       </q-card-section>
       <q-card-section class="row justify-center tw-gap-x-4">
@@ -60,7 +90,7 @@ const onAddNewStore = () => {
         />
         <q-btn
           no-caps
-          :label="$q.screen.lt.sm ? 'Tambah' : 'Tambah Toko'"
+          :label="$q.screen.lt.sm ? 'Tambah' : 'Tambah Barang'"
           @click="showConfirmationModal = true"
           color="primary"
           :size="$q.screen.lt.sm ? 'md' : 'lg'"
@@ -70,9 +100,9 @@ const onAddNewStore = () => {
     </q-card>
 
     <ConfirmationModal
-      :copy-text="`Apakah Anda yakin ingin menambahkan toko ${newStoreName}?`"
+      :copy-text="`Apakah Anda yakin ingin menambahkan barang ${newProduct?.name}?`"
       v-model="showConfirmationModal"
-      @continue="onAddNewStore"
+      @continue="onAddNewProduct"
     />
   </q-dialog>
 </template>

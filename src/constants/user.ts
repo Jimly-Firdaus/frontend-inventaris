@@ -21,6 +21,11 @@ export const TABS_AVAILABLE_BY_USER_ROLE = {
       tabLabel: "Barang",
       routeName: "ManageProductsPage",
     },
+    {
+      id: 4,
+      tabLabel: "Akun Gudang",
+      routeName: "ManageWarehouseAccountPage",
+    },
   ],
   [USER_ROLE.WAREHOUSE_MANAGER]: [
     {

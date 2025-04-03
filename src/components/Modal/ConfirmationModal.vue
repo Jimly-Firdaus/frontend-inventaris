@@ -1,6 +1,7 @@
 <script setup lang="ts">
 defineProps({
   copyText: String,
+  isWarning: Boolean,
 });
 const modelValue = defineModel<boolean>({ required: true, default: false });
 const emit = defineEmits<{
@@ -36,10 +37,11 @@ const onConfirm = (confirm = true) => {
           class="tw-rounded-2xl text-grey-10 tw-w-[100px]"
         />
         <q-btn
+          unelevated
           no-caps
           label="Ya"
           @click="onConfirm()"
-          color="primary"
+          :color="isWarning ? 'negative' : 'primary'"
           :size="$q.screen.lt.sm ? 'md' : 'lg'"
           class="tw-rounded-2xl text-grey-10 tw-w-[100px]"
         />

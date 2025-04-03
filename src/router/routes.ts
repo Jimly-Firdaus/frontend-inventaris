@@ -21,6 +21,11 @@ const routes: RouteRecordRaw[] = [
         path: "/transactions",
         component: () => import("pages/Owner/TransactionsPage.vue"),
       },
+      {
+        name: "ManageWarehouseAccountPage",
+        path: "/manage/warehouse-account",
+        component: () => import("pages/Owner/ManageWarehouseAccountPage.vue"),
+      },
 
       // warehouse manager route
       {

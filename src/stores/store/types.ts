@@ -43,3 +43,4 @@ export interface GetAllStoresResponse {
 export interface CreateStoreRequest {
   name: string;
 }
+
