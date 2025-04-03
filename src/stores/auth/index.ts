@@ -1,4 +1,4 @@
-import { api } from "boot/axios";
+// import { api } from "boot/axios";
 import { defineStore } from "pinia";
 import type {
   LoginResponse,
@@ -12,8 +12,8 @@ export const useAuthStore = defineStore("auth", () => {
   const users = ref<GetUsersResponseData[]>([]);
   const userRole = ref("");
   const login = async (payload: { username: string; password: string }) => {
-    const res = await api.post("/login", payload);
-    console.log("LOGIN called", res);
+    // const res = await api.post("/login", payload);
+    // console.log("LOGIN called", res);
     user.value = {
       token: "random-token",
       role: USER_ROLE.OWNER,
