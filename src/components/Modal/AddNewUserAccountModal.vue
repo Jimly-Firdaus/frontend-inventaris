@@ -12,7 +12,7 @@ const props = defineProps({
   },
   storeId: String,
   storeName: String,
-})
+});
 
 const $q = useQuasar();
 const store = useStore();
@@ -24,7 +24,7 @@ const newUser = ref<CreateUserRequest>({
   role: props.userRole,
   store_id: props.storeId,
   store_name: props.storeName,
-})
+});
 const showConfirmationModal = ref(false);
 
 // TODO: integrate with API
@@ -81,6 +81,9 @@ const onAddNewUserAccount = () => {
           class="tw-rounded-2xl text-grey-10"
         />
         <q-btn
+          :disable="
+            newUser.username.length == 0 || newUser.password.length == 0
+          "
           no-caps
           :label="$q.screen.lt.sm ? 'Tambah' : 'Tambah User'"
           @click="showConfirmationModal = true"

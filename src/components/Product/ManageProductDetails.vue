@@ -4,6 +4,7 @@ import type { UpdateProductRequest } from "src/stores/product/types";
 import { useRouter } from "vue-router";
 import BackButton from "src/components/Button/BackButton.vue";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
+import AddProductStockModal from "src/components/Modal/AddProductStockModal.vue";
 
 const props = defineProps({
   productId: {
@@ -24,6 +25,7 @@ const confirmationModalCopy = computed(() =>
     ? "Apakah Anda yakin ingin menghapus barang ini?"
     : "Apakah Anda yakin ingin memperbarui data barang ini?",
 );
+const showAddProductStockModal = ref(false);
 
 const selectedProduct = computed(() =>
   allProducts.value.find((p) => p.id == props.productId),
@@ -81,12 +83,23 @@ onMounted(() => {
 <template>
   <div>
     <BackButton is-remove-route-query />
-    <p
-      class="text-grey-10 tw-mt-4 tw-font-bold"
-      :class="$q.screen.lt.sm ? 'text-h6' : 'text-h4'"
-    >
-      Detail Informasi Barang
-    </p>
+    <div class="tw-flex tw-w-full tw-items-center">
+      <span
+        class="text-grey-10 tw-font-bold"
+        :class="$q.screen.lt.sm ? 'text-h6' : 'text-h4'"
+        >Detail Informasi Barang</span
+      >
+      <q-space />
+      <q-btn
+        no-caps
+        label="Tambah Stock"
+        icon="add"
+        @click="showAddProductStockModal = true"
+        :size="$q.screen.lt.sm ? 'md' : 'lg'"
+        class="tw-rounded-3xl"
+        color="primary"
+      />
+    </div>
     <q-separator size="1px" class="tw-mb-10 tw-mt-2" color="primary" />
 
     <q-card flat bordered class="tw-border-2 tw-p-4 card-container tw-w-fit">
@@ -192,11 +205,26 @@ onMounted(() => {
       :is-warning="isWarningTypeConfirmationModal"
       @continue="onConfirm"
     />
+    <AddProductStockModal
+      v-if="showAddProductStockModal"
+      v-model="showAddProductStockModal"
+      :product-id="props.productId"
+    />
   </div>
 </template>
 <style scoped lang="scss">
 .card-container {
   border-color: $grey-6;
   border-radius: 24px;
+}
+:deep(input::-webkit-outer-spin-button),
+:deep(input::-webkit-inner-spin-button) {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+:deep(input[type="number"]) {
+  -moz-appearance: textfield;
 }
 </style>

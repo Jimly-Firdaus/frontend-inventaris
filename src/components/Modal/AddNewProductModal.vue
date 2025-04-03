@@ -89,6 +89,7 @@ const onAddNewProduct = () => {
           class="tw-rounded-2xl text-grey-10"
         />
         <q-btn
+          :disable="newProduct.name.length == 0"
           no-caps
           :label="$q.screen.lt.sm ? 'Tambah' : 'Tambah Barang'"
           @click="showConfirmationModal = true"

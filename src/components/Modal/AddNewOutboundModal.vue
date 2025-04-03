@@ -1,0 +1,169 @@
+<script setup lang="ts">
+import { useQuasar } from "quasar";
+import { useStore } from "src/stores";
+import type { CreateOutboundRequest } from "src/stores/product/types";
+import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
+import {
+  PRODUCT_PRICE_TYPE,
+  PRODUCT_PRICE_TYPE_LABEL,
+} from "src/constants/price";
+
+const props = defineProps({
+  storeId: {
+    type: String,
+    required: true,
+  },
+  storeName: {
+    type: String,
+    required: true,
+  },
+});
+
+const $q = useQuasar();
+const store = useStore();
+const modelValue = defineModel<boolean>({ required: true, default: false });
+
+const selectedProduct = ref<{ label: string; value: string }>();
+const availableProductsOpts = computed(() =>
+  store.products.products.map((p) => ({
+    value: p.id,
+    label: p.name,
+  })),
+);
+
+const options = ref([availableProductsOpts.value[0]]);
+const newOutbound = ref<CreateOutboundRequest>({
+  product_id: "",
+  store_id: props.storeId,
+  to: props.storeName,
+  quantity: 0,
+  price_type: PRODUCT_PRICE_TYPE.RETAIL,
+});
+
+const priceTypeOpts = computed(() =>
+  Object.entries(PRODUCT_PRICE_TYPE_LABEL).map(([value, label]) => ({
+    value,
+    label,
+  })),
+);
+const selectedPriceType = ref(priceTypeOpts.value[0]);
+
+const showConfirmationModal = ref(false);
+
+const filterProductName = (
+  val: string,
+  update: (callback: () => void) => void,
+  abort: () => void,
+) => {
+  if (val.length < 2) {
+    abort();
+    return;
+  }
+  console.log(val)
+  update(() => {
+    const needle = val.toLowerCase();
+    options.value = availableProductsOpts.value.filter(
+      (v) => v.label.toLowerCase().indexOf(needle) > -1,
+    );
+  });
+};
+
+// TODO: integrate with API
+const onAddNewOutbound = () => {
+  console.log("Added new outbound", newOutbound.value);
+  if (newOutbound.value && selectedProduct.value && selectedPriceType.value) {
+    newOutbound.value.product_id = selectedProduct.value.value;
+    newOutbound.value.price_type = selectedPriceType.value.value as PRODUCT_PRICE_TYPE;
+    store.products.createProductOutbound(newOutbound.value);
+
+    modelValue.value = false;
+
+    $q.notify({
+      message: "Berhasil menambahkan pengeluaran barang baru!",
+      color: "primary",
+    });
+  }
+};
+</script>
+<template>
+  <q-dialog v-model="modelValue">
+    <q-card class="tw-w-full tw-p-8 !tw-rounded-3xl">
+      <q-card-section class="tw-p-0">
+        <p
+          class="tw-mb-0 text-body-large tw-font-bold text-center text-grey-10"
+          :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+        >
+          Tambah Pengeluaran Barang Baru
+        </p>
+      </q-card-section>
+      <q-card-section class="tw-flex tw-flex-col tw-gap-y-2">
+        <q-select
+          filled
+          v-model="selectedProduct"
+          use-input
+          hide-selected
+          fill-input
+          input-debounce="500"
+          :options="options"
+          @filter="filterProductName"
+          label="Nama Barang"
+          style="padding-bottom: 24px"
+        >
+          <template v-slot:no-option>
+            <q-item>
+              <q-item-section class="text-grey">
+                Tidak ada hasil
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
+        <q-input
+          v-model="newOutbound.quantity"
+          outlined
+          label="Jumlah Barang"
+          lazy-rules
+          :rules="[
+            (val: string) => !!val || 'Jumlah stock baru tidak boleh kosong!',
+            (val: string) =>
+              parseInt(val) > 0 || 'Jumlah stock harus lebih dari 0!',
+          ]"
+          class="text-body-medium"
+          :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+          type="number"
+        />
+        <q-select
+          filled
+          v-model="selectedPriceType"
+          :options="priceTypeOpts"
+          label="Tipe Harga Jual"
+        />
+      </q-card-section>
+      <q-card-section class="row justify-center tw-gap-x-4">
+        <q-btn
+          outline
+          label="Kembali"
+          no-caps
+          @click="modelValue = false"
+          :size="$q.screen.lt.sm ? 'md' : 'lg'"
+          class="tw-rounded-2xl text-grey-10"
+        />
+        <q-btn
+          :disable="!selectedProduct || newOutbound.quantity <= 0"
+          no-caps
+          :label="$q.screen.lt.sm ? 'Tambah' : 'Tambah Barang'"
+          @click="showConfirmationModal = true"
+          color="primary"
+          :size="$q.screen.lt.sm ? 'md' : 'lg'"
+          class="tw-rounded-2xl text-grey-10"
+        />
+      </q-card-section>
+    </q-card>
+
+    <ConfirmationModal
+      :copy-text="`Apakah Anda yakin ingin menambahkan pengeluaran barang?`"
+      v-model="showConfirmationModal"
+      @continue="onAddNewOutbound"
+    />
+  </q-dialog>
+</template>
+<style scoped lang="scss"></style>

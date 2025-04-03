@@ -6,6 +6,8 @@ import AddNewUserAccountModal from "src/components/Modal/AddNewUserAccountModal.
 import BackButton from "src/components/Button/BackButton.vue";
 import UserDataTable from "src/components/Table/UserDataTable.vue";
 import { USER_ROLE } from "src/constants/user";
+import AddNewOutboundModal from "src/components/Modal/AddNewOutboundModal.vue";
+import OutboundTable from "src/components/Table/OutboundTable.vue";
 
 const props = defineProps({
   storeId: {
@@ -20,6 +22,7 @@ const props = defineProps({
 
 const $q = useQuasar();
 const store = useStore();
+const outbounds = computed(() => store.products.outbounds?.filter((o) => o.store_name == props.storeName));
 // const route = useRoute();
 
 const storeManagers = computed(() =>
@@ -37,6 +40,7 @@ const filteredStoreManagers = computed(() => {
 });
 
 const showAddNewStoreManagerModal = ref(false);
+const showAddNewOutboundModal = ref(false);
 
 // TODO: to show selected store details (account, outbound items?) as expansion item
 // const onClickStoreManager = (userId: string) => {
@@ -48,6 +52,13 @@ onMounted(() => {
     // const payload: GetAllStoresQuery = {};
     store.auth.getAllStoreUsers(props.storeName);
   }
+
+  if (!store.products.outbounds.length) {
+    store.products.getAllOutbounds();
+  }
+  // if (!store.products.products.length) {
+  //   store.products.getAllProducts();
+  // }
 });
 </script>
 <template>
@@ -61,12 +72,12 @@ onMounted(() => {
     </p>
     <q-separator size="1px" class="tw-mb-10 tw-mt-2" color="primary" />
 
-    <q-card flat bordered class="tw-border-2 tw-p-4 card-container">
-      <div class="tw-flex tw-items-center">
+    <q-card flat bordered class="tw-border-2 card-container">
+      <div class="tw-flex tw-items-center tw-p-4">
         <span
           class="text-grey-10 tw-font-bold text-body-large"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-          >Informasi user toko</span
+          >Informasi User Toko</span
         >
         <q-space />
         <q-btn
@@ -83,32 +94,35 @@ onMounted(() => {
         v-model="usernameFilter"
         outlined
         label="Cari Username"
-        class="tw-mt-4 text-body-medium"
+        class="tw-mt-4 text-body-medium tw-px-2"
         :class="$q.screen.lt.sm ? 'text-mobile tw-mb-4' : 'tw-mb-12'"
       />
 
       <UserDataTable :user-data="filteredStoreManagers" />
     </q-card>
 
-    <q-card flat bordered class="tw-border-2 tw-p-4 tw-mt-8 card-container">
-      <div class="tw-flex tw-items-center">
+    <q-card flat bordered class="tw-border-2 tw-mt-8 card-container">
+      <div class="tw-flex tw-items-center tw-p-4" :class="$q.screen.lt.sm ? 'text-mobile tw-mb-2' : 'tw-mb-4'">
         <span
           class="text-grey-10 tw-font-bold text-body-large"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-          >Informasi transaksi toko</span
+          >Informasi Transaksi Toko</span
         >
         <q-space />
         <q-btn
           no-caps
           :label="$q.screen.lt.sm ? '' : 'Tambah Transaksi'"
           icon="add"
-          @click="showAddNewStoreManagerModal = true"
+          @click="showAddNewOutboundModal = true"
           :size="$q.screen.lt.sm ? 'md' : 'lg'"
           class="tw-rounded-3xl"
           color="primary"
         />
       </div>
+
+      <OutboundTable :outbounds="outbounds"/>
     </q-card>
+
 
     <AddNewUserAccountModal
       v-if="showAddNewStoreManagerModal"
@@ -117,31 +131,14 @@ onMounted(() => {
       :store-id="props.storeId"
       :store-name="props.storeName"
     />
+    <AddNewOutboundModal
+      v-model="showAddNewOutboundModal"
+      :store-id="props.storeId"
+      :store-name="props.storeName"
+    />
   </div>
 </template>
 <style scoped lang="scss">
-:deep(.q-table th) {
-  font-size: 20px;
-  line-height: 24px;
-  font-weight: 700;
-  @media (max-width: 600px) {
-    font-size: 14px;
-    line-height: 20px;
-  }
-}
-:deep(.q-table td) {
-  font-size: 16px;
-  @media (max-width: 600px) {
-    font-size: 14px;
-  }
-}
-:deep(.q-tr) {
-  th:first-child {
-    position: sticky;
-    left: 0;
-    z-index: 1;
-  }
-}
 .card-container {
   border-color: $grey-6;
   border-radius: 24px;

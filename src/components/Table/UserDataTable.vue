@@ -70,6 +70,7 @@ const onConfirmDelete = () => {
     flat
     virtual-scroll
     hide-pagination
+    bordered
     :rows="props.userData"
     :columns="columns"
     :rows-per-page-options="[0]"
@@ -101,14 +102,14 @@ const onConfirmDelete = () => {
             icon="delete_forever"
             :size="$q.screen.lt.sm ? 'sm' : 'md'"
             @click="onDeleteUserAccount(props.row.id)"
-            label="Hapus"
+            :label="$q.screen.lt.sm ? '' : 'Hapus'"
           />
         </q-td>
       </q-tr>
     </template>
     <template #no-data>
       <div class="full-width row flex-center q-gutter-sm q-pa-xl">
-        <span class="text-h6"> Tidak ada user sesuai pencarian </span>
+        <span class="text-h6"> Tidak ada user </span>
         <q-icon size="2em" name="sentiment_dissatisfied" />
       </div>
     </template>
@@ -127,6 +128,15 @@ const onConfirmDelete = () => {
   />
 </template>
 <style scoped lang="scss">
+// Sticky header
+:deep(thead tr:first-child th) {
+  background-color: $grey-2;
+  top: 0;
+}
+:deep(thead tr th) {
+  position: sticky;
+  z-index: 1;
+}
 :deep(.q-table th) {
   font-size: 20px;
   line-height: 24px;

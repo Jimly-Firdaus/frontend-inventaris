@@ -59,6 +59,7 @@ const onAddNewStore = () => {
           class="tw-rounded-2xl text-grey-10"
         />
         <q-btn
+          :disable="newStoreName.length == 0"
           no-caps
           :label="$q.screen.lt.sm ? 'Tambah' : 'Tambah Toko'"
           @click="showConfirmationModal = true"

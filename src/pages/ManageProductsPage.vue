@@ -5,6 +5,7 @@ import type { GetAllProductsQuery } from "src/stores/product/types";
 import { useRouter, useRoute } from "vue-router";
 import AddNewProductModal from "src/components/Modal/AddNewProductModal.vue";
 import ManageProductDetails from "src/components/Product/ManageProductDetails.vue";
+import InboundTable from "src/components/Table/InboundTable.vue";
 
 const $q = useQuasar();
 const store = useStore();
@@ -56,6 +57,8 @@ const columns: QTableProps["columns"] = [
   },
 ];
 
+const inbounds = computed(() => store.products.inbounds);
+
 const onClickProduct = async (productId: string) => {
   await router.replace({
     query: {
@@ -68,6 +71,9 @@ onMounted(() => {
   if (!allProducts.value.length) {
     const req: GetAllProductsQuery = {};
     store.products.getAllProducts(req);
+  }
+  if (!inbounds.value.length) {
+    store.products.getAllInbounds();
   }
 });
 </script>
@@ -105,6 +111,8 @@ onMounted(() => {
         flat
         virtual-scroll
         hide-pagination
+        bordered
+        style="max-height: 290px"
         :rows="filteredProducts"
         :columns="columns"
         :rows-per-page-options="[0]"
@@ -134,11 +142,26 @@ onMounted(() => {
         </template>
         <template #no-data>
           <div class="full-width row flex-center q-gutter-sm q-pa-xl">
-            <span class="text-h6"> Tidak ada produk sesuai pencarian </span>
+            <span class="text-h6"> Tidak ada produk </span>
             <q-icon size="2em" name="sentiment_dissatisfied" />
           </div>
         </template>
       </q-table>
+
+      <q-card flat bordered class="tw-border-2 tw-mt-16 card-container">
+        <div
+          class="tw-flex tw-items-center tw-p-4"
+          :class="$q.screen.lt.sm ? 'text-mobile tw-mb-2' : 'tw-mb-4'"
+        >
+          <span
+            class="text-grey-10 tw-font-bold text-body-large"
+            :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+            >Informasi Pemasukan Barang</span
+          >
+          <q-space />
+        </div>
+        <InboundTable :inbounds="inbounds" />
+      </q-card>
     </template>
     <template v-else>
       <ManageProductDetails :product-id="selectedProductId" />
@@ -151,6 +174,15 @@ onMounted(() => {
   </q-page>
 </template>
 <style scoped lang="scss">
+// Sticky header
+:deep(thead tr:first-child th) {
+  background-color: $grey-2;
+  top: 0;
+}
+:deep(thead tr th) {
+  position: sticky;
+  z-index: 1;
+}
 :deep(.q-table th) {
   font-size: 20px;
   line-height: 24px;
@@ -173,14 +205,8 @@ onMounted(() => {
     z-index: 1;
   }
 }
-:deep(input::-webkit-outer-spin-button),
-:deep(input::-webkit-inner-spin-button) {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* Firefox */
-:deep(input[type="number"]) {
-  -moz-appearance: textfield;
+.card-container {
+  border-color: $grey-6;
+  border-radius: 24px;
 }
 </style>
