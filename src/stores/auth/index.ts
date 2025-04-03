@@ -13,7 +13,7 @@ export const useAuthStore = defineStore("auth", () => {
   const userRole = ref("");
   const login = async (payload: { username: string; password: string }) => {
     // const res = await api.post("/login", payload);
-    // console.log("LOGIN called", res);
+    console.log("LOGIN called", payload);
     user.value = {
       token: "random-token",
       role: USER_ROLE.OWNER,
