@@ -11,7 +11,7 @@ export const useAuthStore = defineStore("auth", () => {
   const user = ref<LoginResponse>();
   const users = ref<GetUsersResponseData[]>([]);
   const userRole = ref("");
-  const login = async (payload: { username: string; password: string }) => {
+  const login = (payload: { username: string; password: string }) => {
     // const res = await api.post("/login", payload);
     console.log("LOGIN called", payload);
     user.value = {
