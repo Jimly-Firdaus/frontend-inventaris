@@ -12,7 +12,7 @@ const formData = ref({
 const isPwd = ref(true);
 
 const onLogin = async () => {
-  store.auth.login(formData.value);
+  await store.auth.login(formData.value);
 
   if (store.auth.user) {
     switch (store.auth.user.role) {
