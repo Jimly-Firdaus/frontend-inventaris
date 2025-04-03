@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useStore } from "src/stores";
-import type { GetAllStoresQuery } from "src/stores/store/types";
+// import type { GetAllStoresQuery } from "src/stores/store/types";
 import AddNewUserAccountModal from "src/components/Modal/AddNewUserAccountModal.vue";
 import { useRoute } from "vue-router";
 import BackButton from "src/components/Button/BackButton.vue";
@@ -20,7 +20,7 @@ const props = defineProps({
 
 const $q = useQuasar();
 const store = useStore();
-const route = useRoute();
+// const route = useRoute();
 
 const storeManagers = computed(() =>
   store.auth.users.filter((u) => u.store_name == props.storeName),
@@ -39,9 +39,9 @@ const filteredStoreManagers = computed(() => {
 const showAddNewStoreManagerModal = ref(false);
 
 // TODO: to show selected store details (account, outbound items?) as expansion item
-const onClickStoreManager = (userId: string) => {
-  console.log("UserID: ", userId, "clicked!");
-};
+// const onClickStoreManager = (userId: string) => {
+//   console.log("UserID: ", userId, "clicked!");
+// };
 
 onMounted(() => {
   if (!store.auth.users.length) {
