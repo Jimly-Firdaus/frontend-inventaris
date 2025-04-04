@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { QTableProps } from "quasar";
 import type { OutboundInsightDataItem } from "src/stores/store/types";
+import { formatWithThousandSeparator } from "src/util/number";
 
 const props = defineProps({
   items: {
@@ -76,10 +77,10 @@ const columns: QTableProps["columns"] = [
           {{ props.row.total_wholesale_sold }}
         </q-td>
         <q-td key="avg_retail_price" :props="props">
-          {{ props.row.avg_retail_price }}
+          {{ formatWithThousandSeparator(props.row.avg_retail_price) }}
         </q-td>
         <q-td key="avg_wholesale_price" :props="props">
-          {{ props.row.avg_wholesale_price }}
+          {{ formatWithThousandSeparator(props.row.avg_wholesale_price) }}
         </q-td>
       </q-tr>
     </template>

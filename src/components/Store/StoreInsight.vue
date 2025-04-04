@@ -175,19 +175,6 @@ const chartOptionsSales = computed(() => ({
 }));
 
 const selectedTimeframe = ref("");
-// const start = computed(() =>
-//   DateTime.fromFormat(
-//     selectedTimeframe.value.split(" - ")[0]?.trim() ?? "",
-//     "dd LLL, yyyy",
-//   ),
-// );
-
-// const end = computed(() =>
-//   DateTime.fromFormat(
-//     selectedTimeframe.value.split(" - ")[1]?.trim() ?? "",
-//     "dd LLL, yyyy",
-//   ),
-// );
 const dateOptions = computed(() => insights.value?.data.map((i) => i.date));
 const selectedDate = ref(dateOptions.value?.[0]);
 
@@ -237,7 +224,7 @@ watch(
       }
       await store.stores.getInsight(req);
     }
-
+    selectedDate.value = dateOptions.value?.[0];
     isLoading.value = false;
   },
   { deep: true },
@@ -332,7 +319,7 @@ onMounted(async () => {
         </span>
       </template>
     </q-select>
-    <ProductSalesTable :items="items ?? []" />
+    <ProductSalesTable :items="items ?? []" :loading="isLoading" />
   </div>
 </template>
 <style scoped lang="scss">

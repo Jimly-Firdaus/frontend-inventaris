@@ -60,7 +60,7 @@ const onAddNewUserAccount = async () => {
           Tambah User Baru
         </p>
       </q-card-section>
-      <q-card-section class="tw-flex tw-flex-col tw-gap-y-4">
+      <q-card-section class="tw-flex tw-flex-col tw-gap-y-1 tw-p-2 tw-mt-4">
         <q-input
           v-model="newUser.username"
           outlined
@@ -84,7 +84,7 @@ const onAddNewUserAccount = async () => {
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
         />
       </q-card-section>
-      <q-card-section class="row justify-center tw-gap-x-4">
+      <q-card-section class="row justify-center tw-gap-x-4 tw-p-2">
         <q-btn
           outline
           label="Kembali"
