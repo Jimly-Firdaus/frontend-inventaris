@@ -12,9 +12,17 @@
 // to match your app's branding.
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
 
-$primary   : #1976D2;
-$secondary : #26A69A;
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap");
+
+$typography-font-family: "Manrope", sans-serif !default;
+
+$primary   : #1E1E2C;
+$secondary : #F29F67;
 $accent    : #9C27B0;
+
+$accent-1 :#3B8FF3;
+$accent-2 :#34B1AA;
+$accent-3 :#E0B50F;
 
 $dark      : #1D1D1D;
 $dark-page : #121212;
@@ -23,3 +31,26 @@ $positive  : #21BA45;
 $negative  : #C10015;
 $info      : #31CCEC;
 $warning   : #F2C037;
+
+$white :#FFF;
+
+$colors: (
+  "primary": $primary,
+  "secondary": $secondary,
+  
+  "accent-1": $accent-1,
+  "accent-2": $accent-2,
+  "accent-3": $accent-3,
+
+  "white": $white,
+);
+
+@each $name, $color in $colors {
+    .text-#{$name} {
+      color: $color !important;
+    }
+    .bg-#{$name} {
+      background: $color !important;
+    }
+  }
+  

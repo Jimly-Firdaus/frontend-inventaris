@@ -1,0 +1,35 @@
+.text-card-title {
+  font-size: 24px;
+  line-height: 28px;
+  &.text-mobile {
+    font-size: 20px;
+    line-height: 24px;
+  }
+}
+
+.text-body-large {
+  font-size: 28px;
+  line-height: 32px;
+  &.text-mobile {
+    font-size: 20px;
+    line-height: 28px;
+  }
+}
+
+.text-body-medium {
+  font-size: 20px;
+  line-height: 24px;
+  &.text-mobile {
+    font-size: 18px;
+    line-height: 20px;
+  }
+}
+
+.text-body-small {
+  font-size: 18px;
+  line-height: 24px;
+  &.text-mobile {
+    font-size: 14px;
+    line-height: 20px;
+  }
+}
