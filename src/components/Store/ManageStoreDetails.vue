@@ -95,6 +95,9 @@ watch(page, async () => {
 });
 
 onMounted(async () => {
+  $q.loading.show({
+    message: "Loading...",
+  });
   if (!storeManagers.value && store.auth.userRole == USER_ROLE.OWNER)
     await store.auth.getAllStoreUsers(props.storeId);
   else currentTab.value = "outbound"
@@ -109,6 +112,7 @@ onMounted(async () => {
   await store.products.getAllOutbounds(req);
 
   await store.products.getAllProducts();
+  $q.loading.hide();
 });
 </script>
 <template>

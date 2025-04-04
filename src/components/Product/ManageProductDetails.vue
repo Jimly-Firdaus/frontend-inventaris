@@ -4,7 +4,6 @@ import type { UpdateProductRequest } from "src/stores/product/types";
 import { useRouter } from "vue-router";
 import BackButton from "src/components/Button/BackButton.vue";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
-// import AddProductStockModal from "src/components/Modal/AddProductStockModal.vue";
 
 const props = defineProps({
   productId: {
@@ -25,7 +24,6 @@ const confirmationModalCopy = computed(() =>
     ? "Apakah Anda yakin ingin menghapus barang ini?"
     : "Apakah Anda yakin ingin memperbarui data barang ini?",
 );
-// const showAddProductStockModal = ref(false);
 
 const selectedProduct = computed(() =>
   allProducts.value.find((p) => p.id == props.productId),
@@ -39,6 +37,9 @@ const productPrice = ref({
 
 const onSaveProductChanges = async () => {
   try {
+    $q.loading.show({
+    message: "Loading...",
+  });
     const req = {
       name: productPrice.value.name,
       buy_price:
@@ -69,12 +70,17 @@ const onSaveProductChanges = async () => {
       color: "negative",
       classes: "q-notify-font",
     });
+  } finally {
+    $q.loading.hide();
   }
 };
 
 const onConfirm = async () => {
   if (isWarningTypeConfirmationModal.value) {
     try {
+      $q.loading.show({
+        message: "Loading...",
+      });
       await store.products.deleteProduct(props.productId);
 
       $q.notify({
@@ -90,6 +96,7 @@ const onConfirm = async () => {
         classes: "q-notify-font",
       });
     } finally {
+      $q.loading.hide();
       await router.replace({
         query: {
           productId: undefined,

@@ -6,31 +6,41 @@ const props = defineProps<{
   useDefault?: boolean;
 }>();
 
-const now = DateTime.now().toFormat("yyyy/MM/dd")
-const sevenDaysAgo = DateTime.now().minus({ days: 7 }).toFormat("yyyy/MM/dd")
+const now = DateTime.now().toFormat("yyyy/MM/dd");
+const sevenDaysAgo = DateTime.now().minus({ days: 7 }).toFormat("yyyy/MM/dd");
 
 const _selectedTimeframe = defineModel<string>("selectedTimeframe");
 const timeframe = ref<{ from: string; to: string } | null>(null);
 
-watch(timeframe, () => {
-  if (timeframe.value)
-    _selectedTimeframe.value = `${DateTime.fromFormat(
-      timeframe.value.from,
-      "yyyy/MM/dd",
-    ).toFormat("dd MMM, yyyy")} - ${DateTime.fromFormat(
-      timeframe.value.to,
-      "yyyy/MM/dd",
-    ).toFormat("dd MMM, yyyy")}`;
+watch(timeframe, (val) => {
+  if (!val) return;
+
+  if (typeof val === "string") {
+    // Same date selected (val is "2025/03/06")
+    const formatted = DateTime.fromFormat(val, "yyyy/MM/dd").toFormat(
+      "dd MMM, yyyy",
+    );
+    _selectedTimeframe.value = `${formatted} - ${formatted}`;
+  } else {
+    // Normal range object: { from, to }
+    const fromFormatted = DateTime.fromFormat(val.from, "yyyy/MM/dd").toFormat(
+      "dd MMM, yyyy",
+    );
+    const toFormatted = DateTime.fromFormat(val.to, "yyyy/MM/dd").toFormat(
+      "dd MMM, yyyy",
+    );
+    _selectedTimeframe.value = `${fromFormatted} - ${toFormatted}`;
+  }
 });
 
 onMounted(() => {
-  if(props.useDefault) {
+  if (props.useDefault) {
     timeframe.value = {
       from: sevenDaysAgo,
       to: now,
-    }
+    };
   }
-})
+});
 </script>
 <template>
   <q-btn-dropdown
@@ -57,18 +67,26 @@ onMounted(() => {
         </p>
         <div class="tw-flex tw-gap-x-4 tw-py-2 text-body-2">
           <span class="tw-px-11 tw-py-2 bg-grey-2 text-grey-9 tw-rounded-lg">{{
-            timeframe
+            typeof timeframe === "object" && timeframe?.from
               ? DateTime.fromFormat(timeframe.from, "yyyy/MM/dd").toFormat(
                   "dd MMM, yyyy",
                 )
-              : "Start date"
+              : typeof timeframe === "string"
+                ? DateTime.fromFormat(timeframe, "yyyy/MM/dd").toFormat(
+                    "dd MMM, yyyy",
+                  )
+                : "Start date"
           }}</span>
           <span class="tw-px-11 tw-py-2 bg-grey-2 text-grey-9 tw-rounded-lg">{{
-            timeframe
+            typeof timeframe === "object" && timeframe?.to
               ? DateTime.fromFormat(timeframe.to, "yyyy/MM/dd").toFormat(
                   "dd MMM, yyyy",
                 )
-              : "End date"
+              : typeof timeframe === "string"
+                ? DateTime.fromFormat(timeframe, "yyyy/MM/dd").toFormat(
+                    "dd MMM, yyyy",
+                  )
+                : "End date"
           }}</span>
         </div>
         <div class="tw-max-w-[390px]">

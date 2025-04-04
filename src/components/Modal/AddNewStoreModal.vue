@@ -13,6 +13,9 @@ const showConfirmationModal = ref(false);
 
 const onAddNewStore = async () => {
   try {
+    $q.loading.show({
+      message: "Loading...",
+    });
     const req: CreateStoreRequest = {
       name: newStoreName.value,
     };
@@ -32,6 +35,8 @@ const onAddNewStore = async () => {
       color: "negative",
       classes: "q-notify-font",
     });
+  } finally {
+    $q.loading.hide();
   }
 };
 </script>

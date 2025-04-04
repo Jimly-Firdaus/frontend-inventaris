@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import type { QTableProps } from "quasar";
 import { useStore } from "src/stores";
-// import type { GetAllProductsQuery } from "src/stores/product/types";
 import { useRouter, useRoute } from "vue-router";
 import AddNewProductModal from "src/components/Modal/AddNewProductModal.vue";
 import ManageProductDetails from "src/components/Product/ManageProductDetails.vue";
-// import InboundTable from "src/components/Table/InboundTable.vue";
 import { USER_ROLE } from "src/constants/user";
 import AddProductStockModal from "src/components/Modal/AddProductStockModal.vue";
 import type { GetAllProductsQuery } from "src/stores/product/types";
+import { formatWithThousandSeparator } from "src/util/number";
 
 const $q = useQuasar();
 const store = useStore();
@@ -22,11 +21,6 @@ const showAddProductStockModal = ref(false);
 const nameFilter = ref("");
 
 const allProducts = computed(() => store.products.products ?? []);
-const filteredProducts = computed(() => {
-  if (nameFilter.value.length > 0)
-    return allProducts.value.filter((p) => p.name.includes(nameFilter.value));
-  else return allProducts.value;
-});
 
 const baseColumns: QTableProps["columns"] = [
   {
@@ -109,6 +103,9 @@ const onClickProduct = async (productId: string) => {
 const onRequest = async (props: {
   pagination: { page: number; rowsPerPage: number };
 }) => {
+  $q.loading.show({
+    message: "Loading...",
+  });
   const { page, rowsPerPage } = props.pagination;
   try {
     const req: GetAllProductsQuery = {
@@ -127,6 +124,8 @@ const onRequest = async (props: {
       color: "negative",
       classes: "q-notify-font",
     });
+  } finally {
+    $q.loading.hide();
   }
 };
 
@@ -139,6 +138,9 @@ watch(
 );
 
 onMounted(async () => {
+  $q.loading.show({
+    message: "Loading...",
+  });
   const { page, rowsPerPage } = pagination.value;
   const req: GetAllProductsQuery = {
     page: page,
@@ -147,6 +149,7 @@ onMounted(async () => {
   await store.products.getAllProducts(req);
   totalPages.value = store.products.productsMeta?.total_page ?? 0;
   totalData.value = store.products.productsMeta?.total_item ?? 0;
+  $q.loading.hide();
 });
 </script>
 <template>
@@ -178,6 +181,7 @@ onMounted(async () => {
         label="Cari Barang"
         class="tw-mt-4 text-body-medium"
         :class="$q.screen.lt.sm ? 'text-mobile tw-mb-4' : 'tw-mb-12'"
+        debounce="500"
       />
 
       <q-table
@@ -186,7 +190,7 @@ onMounted(async () => {
         bordered
         virtual-scroll
         style="max-height: 575px"
-        :rows="filteredProducts"
+        :rows="allProducts"
         :columns="columns"
         @request="onRequest"
         :rows-per-page-options="[0]"
@@ -205,13 +209,25 @@ onMounted(async () => {
             </q-td>
             <template v-if="store.auth.userRole == USER_ROLE.OWNER">
               <q-td key="buy_price" :props="props">
-                {{ props.row.buy_price }}
+                {{
+                  props.row.buy_price
+                    ? formatWithThousandSeparator(props.row.buy_price)
+                    : undefined
+                }}
               </q-td>
               <q-td key="wholesale_sell_price" :props="props">
-                {{ props.row.wholesale_sell_price }}
+                {{
+                  props.row.wholesale_sell_price
+                    ? formatWithThousandSeparator(
+                        props.row.wholesale_sell_price,
+                      )
+                    : undefined
+                }}
               </q-td>
               <q-td key="retail_sell_price" :props="props">{{
                 props.row.retail_sell_price
+                  ? formatWithThousandSeparator(props.row.retail_sell_price)
+                  : undefined
               }}</q-td>
             </template>
             <template v-if="store.auth.userRole != USER_ROLE.STORE_MANAGER">
@@ -220,7 +236,7 @@ onMounted(async () => {
                   dense
                   color="primary"
                   no-caps
-                  @click="onUpdateStock(props.row.id)"
+                  @click.stop="onUpdateStock(props.row.id)"
                   :size="$q.screen.lt.sm ? 'sm' : 'md'"
                   icon="add"
                   label="Tambah Stok"
@@ -250,7 +266,7 @@ onMounted(async () => {
             {{ (pagination.page - 1) * pagination.rowsPerPage + 1 }}–{{
               Math.min(
                 pagination.page * pagination.rowsPerPage,
-                filteredProducts.length,
+                allProducts.length,
               ) +
               (pagination.page - 1) * pagination.rowsPerPage
             }}

@@ -43,7 +43,6 @@ export const useStoresStore = defineStore("stores", () => {
     })
 
     storeInsights.value[req.store_id] = res.data.data;
-    console.log(storeInsights.value[req.store_id]);
     return res.data.data;
   }
 
