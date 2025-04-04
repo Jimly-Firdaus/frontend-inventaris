@@ -63,8 +63,8 @@ onMounted(async () => {
 </script>
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar class="bg-grey-2">
+    <q-header>
+      <q-toolbar class="bg-grey-10">
         <q-btn
           flat
           dense
@@ -72,34 +72,33 @@ onMounted(async () => {
           icon="menu"
           aria-label="Menu"
           @click="toggleLeftDrawer"
-          color="primary"
+          color="white"
         />
         <q-space />
         <q-btn
-          flat
+          unelevated
           dense
           no-caps
           icon="logout"
           aria-label="logout"
           @click="logout"
           label="Log Out"
-          color="primary"
         />
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
+    <q-drawer v-model="leftDrawerOpen" show-if-above class="bg-grey-10">
       <q-list class="tw-mt-24">
         <q-item-label
           v-for="(tabData, idx) in currentTabs"
           header
           :key="idx"
           @click="onGoToPage(tabData.routeName, tabData.id)"
-          class="tw-cursor-pointer"
+          class="tw-cursor-pointer tw-font-bold"
           :class="
             currentActiveTab == tabData.id
-              ? 'bg-primary text-white'
-              : 'text-grey-10'
+              ? 'bg-white text-grey-10'
+              : 'text-grey-1'
           "
         >
           <p

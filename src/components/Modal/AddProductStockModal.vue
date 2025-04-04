@@ -20,6 +20,10 @@ const showConfirmationModal = ref(false);
 
 const onAddNewInbound = async () => {
   try {
+    $q.loading.show({
+      message: "Loading...",
+    });
+
     const req: CreateInboundData = {
       product_id: props.productId,
       quantity: Number(additionalStock.value),
@@ -41,6 +45,8 @@ const onAddNewInbound = async () => {
       color: "negative",
       classes: "q-notify-font",
     });
+  } finally {
+    $q.loading.hide();
   }
 };
 </script>

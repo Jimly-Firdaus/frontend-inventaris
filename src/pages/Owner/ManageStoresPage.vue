@@ -6,6 +6,7 @@ import { useRoute, useRouter } from "vue-router";
 import ManageStoreDetails from "src/components/Store/ManageStoreDetails.vue";
 import { USER_ROLE } from "src/constants/user";
 
+const $q = useQuasar();
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
@@ -18,7 +19,7 @@ const nameFilter = ref("");
 const filteredStores = computed(() => {
   if (nameFilter.value.length > 0)
     return availableStores.value.filter((s) =>
-      s.name.includes(nameFilter.value),
+      s.name.toLocaleLowerCase().includes(nameFilter.value.toLocaleLowerCase()),
     );
   else return availableStores.value;
 });
@@ -35,8 +36,12 @@ const onClickStoreName = async (storeId: string, storeName: string) => {
 };
 
 onMounted(async () => {
+  $q.loading.show({
+    message: "Loading...",
+  });
   const payload: GetAllStoresQuery = {};
   await store.stores.getAllStores(payload);
+  $q.loading.hide();
 });
 </script>
 <template>

@@ -4,6 +4,7 @@ import AddNewUserAccountModal from "src/components/Modal/AddNewUserAccountModal.
 import { useStore } from "src/stores";
 import { USER_ROLE } from "src/constants/user";
 
+const $q = useQuasar();
 const store = useStore();
 const warehouseManagers = computed(() =>
   store.auth.users.filter((u) => u.role == USER_ROLE.WAREHOUSE_MANAGER),
@@ -12,10 +13,13 @@ const warehouseManagers = computed(() =>
 const showAddNewUserAccountModal = ref(false);
 
 onMounted(async () => {
+  $q.loading.show({
+    message: "Loading...",
+  });
   if (!store.auth.users.length) {
-    // const payload: GetAllStoresQuery = {};
     await store.auth.getAllUsers();
   }
+  $q.loading.hide();
 });
 </script>
 <template>

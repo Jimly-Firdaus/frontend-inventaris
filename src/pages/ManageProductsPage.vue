@@ -103,6 +103,9 @@ const onClickProduct = async (productId: string) => {
 const onRequest = async (props: {
   pagination: { page: number; rowsPerPage: number };
 }) => {
+  $q.loading.show({
+    message: "Loading...",
+  });
   const { page, rowsPerPage } = props.pagination;
   try {
     const req: GetAllProductsQuery = {
@@ -121,6 +124,8 @@ const onRequest = async (props: {
       color: "negative",
       classes: "q-notify-font",
     });
+  } finally {
+    $q.loading.hide();
   }
 };
 
@@ -133,6 +138,9 @@ watch(
 );
 
 onMounted(async () => {
+  $q.loading.show({
+    message: "Loading...",
+  });
   const { page, rowsPerPage } = pagination.value;
   const req: GetAllProductsQuery = {
     page: page,
@@ -141,6 +149,7 @@ onMounted(async () => {
   await store.products.getAllProducts(req);
   totalPages.value = store.products.productsMeta?.total_page ?? 0;
   totalData.value = store.products.productsMeta?.total_item ?? 0;
+  $q.loading.hide();
 });
 </script>
 <template>
@@ -227,7 +236,7 @@ onMounted(async () => {
                   dense
                   color="primary"
                   no-caps
-                  @click="onUpdateStock(props.row.id)"
+                  @click.stop="onUpdateStock(props.row.id)"
                   :size="$q.screen.lt.sm ? 'sm' : 'md'"
                   icon="add"
                   label="Tambah Stok"

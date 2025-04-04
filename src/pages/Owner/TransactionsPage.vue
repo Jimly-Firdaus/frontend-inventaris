@@ -15,6 +15,7 @@ import {
   PRODUCT_PRICE_TYPE_LABEL,
 } from "src/constants/price";
 
+const $q = useQuasar();
 const store = useStore();
 const inbounds = computed(() => store.products.inbounds ?? []);
 const outbounds = computed(() => store.products.outbounds ?? []);
@@ -122,6 +123,9 @@ watch(
 );
 
 onMounted(async () => {
+  $q.loading.show({
+    message: "Loading...",
+  });
   isLoading.value = true;
   page.value = 1;
   if (store.auth.user) {
@@ -155,6 +159,7 @@ onMounted(async () => {
     }
   }
   isLoading.value = false;
+  $q.loading.hide();
 });
 </script>
 <template>

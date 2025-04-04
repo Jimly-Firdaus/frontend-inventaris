@@ -17,6 +17,7 @@ const props = defineProps({
   },
 });
 
+const $q = useQuasar();
 const store = useStore();
 
 const insights = computed(() => store.stores.storeInsights[props.storeId]);
@@ -176,7 +177,7 @@ const chartOptionsSales = computed(() => ({
 
 const selectedTimeframe = ref("");
 const dateOptions = computed(() => insights.value?.data.map((i) => i.date));
-const selectedDate = ref(dateOptions.value?.[0]);
+const selectedDate = ref(dateOptions.value?.[dateOptions.value.length - 1]);
 
 const intervalOpts = computed(() => [
   ...Object.entries(INSIGHT_INTERVAL_LABEL).map(([value, label]) => ({
@@ -195,6 +196,9 @@ watch(selectedDate, () => {
 watch(
   [selectedTimeframe, selectedInterval],
   async () => {
+    $q.loading.show({
+      message: "Loading...",
+    });
     isLoading.value = true;
     let req: GetOutboundInsightQuery = {
       store_id: props.storeId,
@@ -214,7 +218,9 @@ watch(
         const customEnd = DateTime.fromFormat(
           customDates[1].trim(),
           "dd LLL, yyyy",
-        ).toISO();
+        )
+          .endOf("day")
+          .toISO({ suppressMilliseconds: true });
 
         req = {
           ...req,
@@ -224,20 +230,20 @@ watch(
       }
       await store.stores.getInsight(req);
     }
-    selectedDate.value = dateOptions.value?.[0];
+    selectedDate.value = dateOptions.value?.[dateOptions.value.length - 1];
     isLoading.value = false;
+    $q.loading.hide();
   },
   { deep: true },
 );
 
 onMounted(async () => {
-  const now = DateTime.now()
-    .toUTC()
-    .startOf("day")
-    .toISO({ suppressMilliseconds: true });
+  $q.loading.show({
+    message: "Loading...",
+  });
+  const now = DateTime.now().endOf("day").toISO({ suppressMilliseconds: true });
   const sevenDaysAgo = DateTime.now()
     .minus({ days: 7 })
-    .toUTC()
     .startOf("day")
     .toISO({ suppressMilliseconds: true });
 
@@ -249,6 +255,7 @@ onMounted(async () => {
   };
   await store.stores.getInsight(req);
   items.value = insights.value?.data[0]?.items ?? [];
+  $q.loading.hide();
 });
 </script>
 <template>
