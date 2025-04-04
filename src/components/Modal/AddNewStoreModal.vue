@@ -11,10 +11,8 @@ const modelValue = defineModel<boolean>({ required: true, default: false });
 const newStoreName = ref("");
 const showConfirmationModal = ref(false);
 
-// TODO: integrate with API
 const onAddNewStore = async () => {
   try {
-    console.log("Added new store", newStoreName.value);
     const req: CreateStoreRequest = {
       name: newStoreName.value,
     };

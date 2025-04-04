@@ -96,10 +96,7 @@ watch(
           created_at_gte: customStart!,
           created_at_lte: customEnd!,
         };
-
-        console.log(customStart, customEnd);
       }
-      console.log(selectedTimeframe.value);
     }
     if (productNameFilter.value.trim()) {
       req.product_name = productNameFilter.value.trim();

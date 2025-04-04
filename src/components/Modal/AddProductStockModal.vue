@@ -18,10 +18,8 @@ const modelValue = defineModel<boolean>({ required: true, default: false });
 const additionalStock = ref("0");
 const showConfirmationModal = ref(false);
 
-// TODO: integrate with API
 const onAddNewInbound = async () => {
   try {
-    console.log("Added new stock", additionalStock.value);
     const req: CreateInboundData = {
       product_id: props.productId,
       quantity: Number(additionalStock.value),

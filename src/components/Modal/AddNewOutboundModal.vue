@@ -63,7 +63,6 @@ const filterProductName = (
     abort();
     return;
   }
-  console.log(val);
   update(() => {
     void (async () => {
       const needle = val.toLowerCase();
@@ -78,10 +77,8 @@ const filterProductName = (
   });
 };
 
-// TODO: integrate with API
 const onAddNewOutbound = async () => {
   try {
-    console.log("Added new outbound", newOutbound.value);
     if (newOutbound.value && selectedProduct.value && selectedPriceType.value) {
       newOutbound.value.product_id = selectedProduct.value.value;
       newOutbound.value.price_type = selectedPriceType.value

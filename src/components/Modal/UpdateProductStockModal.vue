@@ -23,7 +23,6 @@ const modelValue = defineModel<boolean>({ required: true, default: false });
 const newStock = ref(props.currentQuantity?.toString());
 const showConfirmationModal = ref(false);
 
-// TODO: integrate with API
 const onUpdateInboundOrOutbound = async () => {
   try {
     if (props.isInbound) {

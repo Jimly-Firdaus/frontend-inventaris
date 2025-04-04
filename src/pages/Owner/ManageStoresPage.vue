@@ -25,7 +25,6 @@ const filteredStores = computed(() => {
 
 const showAddNewStoreModal = ref(false);
 
-// TODO: to show selected store details (account, outbound items?) as expansion item
 const onClickStoreName = async (storeId: string, storeName: string) => {
   await router.replace({
     query: {
@@ -33,7 +32,6 @@ const onClickStoreName = async (storeId: string, storeName: string) => {
       storeName: storeName,
     },
   });
-  console.log("StoreID: ", storeId, "clicked!");
 };
 
 onMounted(async () => {

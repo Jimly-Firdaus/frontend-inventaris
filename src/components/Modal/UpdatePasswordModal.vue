@@ -18,13 +18,7 @@ const modelValue = defineModel<boolean>({ required: true, default: false });
 const newPassword = ref("");
 const showConfirmationModal = ref(false);
 
-// TODO: integrate with API
 const onUpdateUserPassword = async () => {
-  console.log("New password", newPassword.value, props.userId);
-  // const req: CreateStoreRequest = {
-  //   name: newStoreName.value,
-  // };
-  // store.stores.createNewStore(req);
   try {
     await store.auth.updatePassword(props.userId, newPassword.value);
     modelValue.value = false;

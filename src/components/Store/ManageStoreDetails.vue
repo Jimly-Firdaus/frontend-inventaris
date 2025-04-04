@@ -91,11 +91,6 @@ watch(page, async () => {
   await refreshData();
 });
 
-// TODO: to show selected store details (account, outbound items?) as expansion item
-// const onClickStoreManager = (userId: string) => {
-//   console.log("UserID: ", userId, "clicked!");
-// };
-
 onMounted(async () => {
   if (!storeManagers.value && store.auth.userRole == USER_ROLE.OWNER)
     await store.auth.getAllStoreUsers(props.storeId);

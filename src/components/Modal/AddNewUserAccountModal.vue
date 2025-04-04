@@ -27,10 +27,8 @@ const newUser = ref<CreateUserRequest>({
 });
 const showConfirmationModal = ref(false);
 
-// TODO: integrate with API
 const onAddNewUserAccount = async () => {
   try {
-    console.log("Added new user account", newUser.value);
     await store.auth.createNewUserAccount(newUser.value);
     if (props.storeId) await store.auth.getAllStoreUsers(props.storeId);
     else await store.auth.getAllUsers();

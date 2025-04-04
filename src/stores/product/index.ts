@@ -15,7 +15,6 @@ import type {
   GetAllInboundsResponse,
   GetAllInboundsQuery,
 } from "./types";
-// import { PRODUCT_PRICE_TYPE } from "src/constants/price";
 import type { AxiosResponse } from "axios";
 import type { PaginationMeta } from "../store/types";
 import { api } from "src/boot/axios";
@@ -124,7 +123,6 @@ export const useProductsStore = defineStore("products", () => {
         params: finalReq,
       },
     );
-    console.log(res);
 
     outbounds.value = res.data.data.data;
     outboundsMeta.value = res.data.data.meta;
@@ -137,7 +135,6 @@ export const useProductsStore = defineStore("products", () => {
         params: req,
       },
     );
-    console.log(res);
 
     outbounds.value = res.data.data.data;
     outboundsMeta.value = res.data.data.meta;

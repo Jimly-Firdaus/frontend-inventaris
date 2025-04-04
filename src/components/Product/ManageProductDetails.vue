@@ -37,7 +37,6 @@ const productPrice = ref({
   retailSellPrice: "",
 });
 
-// TODO: implement this
 const onSaveProductChanges = async () => {
   try {
     const req = {
@@ -101,7 +100,6 @@ const onConfirm = async () => {
 };
 
 onMounted(async () => {
-  console.log(props.productId);
   if (!allProducts.value.length) await store.products.getAllProducts();
 
   productPrice.value = {

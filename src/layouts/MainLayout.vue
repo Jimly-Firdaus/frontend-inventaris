@@ -39,7 +39,6 @@ const logout = async () => {
   window.location.reload();
 };
 
-// TODO: watch for route change, need to update currentActiveTab so it render appropriately
 watch(() => route.name, updateDrawerActiveTab);
 
 onMounted(async () => {

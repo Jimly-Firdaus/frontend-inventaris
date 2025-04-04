@@ -14,10 +14,8 @@ const newProduct = ref<CreateProductRequest>({
 });
 const showConfirmationModal = ref(false);
 
-// TODO: integrate with API
 const onAddNewProduct = async () => {
   try {
-    console.log("Added new product", newProduct.value);
     if (newProduct.value) {
       newProduct.value.stock = Number(newProduct.value.stock);
       await store.products.createNewProduct(newProduct.value);
