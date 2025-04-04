@@ -16,13 +16,13 @@ declare module 'vue' {
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({ baseURL: process.env.API_SERVICE_URL ?? "" });
+const api = axios.create({ baseURL: "http://52.220.242.12:8080/api" });
 
 api.interceptors.request.use(
   (config) => {
     const authStore = useAuthStore();
     if (authStore.user) {
-      config.headers.Authorization = `Bearer ${authStore.user.token}`;
+      config.headers.Authorization = `Bearer ${authStore.accessToken}`;
     }
     return config;
   },

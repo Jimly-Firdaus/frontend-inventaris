@@ -1,100 +1,153 @@
-// import { api } from "boot/axios";
+import { api } from "boot/axios";
 import { defineStore } from "pinia";
 import type {
   LoginResponse,
   CreateUserRequest,
   GetUsersResponseData,
+  GetAllUsersQuery,
+  GetUsersResponse,
 } from "./types";
-import { USER_ROLE } from "src/constants/user";
+// import { USER_ROLE } from "src/constants/user";
+import type { AxiosResponse } from "axios";
+import type { PaginationMeta } from "../store/types";
 
 export const useAuthStore = defineStore("auth", () => {
-  const user = ref<LoginResponse>();
+  const user = useLocalStorage<LoginResponse | null>("user", null, {
+    serializer: {
+      read: (v: string): LoginResponse | null => {
+        try {
+          return v ? (JSON.parse(v) as LoginResponse) : null;
+        } catch (e) {
+          console.error("Failed to parse user from localStorage", e);
+          return null;
+        }
+      },
+      write: (v: LoginResponse | null): string => {
+        return v ? JSON.stringify(v) : "";
+      },
+    },
+  });
+  const userRole = computed(() => user.value?.role);
+  const accessToken = computed(() => user.value?.token);
+
   const users = ref<GetUsersResponseData[]>([]);
-  const userRole = ref("");
-  const login = (payload: { username: string; password: string }) => {
-    // const res = await api.post("/login", payload);
+  const usersMeta = ref<PaginationMeta>();
+
+  const storeManagers = ref<{ [storeId: string]: GetUsersResponseData[] }>({});
+  const storeManagersMeta = ref<{ [storeId: string]: PaginationMeta }>({});
+
+  const login = async (payload: { username: string; password: string }) => {
+    const res: AxiosResponse<{ data: LoginResponse }> = await api.post(
+      "/auth/login",
+      payload,
+    );
     console.log("LOGIN called", payload);
-    user.value = {
-      token: "random-token",
-      role: USER_ROLE.OWNER,
-    };
-    userRole.value = user.value.role;
+    user.value = res.data.data;
   };
 
   const logout = () => {
-    user.value = undefined;
-    userRole.value = "";
+    user.value = null;
   };
 
-  const createNewUserAccount = (payload: CreateUserRequest) => {
-    const newUser: GetUsersResponseData = {
-      id: "12112121",
-      username: payload.username,
-      role: payload.role,
-      store_name: payload.store_name,
-      updated_at: "2025-04-02T10:00:00Z",
-    }
-
-    users.value.push(newUser);
+  const updatePassword = async (userId: string, newPassword: string) => {
+    await api.patch(`/users/${userId}`, {
+      password: newPassword,
+    });
   };
 
-  const getAllUsers = () => {
-    const dummyUsers: GetUsersResponseData[] = [
-      {
-        id: "axaxa",
-        username: "store_manager_one",
-        role: USER_ROLE.STORE_MANAGER,
-        updated_at: "2025-04-02T10:00:00Z",
-        store_name: "Toko A",
-      },
-      {
-        id: "adadada",
-        username: "store_manager_two",
-        role: USER_ROLE.STORE_MANAGER,
-        updated_at: "2025-04-02T10:00:00Z",
-        store_name: "Toko A",
-      },
-      {
-        id: "acacaca",
-        username: "store_manager_three",
-        role: USER_ROLE.STORE_MANAGER,
-        updated_at: "2025-04-02T10:00:00Z",
-        store_name: "Toko B",
-      },
-      {
-        id: "10101010",
-        username: "warehouse_manager_one",
-        role: USER_ROLE.WAREHOUSE_MANAGER,
-        updated_at: "2025-04-02T10:00:00Z",
-      },
-      {
-        id: "101010121210",
-        username: "warehouse_manager_two",
-        role: USER_ROLE.WAREHOUSE_MANAGER,
-        updated_at: "2025-04-02T10:00:00Z",
-      },
-    ];
+  const createNewUserAccount = async (payload: CreateUserRequest) => {
+    // const newUser: GetUsersResponseData = {
+    //   id: "12112121",
+    //   username: payload.username,
+    //   role: payload.role,
+    //   store_name: payload.store_name,
+    //   updated_at: "2025-04-02T10:00:00Z",
+    // }
 
-    users.value.push(...dummyUsers);
+    // users.value.push(newUser);
+    await api.post("/users", payload);
   };
 
-  const getAllStoreUsers = (storeName: string) => {
-    if (!users.value.length) getAllUsers();
+  const getAllUsers = async (req?: GetAllUsersQuery) => {
+    // const dummyUsers: GetUsersResponseData[] = [
+    //   {
+    //     id: "axaxa",
+    //     username: "store_manager_one",
+    //     role: USER_ROLE.STORE_MANAGER,
+    //     updated_at: "2025-04-02T10:00:00Z",
+    //     store_name: "Toko A",
+    //   },
+    //   {
+    //     id: "adadada",
+    //     username: "store_manager_two",
+    //     role: USER_ROLE.STORE_MANAGER,
+    //     updated_at: "2025-04-02T10:00:00Z",
+    //     store_name: "Toko A",
+    //   },
+    //   {
+    //     id: "acacaca",
+    //     username: "store_manager_three",
+    //     role: USER_ROLE.STORE_MANAGER,
+    //     updated_at: "2025-04-02T10:00:00Z",
+    //     store_name: "Toko B",
+    //   },
+    //   {
+    //     id: "10101010",
+    //     username: "warehouse_manager_one",
+    //     role: USER_ROLE.WAREHOUSE_MANAGER,
+    //     updated_at: "2025-04-02T10:00:00Z",
+    //   },
+    //   {
+    //     id: "101010121210",
+    //     username: "warehouse_manager_two",
+    //     role: USER_ROLE.WAREHOUSE_MANAGER,
+    //     updated_at: "2025-04-02T10:00:00Z",
+    //   },
+    // ];
 
-    return users.value.filter((u) => u.store_name == storeName);
+    // users.value.push(...dummyUsers);
+
+    const res: AxiosResponse<{ data: GetUsersResponse }> = await api.get(
+      "/users",
+      {
+        params: req,
+      },
+    );
+
+    users.value = res.data.data.data;
+    usersMeta.value = res.data.data.meta;
+  };
+
+  const getAllStoreUsers = async (storeId: string) => {
+    const res: AxiosResponse<{ data: GetUsersResponse }> = await api.get(
+      "/users",
+      {
+        params: {
+          store_id: storeId,
+        },
+      },
+    );
+
+    storeManagers.value[storeId] = res.data.data.data;
+    storeManagersMeta.value[storeId] = res.data.data.meta;
   };
 
   const deleteUser = (userId: string) => {
-    users.value = users.value.filter(u => u.id != userId);
-  }
+    users.value = users.value.filter((u) => u.id != userId);
+  };
 
   return {
     user,
     users,
+    usersMeta,
     userRole,
+    accessToken,
+    storeManagers,
+    storeManagersMeta,
 
     login,
     logout,
+    updatePassword,
     getAllUsers,
     getAllStoreUsers,
     createNewUserAccount,

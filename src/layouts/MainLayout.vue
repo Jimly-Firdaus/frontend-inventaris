@@ -2,12 +2,14 @@
 import { ref } from "vue";
 import { TABS_AVAILABLE_BY_USER_ROLE } from "src/constants/user";
 import { useStore } from "src/stores";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
+import { USER_ROLE } from "src/constants/user";
 
 const store = useStore();
 const router = useRouter();
+const route = useRoute();
 const leftDrawerOpen = ref(false);
-const currentActiveTab = ref(0);
+const currentActiveTab = ref(1);
 
 const currentTabs = computed(() =>
   store.auth.user ? TABS_AVAILABLE_BY_USER_ROLE[store.auth.user.role] : [],
@@ -22,15 +24,42 @@ function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
 
+const updateDrawerActiveTab = () => {
+  if (store.auth.user) {
+    const activeIdx = currentTabs.value.findIndex(
+      (t) => t.routeName == route.name,
+    );
+    currentActiveTab.value = activeIdx + 1;
+  }
+};
+
 const logout = async () => {
   store.auth.logout();
   await router.push({ name: "LoginPage" });
+  window.location.reload();
 };
 
 // TODO: watch for route change, need to update currentActiveTab so it render appropriately
+watch(() => route.name, updateDrawerActiveTab);
 
 onMounted(async () => {
   if (!store.auth.user) await router.push({ name: "LoginPage" });
+  else {
+    if (store.auth.user && route.path == "/") {
+      switch (store.auth.user.role) {
+        case USER_ROLE.OWNER:
+          await router.push({ name: "TransactionsPage" });
+          break;
+        case USER_ROLE.WAREHOUSE_MANAGER:
+          await router.push({ name: "ManageProductsPage" });
+          break;
+        case USER_ROLE.STORE_MANAGER:
+          await router.push({ name: "ManageStoresPage" });
+          break;
+      }
+    }
+  }
+  updateDrawerActiveTab();
 });
 </script>
 <template>
@@ -65,14 +94,19 @@ onMounted(async () => {
         <q-item-label
           v-for="(tabData, idx) in currentTabs"
           header
-          :key="tabData.id"
-          @click="onGoToPage(tabData.routeName, idx)"
+          :key="idx"
+          @click="onGoToPage(tabData.routeName, tabData.id)"
           class="tw-cursor-pointer"
           :class="
-            currentActiveTab == idx ? 'bg-primary text-white' : 'text-grey-10'
+            currentActiveTab == tabData.id
+              ? 'bg-primary text-white'
+              : 'text-grey-10'
           "
         >
-          <p class="tw-mb-0 text-body-large" :class="$q.screen.lt.sm ? 'text-mobile' : ''">
+          <p
+            class="tw-mb-0 text-body-large"
+            :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+          >
             {{ tabData.tabLabel }}
           </p>
         </q-item-label>

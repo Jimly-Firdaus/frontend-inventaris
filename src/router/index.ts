@@ -7,6 +7,7 @@ import {
 } from 'vue-router';
 import routes from './routes';
 import { useStore } from "src/stores";
+import { USER_ROLE } from 'src/constants/user';
 
 /*
  * If not building with SSR mode, you can
@@ -41,12 +42,14 @@ export default defineRouter(function (/* { store, ssrContext } */) {
         // Check if the user has the required role
         const userRole = store.auth.userRole;
         const requiredRole = to.meta.role as string[];
-        if (!requiredRole.includes(userRole)) {
+        if (userRole && !requiredRole.includes(userRole)) {
           // Redirect to a default page if the user does not have the required role
-          if (userRole === "owner") {
-            next("/owner/dashboard");
-          } else {
-            next("/");
+          if (userRole == USER_ROLE.OWNER) {
+            next({ name: "TransactionsPage" });
+          } else if (userRole == USER_ROLE.WAREHOUSE_MANAGER) {
+            next({ name: "ManageProductsPage" });
+          } else if (userRole == USER_ROLE.STORE_MANAGER) {
+            next({ name: "ManageStoresPage" });
           }
         }
       }

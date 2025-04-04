@@ -33,12 +33,22 @@ export const TABS_AVAILABLE_BY_USER_ROLE = {
       tabLabel: "Barang",
       routeName: "ManageProductsPage",
     },
+    {
+      id: 2,
+      tabLabel: "Pemasukan Barang",
+      routeName: "TransactionsPage",
+    },
   ],
   [USER_ROLE.STORE_MANAGER]: [
     {
       id: 1,
+      tabLabel: "Barang",
+      routeName: "ManageProductsPage",
+    },
+    {
+      id: 2,
       tabLabel: "Transaksi",
-      routeName: "TransactionsPage",
+      routeName: "ManageStoresPage",
     },
   ]
 }

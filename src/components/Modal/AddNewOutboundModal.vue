@@ -7,15 +7,16 @@ import {
   PRODUCT_PRICE_TYPE,
   PRODUCT_PRICE_TYPE_LABEL,
 } from "src/constants/price";
+import { USER_ROLE } from "src/constants/user";
+import { AxiosError } from "axios";
+import type { GetAllOutboundsQuery } from "src/stores/product/types";
 
 const props = defineProps({
   storeId: {
     type: String,
-    required: true,
   },
   storeName: {
     type: String,
-    required: true,
   },
 });
 
@@ -34,8 +35,8 @@ const availableProductsOpts = computed(() =>
 const options = ref([availableProductsOpts.value[0]]);
 const newOutbound = ref<CreateOutboundRequest>({
   product_id: "",
-  store_id: props.storeId,
-  to: props.storeName,
+  store_name: props.storeName ?? "",
+  to: store.auth.user?.store_id ?? props.storeId ?? "",
   quantity: 0,
   price_type: PRODUCT_PRICE_TYPE.RETAIL,
 });
@@ -59,7 +60,7 @@ const filterProductName = (
     abort();
     return;
   }
-  console.log(val)
+  console.log(val);
   update(() => {
     const needle = val.toLowerCase();
     options.value = availableProductsOpts.value.filter(
@@ -69,19 +70,52 @@ const filterProductName = (
 };
 
 // TODO: integrate with API
-const onAddNewOutbound = () => {
-  console.log("Added new outbound", newOutbound.value);
-  if (newOutbound.value && selectedProduct.value && selectedPriceType.value) {
-    newOutbound.value.product_id = selectedProduct.value.value;
-    newOutbound.value.price_type = selectedPriceType.value.value as PRODUCT_PRICE_TYPE;
-    store.products.createProductOutbound(newOutbound.value);
+const onAddNewOutbound = async () => {
+  try {
+    console.log("Added new outbound", newOutbound.value);
+    if (newOutbound.value && selectedProduct.value && selectedPriceType.value) {
+      newOutbound.value.product_id = selectedProduct.value.value;
+      newOutbound.value.price_type = selectedPriceType.value
+        .value as PRODUCT_PRICE_TYPE;
+      newOutbound.value.quantity = Number(newOutbound.value.quantity);
+      await store.products.createProductOutbound(newOutbound.value);
+      const req: GetAllOutboundsQuery = {
+        page: 1,
+        limit: 10,
+      };
 
-    modelValue.value = false;
+      if (store.auth.userRole == USER_ROLE.STORE_MANAGER) {
+        req.store_id = store.auth.user?.store_id ?? props.storeId ?? "";
+        await store.products.getAllOutboundsByStoreId(req);
+      } else {
+        const req: GetAllOutboundsQuery = {
+          page: 1,
+          limit: 10,
+        };
+        await store.products.getAllOutbounds(req);
+      }
+      modelValue.value = false;
 
-    $q.notify({
-      message: "Berhasil menambahkan pengeluaran barang baru!",
-      color: "primary",
-    });
+      $q.notify({
+        message: "Berhasil menambahkan pengeluaran barang baru!",
+        color: "primary",
+        classes: "q-notify-font",
+      });
+    }
+  } catch (err: unknown) {
+    if (err instanceof AxiosError && err.response?.data?.message) {
+      $q.notify({
+        message: `Terjadi kesalahan saat menambahkan transaksi baru: ${err.response.data.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    } else {
+      $q.notify({
+        message: `Terjadi kesalahan saat menambahkan transaksi baru`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    }
   }
 };
 </script>
@@ -123,9 +157,9 @@ const onAddNewOutbound = () => {
           label="Jumlah Barang"
           lazy-rules
           :rules="[
-            (val: string) => !!val || 'Jumlah stock baru tidak boleh kosong!',
+            (val: string) => !!val || 'Jumlah stok baru tidak boleh kosong!',
             (val: string) =>
-              parseInt(val) > 0 || 'Jumlah stock harus lebih dari 0!',
+              parseInt(val) > 0 || 'Jumlah stok harus lebih dari 0!',
           ]"
           class="text-body-medium"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"

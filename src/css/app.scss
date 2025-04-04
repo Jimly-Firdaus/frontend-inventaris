@@ -1,1 +1,9 @@
 // app global css in SCSS form
+.q-notify-font {
+  font-size: 20px;
+  line-height: 24px;
+  @media (max-width: 600px) {
+    font-size: 18px;
+    line-height: 20px;
+  }
+}

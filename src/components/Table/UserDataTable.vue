@@ -4,6 +4,7 @@ import type { QTableProps } from "quasar";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
 import UpdatePasswordModal from "src/components/Modal/UpdatePasswordModal.vue";
 import { useStore } from "src/stores";
+import { DateTime } from "luxon";
 
 const props = defineProps({
   userData: {
@@ -62,6 +63,7 @@ const onConfirmDelete = () => {
   $q.notify({
     message: "Berhasil menghapus user!",
     color: "primary",
+    classes: "q-notify-font",
   });
 };
 </script>
@@ -81,7 +83,7 @@ const onConfirmDelete = () => {
           {{ props.row.username }}
         </q-td>
         <q-td key="updated_at" :props="props">
-          {{ props.row.updated_at }}
+          {{ DateTime.fromISO(props.row.updated_at).toFormat("dd LLL yyyy, HH:mm") }}
         </q-td>
         <q-td key="update_password" :props="props">
           <q-btn

@@ -4,6 +4,7 @@ import type { GetAllStoresQuery } from "src/stores/store/types";
 import AddNewStoreModal from "src/components/Modal/AddNewStoreModal.vue";
 import { useRoute, useRouter } from "vue-router";
 import ManageStoreDetails from "src/components/Store/ManageStoreDetails.vue";
+import { USER_ROLE } from "src/constants/user";
 
 const store = useStore();
 const route = useRoute();
@@ -35,16 +36,20 @@ const onClickStoreName = async (storeId: string, storeName: string) => {
   console.log("StoreID: ", storeId, "clicked!");
 };
 
-onMounted(() => {
+onMounted(async () => {
   const payload: GetAllStoresQuery = {};
-  store.stores.getAllStores(payload);
+  await store.stores.getAllStores(payload);
 });
 </script>
 <template>
   <q-page class="tw-py-8 tw-px-4">
-    <template v-if="!selectedStoreId">
+    <template v-if="!selectedStoreId && store.auth.userRole != USER_ROLE.STORE_MANAGER">
       <div class="tw-flex tw-w-full tw-items-center">
-        <span class="text-grey-10 tw-font-bold" :class="$q.screen.lt.sm ? 'text-h6' : 'text-h4'">Daftar Toko</span>
+        <span
+          class="text-grey-10 tw-font-bold"
+          :class="$q.screen.lt.sm ? 'text-h6' : 'text-h4'"
+          >Daftar Toko</span
+        >
         <q-space />
         <q-btn
           no-caps
@@ -66,30 +71,42 @@ onMounted(() => {
         :class="$q.screen.lt.sm ? 'text-mobile tw-mb-4' : 'tw-mb-12'"
       />
       <q-card flat bordered>
-        <template v-if="filteredStores.length">
+        <template v-if="filteredStores && filteredStores.length">
           <template v-for="(store, idx) in filteredStores" :key="store.id">
             <q-card-section
               class="tw-cursor-pointer card-content tw-p-0 text-grey-10"
               @click="onClickStoreName(store.id, store.name)"
             >
-              <p class="text-body-large tw-mb-0 tw-py-4 tw-px-4" :class="$q.screen.lt.sm ? 'text-mobile' : ''">
+              <p
+                class="text-body-large tw-mb-0 tw-py-4 tw-px-4"
+                :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+              >
                 {{ idx + 1 }}. {{ store.name }}
               </p>
             </q-card-section>
             <q-separator
-              v-if="filteredStores.length > 1 && idx != filteredStores.length - 1"
+              v-if="
+                filteredStores.length > 1 && idx != filteredStores.length - 1
+              "
             />
           </template>
         </template>
-        <p v-else class="text-h6 tw-px-4 tw-py-4 text-grey-9 text-center">
-          Toko "{{ nameFilter }}" tidak ditemukan.
-        </p>
+        <div v-else class="full-width row flex-center q-gutter-sm q-pa-xl">
+          <span class="text-h6"> Tidak ada toko </span>
+          <q-icon size="2em" name="sentiment_dissatisfied" />
+        </div>
       </q-card>
 
-      <AddNewStoreModal v-if="showAddNewStoreModal" v-model="showAddNewStoreModal" />
+      <AddNewStoreModal
+        v-if="showAddNewStoreModal"
+        v-model="showAddNewStoreModal"
+      />
     </template>
     <template v-else>
-      <ManageStoreDetails :store-id="selectedStoreId" :store-name="selectedStoreName" />
+      <ManageStoreDetails
+        :store-id="selectedStoreId"
+        :store-name="selectedStoreName"
+      />
     </template>
   </q-page>
 </template>

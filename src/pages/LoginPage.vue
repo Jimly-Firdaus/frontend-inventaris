@@ -11,21 +11,30 @@ const formData = ref({
 
 const isPwd = ref(true);
 
-const onLogin = async () => {
-  store.auth.login(formData.value);
-
+const redirectLoggedInUser = async () => {
   if (store.auth.user) {
     switch (store.auth.user.role) {
       case USER_ROLE.OWNER:
-      case USER_ROLE.STORE_MANAGER:
         await router.push({ name: "TransactionsPage" });
         break;
       case USER_ROLE.WAREHOUSE_MANAGER:
         await router.push({ name: "ManageProductsPage" });
         break;
+      case USER_ROLE.STORE_MANAGER:
+        await router.push({ name: "ManageStoresPage" });
+        break;
     }
   }
+}
+
+const onLogin = async () => {
+  await store.auth.login(formData.value);
+  await redirectLoggedInUser();
 };
+
+onMounted(async () => {
+  await redirectLoggedInUser();
+})
 </script>
 <template>
   <q-page class="row items-center justify-center bg-grey-4">
@@ -80,7 +89,7 @@ const onLogin = async () => {
             no-caps
             type="submit"
             label="Login"
-            class="tw-w-full"
+            class="tw-w-full tw-mt-4"
             color="primary"
             icon="login"
             rounded

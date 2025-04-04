@@ -12,19 +12,29 @@ const newStoreName = ref("");
 const showConfirmationModal = ref(false);
 
 // TODO: integrate with API
-const onAddNewStore = () => {
-  console.log("Added new store", newStoreName.value);
-  const req: CreateStoreRequest = {
-    name: newStoreName.value,
-  };
-  store.stores.createNewStore(req);
+const onAddNewStore = async () => {
+  try {
+    console.log("Added new store", newStoreName.value);
+    const req: CreateStoreRequest = {
+      name: newStoreName.value,
+    };
+    await store.stores.createNewStore(req);
 
-  modelValue.value = false;
+    modelValue.value = false;
 
-  $q.notify({
-    message: "Berhasil menambahkan toko baru!",
-    color: "primary",
-  });
+    $q.notify({
+      message: "Berhasil menambahkan toko baru!",
+      color: "primary",
+      classes: "q-notify-font",
+    });
+  } catch (err) {
+    console.error(err);
+    $q.notify({
+      message: "Terjadi kesalahan saat menambahkan toko baru.",
+      color: "negative",
+      classes: "q-notify-font",
+    });
+  }
 };
 </script>
 <template>

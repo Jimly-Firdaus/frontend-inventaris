@@ -11,10 +11,10 @@ const warehouseManagers = computed(() =>
 
 const showAddNewUserAccountModal = ref(false);
 
-onMounted(() => {
+onMounted(async () => {
   if (!store.auth.users.length) {
     // const payload: GetAllStoresQuery = {};
-    store.auth.getAllUsers();
+    await store.auth.getAllUsers();
   }
 });
 </script>

@@ -9,6 +9,7 @@ export interface User {
 export interface LoginResponse {
   token: string;
   role: USER_ROLE;
+  store_id?: string;
 }
 
 export interface CreateUserRequest {
@@ -20,8 +21,7 @@ export interface CreateUserRequest {
 }
 
 export interface GetAllUsersQuery {
-  username?: string;
-  role?: USER_ROLE;
+  store_id?: string;
   page?: number;
   limit?: number;
   asc?: boolean;

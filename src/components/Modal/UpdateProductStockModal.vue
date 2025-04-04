@@ -1,50 +1,51 @@
 <script setup lang="ts">
 import { useQuasar } from "quasar";
 import { useStore } from "src/stores";
-import type { CreateUserRequest } from "src/stores/auth/types";
+// import type { CreateInboundData } from "src/stores/product/types";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
-import type { USER_ROLE } from "src/constants/user";
 
 const props = defineProps({
-  userRole: {
-    type: String as PropType<USER_ROLE>,
+  id: {
+    type: String,
     required: true,
   },
-  storeId: String,
-  storeName: String,
+  currentQuantity: {
+    type: Number,
+    required: true,
+  },
+  isInbound: Boolean,
 });
 
 const $q = useQuasar();
 const store = useStore();
 const modelValue = defineModel<boolean>({ required: true, default: false });
 
-const newUser = ref<CreateUserRequest>({
-  username: "",
-  password: "",
-  role: props.userRole,
-  store_id: props.storeId,
-  store_name: props.storeName,
-});
+const newStock = ref(props.currentQuantity?.toString());
 const showConfirmationModal = ref(false);
 
 // TODO: integrate with API
-const onAddNewUserAccount = async () => {
+const onUpdateInboundOrOutbound = async () => {
   try {
-    console.log("Added new user account", newUser.value);
-    await store.auth.createNewUserAccount(newUser.value);
-    if (props.storeId) await store.auth.getAllStoreUsers(props.storeId);
-    else await store.auth.getAllUsers();
+    if (props.isInbound) {
+      await store.products.updateInbound(props.id, Number(newStock.value));
+      await store.products.getAllInbounds();
+    } else {
+      await store.products.updateOutbound(props.id, Number(newStock.value));
+      await store.products.getAllOutbounds();
+    }
+    await store.products.getAllProducts();
+
     modelValue.value = false;
 
     $q.notify({
-      message: "Berhasil menambahkan user baru!",
+      message: `Berhasil mengubah data ${props.isInbound ? 'pemasukan' : 'pengeluaran'} stok barang!`,
       color: "primary",
       classes: "q-notify-font",
     });
   } catch (err) {
     console.error(err);
     $q.notify({
-      message: "Terjadi kesalahan saat menambahkan user baru.",
+      message: `Terjadi kesalahan saat mengubah data ${props.isInbound ? 'pemasukan' : 'pengeluaran'} stok barang`,
       color: "negative",
       classes: "q-notify-font",
     });
@@ -59,31 +60,23 @@ const onAddNewUserAccount = async () => {
           class="tw-mb-0 text-body-large tw-font-bold text-center text-grey-10"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
         >
-          Tambah User Baru
+          Ubah Stok Barang
         </p>
       </q-card-section>
-      <q-card-section class="tw-flex tw-flex-col tw-gap-y-4">
+      <q-card-section>
         <q-input
-          v-model="newUser.username"
+          v-model="newStock"
           outlined
-          label="Username"
+          label="Stok barang"
           lazy-rules
           :rules="[
-            (val: string) => !!val || 'Username tidak boleh kosong!',
+            (val: string) => !!val || 'Jumlah stok baru tidak boleh kosong!',
             (val: string) =>
-              !/\s/.test(val) || 'Username tidak boleh mengandung spasi!',
+              parseInt(val) > 0 || 'Jumlah stok harus lebih dari 0!',
           ]"
           class="text-body-medium"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-        />
-        <q-input
-          v-model="newUser.password"
-          outlined
-          label="Password"
-          lazy-rules
-          :rules="[(val: string) => !!val || 'Password tidak boleh kosong!']"
-          class="text-body-medium"
-          :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+          type="number"
         />
       </q-card-section>
       <q-card-section class="row justify-center tw-gap-x-4">
@@ -97,10 +90,10 @@ const onAddNewUserAccount = async () => {
         />
         <q-btn
           :disable="
-            newUser.username.length == 0 || newUser.password.length == 0
+            newStock.length == 0 || parseInt(newStock) <= 0
           "
           no-caps
-          :label="$q.screen.lt.sm ? 'Tambah' : 'Tambah User'"
+          :label="$q.screen.lt.sm ? 'Ubah' : 'Ubah Stok'"
           @click="showConfirmationModal = true"
           color="primary"
           :size="$q.screen.lt.sm ? 'md' : 'lg'"
@@ -110,10 +103,21 @@ const onAddNewUserAccount = async () => {
     </q-card>
 
     <ConfirmationModal
-      :copy-text="`Apakah Anda yakin ingin menambahkan user ${newUser.username}?`"
+      :copy-text="`Apakah Anda yakin ingin mengubah stok barang?`"
       v-model="showConfirmationModal"
-      @continue="onAddNewUserAccount"
+      @continue="onUpdateInboundOrOutbound"
     />
   </q-dialog>
 </template>
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+:deep(input::-webkit-outer-spin-button),
+:deep(input::-webkit-inner-spin-button) {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+:deep(input[type="number"]) {
+  -moz-appearance: textfield;
+}
+</style>

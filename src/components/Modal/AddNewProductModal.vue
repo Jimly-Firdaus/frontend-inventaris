@@ -11,23 +11,31 @@ const modelValue = defineModel<boolean>({ required: true, default: false });
 const newProduct = ref<CreateProductRequest>({
   name: "",
   stock: 0,
-  buy_price: undefined,
-  wholesale_sell_price: undefined,
-  retail_sell_price: undefined,
 });
 const showConfirmationModal = ref(false);
 
 // TODO: integrate with API
-const onAddNewProduct = () => {
-  console.log("Added new product", newProduct.value);
-  if (newProduct.value) {
-    store.products.createNewProduct(newProduct.value);
+const onAddNewProduct = async () => {
+  try {
+    console.log("Added new product", newProduct.value);
+    if (newProduct.value) {
+      newProduct.value.stock = Number(newProduct.value.stock);
+      await store.products.createNewProduct(newProduct.value);
+      await store.products.getAllProducts();
+      modelValue.value = false;
 
-    modelValue.value = false;
-
+      $q.notify({
+        message: "Berhasil menambahkan barang baru!",
+        color: "primary",
+        classes: "q-notify-font",
+      });
+    }
+  } catch (err) {
+    console.error(err);
     $q.notify({
-      message: "Berhasil menambahkan barang baru!",
-      color: "primary",
+      message: "Terjadi kesalahan saat menambahkan barang baru.",
+      color: "negative",
+      classes: "q-notify-font",
     });
   }
 };
@@ -57,10 +65,10 @@ const onAddNewProduct = () => {
         <q-input
           v-model="newProduct.stock"
           outlined
-          label="Jumlah Stock"
+          label="Jumlah Stok"
           type="number"
         />
-        <q-input
+        <!-- <q-input
           v-model="newProduct.buy_price"
           outlined
           label="Modal"
@@ -77,7 +85,7 @@ const onAddNewProduct = () => {
           outlined
           label="Harga Eceran"
           type="number"
-        />
+        /> -->
       </q-card-section>
       <q-card-section class="row justify-center tw-gap-x-4">
         <q-btn

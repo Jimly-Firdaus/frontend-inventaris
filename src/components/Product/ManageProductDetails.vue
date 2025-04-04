@@ -4,7 +4,7 @@ import type { UpdateProductRequest } from "src/stores/product/types";
 import { useRouter } from "vue-router";
 import BackButton from "src/components/Button/BackButton.vue";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
-import AddProductStockModal from "src/components/Modal/AddProductStockModal.vue";
+// import AddProductStockModal from "src/components/Modal/AddProductStockModal.vue";
 
 const props = defineProps({
   productId: {
@@ -25,7 +25,7 @@ const confirmationModalCopy = computed(() =>
     ? "Apakah Anda yakin ingin menghapus barang ini?"
     : "Apakah Anda yakin ingin memperbarui data barang ini?",
 );
-const showAddProductStockModal = ref(false);
+// const showAddProductStockModal = ref(false);
 
 const selectedProduct = computed(() =>
   allProducts.value.find((p) => p.id == props.productId),
@@ -38,40 +38,72 @@ const productPrice = ref({
 });
 
 // TODO: implement this
-const onSaveProductChanges = () => {
-  const req = {
-    name: productPrice.value.name,
-    buy_price: productPrice.value.buyPrice,
-    wholesale_sell_price: productPrice.value.wholesaleSellPrice,
-    retail_sell_price: productPrice.value.retailSellPrice,
-  } as UpdateProductRequest;
+const onSaveProductChanges = async () => {
+  try {
+    const req = {
+      name: productPrice.value.name,
+      buy_price:
+        Number(productPrice.value.buyPrice) === 0
+          ? undefined
+          : Number(productPrice.value.buyPrice),
+      wholesale_sell_price:
+        Number(productPrice.value.wholesaleSellPrice) === 0
+          ? undefined
+          : Number(productPrice.value.wholesaleSellPrice),
+      retail_sell_price:
+        Number(productPrice.value.retailSellPrice) === 0
+          ? undefined
+          : Number(productPrice.value.retailSellPrice),
+    } as UpdateProductRequest;
 
-  store.products.updateProduct(props.productId, req);
+    await store.products.updateProduct(props.productId, req);
 
-  $q.notify({
-    message: "Berhasil mengupdate barang!",
-    color: "primary",
-  });
+    $q.notify({
+      message: "Berhasil mengubah barang!",
+      color: "primary",
+      classes: "q-notify-font",
+    });
+  } catch (err) {
+    console.error(err);
+    $q.notify({
+      message: "Terjadi kesalahan saat mengubah barang.",
+      color: "negative",
+      classes: "q-notify-font",
+    });
+  }
 };
 
 const onConfirm = async () => {
   if (isWarningTypeConfirmationModal.value) {
-    store.products.deleteProduct(props.productId);
+    try {
+      await store.products.deleteProduct(props.productId);
 
-    await router.replace({
-      query: {
-        productId: undefined,
-      },
-    });
-    $q.notify({
-      message: "Berhasil menghapus barang!",
-      color: "primary",
-    });
-  } else onSaveProductChanges();
+      $q.notify({
+        message: "Berhasil menghapus barang!",
+        color: "primary",
+        classes: "q-notify-font",
+      });
+    } catch (err) {
+      console.error(err);
+      $q.notify({
+        message: "Terjadi kesalahan saat menghapus barang.",
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    } finally {
+      await router.replace({
+        query: {
+          productId: undefined,
+        },
+      });
+    }
+  } else await onSaveProductChanges();
 };
 
-onMounted(() => {
+onMounted(async () => {
   console.log(props.productId);
+  if (!allProducts.value.length) await store.products.getAllProducts();
+
   productPrice.value = {
     name: selectedProduct.value?.name ?? "",
     buyPrice: selectedProduct.value?.buy_price ?? "",
@@ -83,22 +115,13 @@ onMounted(() => {
 <template>
   <div>
     <BackButton is-remove-route-query />
-    <div class="tw-flex tw-w-full tw-items-center">
+    <div class="tw-flex tw-w-full tw-items-center tw-mt-4">
       <span
         class="text-grey-10 tw-font-bold"
         :class="$q.screen.lt.sm ? 'text-h6' : 'text-h4'"
         >Detail Informasi Barang</span
       >
       <q-space />
-      <q-btn
-        no-caps
-        label="Tambah Stock"
-        icon="add"
-        @click="showAddProductStockModal = true"
-        :size="$q.screen.lt.sm ? 'md' : 'lg'"
-        class="tw-rounded-3xl"
-        color="primary"
-      />
     </div>
     <q-separator size="1px" class="tw-mb-10 tw-mt-2" color="primary" />
 
@@ -123,7 +146,7 @@ onMounted(() => {
           class="text-body-medium tw-mb-0"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
         >
-          Total Stock Barang: {{ selectedProduct?.stock }}
+          Total Stok Barang: {{ selectedProduct?.stock }}
         </p>
       </q-card-section>
       <q-card-section>
@@ -205,11 +228,11 @@ onMounted(() => {
       :is-warning="isWarningTypeConfirmationModal"
       @continue="onConfirm"
     />
-    <AddProductStockModal
+    <!-- <AddProductStockModal
       v-if="showAddProductStockModal"
       v-model="showAddProductStockModal"
       :product-id="props.productId"
-    />
+    /> -->
   </div>
 </template>
 <style scoped lang="scss">

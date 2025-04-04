@@ -1,13 +1,30 @@
 <script setup lang="ts">
 import type { QTableProps } from "quasar";
 import type { GetAllOutboundsResponseData } from "src/stores/product/types";
-import { type PRODUCT_PRICE_TYPE, PRODUCT_PRICE_TYPE_LABEL } from "src/constants/price";
+import {
+  type PRODUCT_PRICE_TYPE,
+  PRODUCT_PRICE_TYPE_LABEL,
+} from "src/constants/price";
+import { DateTime } from "luxon";
+import UpdateProductStockModal from "src/components/Modal/UpdateProductStockModal.vue";
+
 const props = defineProps({
   outbounds: {
     type: Array as PropType<GetAllOutboundsResponseData[]>,
     required: true,
   },
+  totalPages: {
+    type: Number,
+    required: true,
+  },
+  totalData: Number,
+  rowsPerPage: {
+    type: Number,
+    required: true,
+  },
 });
+
+const page = defineModel<number>({ required: true });
 
 const columns: QTableProps["columns"] = [
   {
@@ -59,6 +76,15 @@ const columns: QTableProps["columns"] = [
     sortable: false,
   },
 ];
+
+const showUpdateProductStockModal = ref(false);
+const selectedOutboundId = ref("");
+const selectedOutboundQuantity = ref(0);
+const onUpdateOutbound = (outboundId: string, quantity: number) => {
+  selectedOutboundId.value = outboundId;
+  selectedOutboundQuantity.value = quantity;
+  showUpdateProductStockModal.value = true;
+};
 </script>
 <template>
   <q-table
@@ -77,9 +103,17 @@ const columns: QTableProps["columns"] = [
         </q-td>
         <q-td key="quantity" :props="props">
           {{ props.row.quantity }}
+          <q-btn
+            flat
+            icon="edit"
+            class="tw-ml-1"
+            @click="onUpdateOutbound(props.row.id, props.row.quantity)"
+          />
         </q-td>
         <q-td key="price_type" :props="props">
-          {{ PRODUCT_PRICE_TYPE_LABEL[props.row.price_type as PRODUCT_PRICE_TYPE] }}
+          {{
+            PRODUCT_PRICE_TYPE_LABEL[props.row.price_type as PRODUCT_PRICE_TYPE]
+          }}
         </q-td>
         <q-td key="store_name" :props="props">
           {{ props.row.store_name }}
@@ -88,13 +122,21 @@ const columns: QTableProps["columns"] = [
           {{ props.row.created_by }}
         </q-td>
         <q-td key="created_at" :props="props">
-          {{ props.row.created_at }}
+          {{
+            DateTime.fromISO(props.row.created_at).toFormat(
+              "dd LLL yyyy, HH:mm",
+            )
+          }}
         </q-td>
         <q-td key="updated_by" :props="props">
           {{ props.row.updated_by }}
         </q-td>
         <q-td key="updated_at" :props="props">
-          {{ props.row.updated_at }}
+          {{
+            DateTime.fromISO(props.row.updated_at).toFormat(
+              "dd LLL yyyy, HH:mm",
+            )
+          }}
         </q-td>
       </q-tr>
     </template>
@@ -105,6 +147,40 @@ const columns: QTableProps["columns"] = [
       </div>
     </template>
   </q-table>
+  <div
+    v-if="props.totalPages > 1"
+    class="tw-flex tw-flex-col tw-items-center tw-justify-center"
+  >
+    <div class="tw-flex tw-w-full">
+      <q-space />
+      <div
+        v-if="props.totalData"
+        class="tw-text-sm tw-text-gray-500 tw-mt-2 tw-text-center"
+      >
+        {{ (page - 1) * props.rowsPerPage + 1 }}–{{
+          Math.min(page * props.rowsPerPage, props.outbounds.length) +
+          (page - 1) * props.rowsPerPage
+        }}
+        dari {{ totalData }} data
+      </div>
+    </div>
+    <q-pagination
+      v-model="page"
+      class="text-grey-9"
+      :max="totalPages"
+      :max-pages="1"
+      direction-links
+      flat
+      color="grey-7"
+      active-color="grey-9"
+    />
+  </div>
+  <UpdateProductStockModal
+    v-if="showUpdateProductStockModal"
+    v-model="showUpdateProductStockModal"
+    :id="selectedOutboundId"
+    :current-quantity="selectedOutboundQuantity"
+  />
 </template>
 <style scoped lang="scss">
 // Sticky header

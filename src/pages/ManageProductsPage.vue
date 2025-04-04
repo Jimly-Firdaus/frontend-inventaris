@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import type { QTableProps } from "quasar";
 import { useStore } from "src/stores";
-import type { GetAllProductsQuery } from "src/stores/product/types";
+// import type { GetAllProductsQuery } from "src/stores/product/types";
 import { useRouter, useRoute } from "vue-router";
 import AddNewProductModal from "src/components/Modal/AddNewProductModal.vue";
 import ManageProductDetails from "src/components/Product/ManageProductDetails.vue";
-import InboundTable from "src/components/Table/InboundTable.vue";
+// import InboundTable from "src/components/Table/InboundTable.vue";
+import { USER_ROLE } from "src/constants/user";
+import AddProductStockModal from "src/components/Modal/AddProductStockModal.vue";
+import type { GetAllProductsQuery } from "src/stores/product/types";
 
 const $q = useQuasar();
 const store = useStore();
@@ -14,17 +17,18 @@ const route = useRoute();
 const selectedProductId = computed(() => route.query.productId as string);
 
 const showAddNewProductModal = ref(false);
+const showAddProductStockModal = ref(false);
 
 const nameFilter = ref("");
 
-const allProducts = computed(() => store.products.products);
+const allProducts = computed(() => store.products.products ?? []);
 const filteredProducts = computed(() => {
   if (nameFilter.value.length > 0)
     return allProducts.value.filter((p) => p.name.includes(nameFilter.value));
   else return allProducts.value;
 });
 
-const columns: QTableProps["columns"] = [
+const baseColumns: QTableProps["columns"] = [
   {
     name: "name",
     align: "left",
@@ -34,9 +38,12 @@ const columns: QTableProps["columns"] = [
   {
     name: "stock",
     align: "left",
-    label: "Total Stock",
+    label: "Total Stok",
     field: "stock",
   },
+];
+
+const ownerExtraColumns: QTableProps["columns"] = [
   {
     name: "buy_price",
     align: "left",
@@ -57,9 +64,41 @@ const columns: QTableProps["columns"] = [
   },
 ];
 
-const inbounds = computed(() => store.products.inbounds);
+const actionsColumn: QTableProps["columns"] = [
+  {
+    name: "action",
+    align: "left",
+    label: "",
+    field: "action",
+  },
+];
+
+const columns = computed(() => [
+  ...baseColumns,
+  ...(store.auth.userRole === USER_ROLE.OWNER ? ownerExtraColumns : []),
+  ...(store.auth.userRole &&
+  [USER_ROLE.OWNER, USER_ROLE.WAREHOUSE_MANAGER].includes(store.auth.userRole)
+    ? actionsColumn
+    : []),
+]);
+
+const selectedProductIdForStockUpdate = ref();
+
+const totalPages = ref(0);
+const totalData = ref(0);
+const pagination = ref({
+  page: 1,
+  rowsPerPage: 10,
+});
+
+const onUpdateStock = (productId: string) => {
+  selectedProductIdForStockUpdate.value = productId;
+  showAddProductStockModal.value = true;
+};
+// const inbounds = computed(() => store.products.inbounds);
 
 const onClickProduct = async (productId: string) => {
+  if (store.auth.userRole != USER_ROLE.OWNER) return;
   await router.replace({
     query: {
       productId: productId,
@@ -67,14 +106,47 @@ const onClickProduct = async (productId: string) => {
   });
 };
 
-onMounted(() => {
-  if (!allProducts.value.length) {
-    const req: GetAllProductsQuery = {};
-    store.products.getAllProducts(req);
+const onRequest = async (props: {
+  pagination: { page: number; rowsPerPage: number };
+}) => {
+  const { page, rowsPerPage } = props.pagination;
+  try {
+    const req: GetAllProductsQuery = {
+      name: nameFilter.value.trim().length ? nameFilter.value : undefined,
+      page: page,
+      limit: rowsPerPage,
+    };
+
+    await store.products.getAllProducts(req);
+    totalPages.value = store.products.productsMeta?.total_page ?? 0;
+    totalData.value = store.products.productsMeta?.total_item ?? 0;
+  } catch (err) {
+    console.error(err);
+    $q.notify({
+      message: "Terjadi kesalahan saat mengambil data.",
+      color: "negative",
+      classes: "q-notify-font",
+    });
   }
-  if (!inbounds.value.length) {
-    store.products.getAllInbounds();
-  }
+};
+
+watch(
+  [pagination, nameFilter],
+  async () => {
+    await onRequest({ pagination: pagination.value });
+  },
+  { deep: true },
+);
+
+onMounted(async () => {
+  const { page, rowsPerPage } = pagination.value;
+  const req: GetAllProductsQuery = {
+    page: page,
+    limit: rowsPerPage,
+  };
+  await store.products.getAllProducts(req);
+  totalPages.value = store.products.productsMeta?.total_page ?? 0;
+  totalData.value = store.products.productsMeta?.total_item ?? 0;
 });
 </script>
 <template>
@@ -88,6 +160,7 @@ onMounted(() => {
         >
         <q-space />
         <q-btn
+          v-if="store.auth.userRole != USER_ROLE.STORE_MANAGER"
           no-caps
           :label="$q.screen.lt.sm ? '' : 'Tambah Barang'"
           icon="add"
@@ -109,12 +182,13 @@ onMounted(() => {
 
       <q-table
         flat
-        virtual-scroll
         hide-pagination
         bordered
-        style="max-height: 290px"
+        virtual-scroll
+        style="max-height: 575px"
         :rows="filteredProducts"
         :columns="columns"
+        @request="onRequest"
         :rows-per-page-options="[0]"
       >
         <template v-slot:body="props">
@@ -129,15 +203,30 @@ onMounted(() => {
             <q-td key="stock" :props="props">
               {{ props.row.stock }}
             </q-td>
-            <q-td key="buy_price" :props="props">
-              {{ props.row.buy_price }}
-            </q-td>
-            <q-td key="wholesale_sell_price" :props="props">
-              {{ props.row.wholesale_sell_price }}
-            </q-td>
-            <q-td key="retail_sell_price" :props="props">{{
-              props.row.retail_sell_price
-            }}</q-td>
+            <template v-if="store.auth.userRole == USER_ROLE.OWNER">
+              <q-td key="buy_price" :props="props">
+                {{ props.row.buy_price }}
+              </q-td>
+              <q-td key="wholesale_sell_price" :props="props">
+                {{ props.row.wholesale_sell_price }}
+              </q-td>
+              <q-td key="retail_sell_price" :props="props">{{
+                props.row.retail_sell_price
+              }}</q-td>
+            </template>
+            <template v-if="store.auth.userRole != USER_ROLE.STORE_MANAGER">
+              <q-td key="action" :props="props">
+                <q-btn
+                  dense
+                  color="primary"
+                  no-caps
+                  @click="onUpdateStock(props.row.id)"
+                  :size="$q.screen.lt.sm ? 'sm' : 'md'"
+                  icon="add"
+                  label="Tambah Stock"
+                />
+              </q-td>
+            </template>
           </q-tr>
         </template>
         <template #no-data>
@@ -147,8 +236,38 @@ onMounted(() => {
           </div>
         </template>
       </q-table>
-
-      <q-card flat bordered class="tw-border-2 tw-mt-16 card-container">
+      <div
+        v-if="totalPages > 1"
+        class="tw-flex tw-flex-col tw-items-center tw-justify-center"
+      >
+        <div class="tw-flex tw-w-full">
+          <q-space />
+          <div
+            v-if="totalData"
+            class="tw-text-sm tw-text-gray-500 tw-mt-2 tw-text-center"
+          >
+            {{ (pagination.page - 1) * pagination.rowsPerPage + 1 }}–{{
+              Math.min(
+                pagination.page * pagination.rowsPerPage,
+                filteredProducts.length,
+              ) +
+              (pagination.page - 1) * pagination.rowsPerPage
+            }}
+            dari {{ totalData }} data
+          </div>
+        </div>
+        <q-pagination
+          v-model="pagination.page"
+          class="text-grey-9"
+          :max="totalPages"
+          :max-pages="1"
+          direction-links
+          flat
+          color="grey-7"
+          active-color="grey-9"
+        />
+      </div>
+      <!-- <q-card flat bordered class="tw-border-2 tw-mt-16 card-container">
         <div
           class="tw-flex tw-items-center tw-p-4"
           :class="$q.screen.lt.sm ? 'text-mobile tw-mb-2' : 'tw-mb-4'"
@@ -161,12 +280,17 @@ onMounted(() => {
           <q-space />
         </div>
         <InboundTable :inbounds="inbounds" />
-      </q-card>
+      </q-card> -->
     </template>
     <template v-else>
       <ManageProductDetails :product-id="selectedProductId" />
     </template>
 
+    <AddProductStockModal
+      v-if="showAddProductStockModal"
+      v-model="showAddProductStockModal"
+      :product-id="selectedProductIdForStockUpdate"
+    />
     <AddNewProductModal
       v-if="showAddNewProductModal"
       v-model="showAddNewProductModal"

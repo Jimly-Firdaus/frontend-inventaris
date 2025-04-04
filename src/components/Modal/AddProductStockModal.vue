@@ -19,20 +19,31 @@ const additionalStock = ref("0");
 const showConfirmationModal = ref(false);
 
 // TODO: integrate with API
-const onAddNewStore = () => {
-  console.log("Added new stock", additionalStock.value);
-  const req: CreateInboundData = {
-    product_id: props.productId,
-    quantity: Number(additionalStock.value),
-  };
-  store.products.createProductInbound(req);
+const onAddNewInbound = async () => {
+  try {
+    console.log("Added new stock", additionalStock.value);
+    const req: CreateInboundData = {
+      product_id: props.productId,
+      quantity: Number(additionalStock.value),
+    };
+    await store.products.createProductInbound(req);
+    await store.products.getAllProducts();
 
-  modelValue.value = false;
+    modelValue.value = false;
 
-  $q.notify({
-    message: "Berhasil menambahkan stock barang!",
-    color: "primary",
-  });
+    $q.notify({
+      message: "Berhasil menambahkan stok barang!",
+      color: "primary",
+      classes: "q-notify-font",
+    });
+  } catch (err) {
+    console.error(err);
+    $q.notify({
+      message: "Terjadi kesalahan saat menambahkan stok barang",
+      color: "negative",
+      classes: "q-notify-font",
+    });
+  }
 };
 </script>
 <template>
@@ -43,19 +54,19 @@ const onAddNewStore = () => {
           class="tw-mb-0 text-body-large tw-font-bold text-center text-grey-10"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
         >
-          Tambah Stock Barang
+          Tambah Stok Barang
         </p>
       </q-card-section>
       <q-card-section>
         <q-input
           v-model="additionalStock"
           outlined
-          label="Jumlah stock baru"
+          label="Jumlah stok baru"
           lazy-rules
           :rules="[
-            (val: string) => !!val || 'Jumlah stock baru tidak boleh kosong!',
+            (val: string) => !!val || 'Jumlah stok baru tidak boleh kosong!',
             (val: string) =>
-              parseInt(val) > 0 || 'Jumlah stock harus lebih dari 0!',
+              parseInt(val) > 0 || 'Jumlah stok harus lebih dari 0!',
           ]"
           class="text-body-medium"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
@@ -76,7 +87,7 @@ const onAddNewStore = () => {
             additionalStock.length == 0 || parseInt(additionalStock) <= 0
           "
           no-caps
-          :label="$q.screen.lt.sm ? 'Tambah' : 'Tambah Stock'"
+          :label="$q.screen.lt.sm ? 'Tambah' : 'Tambah Stok'"
           @click="showConfirmationModal = true"
           color="primary"
           :size="$q.screen.lt.sm ? 'md' : 'lg'"
@@ -86,9 +97,9 @@ const onAddNewStore = () => {
     </q-card>
 
     <ConfirmationModal
-      :copy-text="`Apakah Anda yakin ingin menambahkan stock sebesar ${additionalStock}?`"
+      :copy-text="`Apakah Anda yakin ingin menambahkan stok sebesar ${additionalStock}?`"
       v-model="showConfirmationModal"
-      @continue="onAddNewStore"
+      @continue="onAddNewInbound"
     />
   </q-dialog>
 </template>
