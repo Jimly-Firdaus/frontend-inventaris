@@ -2,6 +2,7 @@
 import { useStore } from "src/stores";
 import { USER_ROLE } from "src/constants/user";
 
+const $q = useQuasar();
 const store = useStore();
 const router = useRouter();
 const formData = ref({
@@ -25,16 +26,25 @@ const redirectLoggedInUser = async () => {
         break;
     }
   }
-}
+};
 
 const onLogin = async () => {
-  await store.auth.login(formData.value);
-  await redirectLoggedInUser();
+  try {
+    await store.auth.login(formData.value);
+    await redirectLoggedInUser();
+  } catch (err) {
+    console.error(err);
+    $q.notify({
+      message: "Username atau password salah!",
+      color: "negative",
+      classes: "q-notify-font",
+    });
+  }
 };
 
 onMounted(async () => {
   await redirectLoggedInUser();
-})
+});
 </script>
 <template>
   <q-page class="row items-center justify-center bg-grey-4">
