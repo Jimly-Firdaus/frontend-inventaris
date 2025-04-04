@@ -24,3 +24,12 @@
     line-height: 20px;
   }
 }
+
+.text-body-small {
+  font-size: 18px;
+  line-height: 24px;
+  &.text-mobile {
+    font-size: 14px;
+    line-height: 20px;
+  }
+}

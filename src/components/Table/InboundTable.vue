@@ -18,6 +18,8 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+  loading: Boolean,
+  isEditable: Boolean,
 });
 
 const page = defineModel<number>({ required: true });
@@ -34,6 +36,7 @@ const columns: QTableProps["columns"] = [
     align: "left",
     label: "Quantity",
     field: "quantity",
+    sortable: true,
   },
   {
     name: "created_by",
@@ -45,7 +48,13 @@ const columns: QTableProps["columns"] = [
     name: "created_at",
     label: "Dibuat Pada",
     field: "created_at",
-    sortable: false,
+    sortable: true,
+    sort: (a, b) =>
+      new Date(a).getTime() === new Date(b).getTime()
+        ? 0
+        : new Date(b).getTime() - new Date(a).getTime() > 0
+          ? 1
+          : -1,
   },
   {
     name: "updated_by",
@@ -57,7 +66,13 @@ const columns: QTableProps["columns"] = [
     name: "updated_at",
     label: "Diubah Pada",
     field: "updated_at",
-    sortable: false,
+    sortable: true,
+    sort: (a, b) =>
+      new Date(a).getTime() === new Date(b).getTime()
+        ? 0
+        : new Date(b).getTime() - new Date(a).getTime() > 0
+          ? 1
+          : -1,
   },
 ];
 
@@ -80,6 +95,7 @@ const onUpdateInbound = (inboundId: string, quantity: number) => {
     :rows="props.inbounds"
     :columns="columns"
     :rows-per-page-options="[0]"
+    :loading="props.loading"
   >
     <template v-slot:body="props">
       <q-tr :props="props" class="tw-cursor-pointer">
@@ -89,6 +105,7 @@ const onUpdateInbound = (inboundId: string, quantity: number) => {
         <q-td key="quantity" :props="props">
           {{ props.row.quantity }}
           <q-btn
+            v-if="isEditable"
             flat
             icon="edit"
             class="tw-ml-1"

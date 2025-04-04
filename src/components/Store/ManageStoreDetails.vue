@@ -81,6 +81,9 @@ const refreshData = async () => {
     page: page.value,
     limit: 10,
   };
+  if (props.storeId) {
+    req.store_id = props.storeId;
+  }
   await store.products.getAllOutbounds(req);
 };
 
@@ -101,6 +104,9 @@ onMounted(async () => {
     page: 1,
     limit: 10,
   };
+  if (props.storeId) {
+    req.store_id = props.storeId;
+  }
   await store.products.getAllOutbounds(req);
 
   await store.products.getAllProducts();
@@ -158,38 +164,37 @@ onMounted(async () => {
       </q-card>
     </template>
 
-    <template v-if="store.auth.userRole == USER_ROLE.STORE_MANAGER">
-      <q-card flat bordered class="tw-border-2 tw-mt-8 tw-pb-2 card-container">
-        <div
-          class="tw-flex tw-items-center tw-p-4"
-          :class="$q.screen.lt.sm ? 'text-mobile tw-mb-2' : 'tw-mb-4'"
+    <q-card flat bordered class="tw-border-2 tw-mt-8 tw-pb-2 card-container">
+      <div
+        class="tw-flex tw-items-center tw-p-4"
+        :class="$q.screen.lt.sm ? 'text-mobile tw-mb-2' : 'tw-mb-4'"
+      >
+        <span
+          class="text-grey-10 tw-font-bold text-body-large"
+          :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+          >Informasi Transaksi Toko</span
         >
-          <span
-            class="text-grey-10 tw-font-bold text-body-large"
-            :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-            >Informasi Transaksi Toko</span
-          >
-          <q-space />
-          <q-btn
-            no-caps
-            :label="$q.screen.lt.sm ? '' : 'Tambah Transaksi'"
-            icon="add"
-            @click="showAddNewOutboundModal = true"
-            :size="$q.screen.lt.sm ? 'md' : 'lg'"
-            class="tw-rounded-3xl"
-            color="primary"
-          />
-        </div>
-
-        <OutboundTable
-          :outbounds="outbounds"
-          :total-pages="store.products.outboundsMeta?.total_page ?? 0"
-          :total-data="store.products.outboundsMeta?.total_item ?? 0"
-          :rows-per-page="10"
-          v-model="page"
+        <q-space />
+        <q-btn
+          no-caps
+          :label="$q.screen.lt.sm ? '' : 'Tambah Transaksi'"
+          icon="add"
+          @click="showAddNewOutboundModal = true"
+          :size="$q.screen.lt.sm ? 'md' : 'lg'"
+          class="tw-rounded-3xl"
+          color="primary"
         />
-      </q-card>
-    </template>
+      </div>
+
+      <OutboundTable
+        :outbounds="outbounds"
+        :total-pages="store.products.outboundsMeta?.total_page ?? 0"
+        :total-data="store.products.outboundsMeta?.total_item ?? 0"
+        :rows-per-page="10"
+        v-model="page"
+        :is-editable="store.auth.userRole == USER_ROLE.OWNER"
+      />
+    </q-card>
 
     <AddNewUserAccountModal
       v-if="showAddNewStoreManagerModal"

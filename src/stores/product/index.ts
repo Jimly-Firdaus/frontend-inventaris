@@ -84,10 +84,16 @@ export const useProductsStore = defineStore("products", () => {
   };
 
   const getAllInbounds = async (req?: GetAllInboundsQuery) => {
+    const finalReq: GetAllInboundsQuery = {
+      ...(req ?? {}),
+      asc: false,
+      order_by: "created_at",
+    };
+
     const res: AxiosResponse<{ data: GetAllInboundsResponse }> = await api.get(
       "/inbounds",
       {
-        params: req,
+        params: finalReq,
       },
     );
 
@@ -106,10 +112,16 @@ export const useProductsStore = defineStore("products", () => {
   };
 
   const getAllOutbounds = async (req?: GetAllOutboundsQuery) => {
+    const finalReq: GetAllOutboundsQuery = {
+      ...(req ?? {}),
+      asc: false,
+      order_by: "created_at",
+    };
+
     const res: AxiosResponse<{ data: GetAllOutboundsResponse }> = await api.get(
       "/outbounds",
       {
-        params: req,
+        params: finalReq,
       },
     );
     console.log(res);

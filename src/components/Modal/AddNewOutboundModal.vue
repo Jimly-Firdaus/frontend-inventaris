@@ -9,7 +9,10 @@ import {
 } from "src/constants/price";
 import { USER_ROLE } from "src/constants/user";
 import { AxiosError } from "axios";
-import type { GetAllOutboundsQuery } from "src/stores/product/types";
+import type {
+  GetAllOutboundsQuery,
+  GetAllProductsQuery,
+} from "src/stores/product/types";
 
 const props = defineProps({
   storeId: {
@@ -32,7 +35,7 @@ const availableProductsOpts = computed(() =>
   })),
 );
 
-const options = ref([availableProductsOpts.value[0]]);
+const options = ref<{ label: string; value: string }[]>([]);
 const newOutbound = ref<CreateOutboundRequest>({
   product_id: "",
   store_name: props.storeName ?? "",
@@ -62,10 +65,16 @@ const filterProductName = (
   }
   console.log(val);
   update(() => {
-    const needle = val.toLowerCase();
-    options.value = availableProductsOpts.value.filter(
-      (v) => v.label.toLowerCase().indexOf(needle) > -1,
-    );
+    void (async () => {
+      const needle = val.toLowerCase();
+      const req: GetAllProductsQuery = {
+        name: needle,
+      };
+      await store.products.getAllProducts(req);
+      options.value = availableProductsOpts.value.filter((v) =>
+        v.label.toLowerCase().includes(needle),
+      );
+    })();
   });
 };
 
@@ -170,6 +179,8 @@ const onAddNewOutbound = async () => {
           v-model="selectedPriceType"
           :options="priceTypeOpts"
           label="Tipe Harga Jual"
+          class="tw-w-[150px] text-body-small selector"
+          :class="$q.screen.lt.sm ? 'text-mobile' : ''"
         />
       </q-card-section>
       <q-card-section class="row justify-center tw-gap-x-4">
@@ -200,4 +211,16 @@ const onAddNewOutbound = async () => {
     />
   </q-dialog>
 </template>
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.selector {
+  :deep(.q-field__inner) {
+    background-color: white !important;
+  }
+  :deep(.q-field__control) {
+    border-color: $grey-5 !important;
+    border: 1px solid;
+    border-radius: 6px;
+    background-color: white !important;
+  }
+}
+</style>

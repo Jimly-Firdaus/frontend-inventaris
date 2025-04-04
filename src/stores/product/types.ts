@@ -53,12 +53,15 @@ export interface GetAllInboundsQuery {
   updated_by_username?: string;
   quantity_lte?: number;
   quantity_gte?: number;
-  created_at_lte?: string;
-  created_at_gte?: string;
+  created_at_lte?: string | undefined;
+  created_at_gte?: string | undefined;
   page?: number;
 	limit?: number;
   order_by?: string;
   asc?: boolean;
+
+  price_type?: PRODUCT_PRICE_TYPE;
+	store_name?: string;
 }
 
 export interface GetAllInboundsResponseData {
@@ -94,8 +97,8 @@ export interface GetAllOutboundsQuery {
 	price_type?: PRODUCT_PRICE_TYPE;
 	price_lte?: number;
 	price_gte?: number;
-	created_at_lte?: string;
-	created_at_gte?: string;
+	created_at_lte?: string | undefined;
+	created_at_gte?: string | undefined;
 	created_by_username?: string;
 	page?: number;
 	limit?: number;

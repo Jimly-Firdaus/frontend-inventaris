@@ -11,6 +11,7 @@ const props = defineProps({
     type: Array as PropType<GetUsersResponseData[]>,
     required: true,
   },
+  loading: Boolean,
 });
 
 const $q = useQuasar();
@@ -76,6 +77,7 @@ const onConfirmDelete = () => {
     :rows="props.userData"
     :columns="columns"
     :rows-per-page-options="[0]"
+    :loading="props.loading"
   >
     <template v-slot:body="props">
       <q-tr :props="props" class="tw-cursor-pointer">

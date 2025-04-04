@@ -223,7 +223,8 @@ onMounted(async () => {
                   @click="onUpdateStock(props.row.id)"
                   :size="$q.screen.lt.sm ? 'sm' : 'md'"
                   icon="add"
-                  label="Tambah Stock"
+                  label="Tambah Stok"
+                  class="tw-rounded-xl tw-pr-2"
                 />
               </q-td>
             </template>
