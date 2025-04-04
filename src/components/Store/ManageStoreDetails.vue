@@ -11,6 +11,7 @@ import OutboundTable from "src/components/Table/OutboundTable.vue";
 import type { GetAllOutboundsQuery } from "src/stores/product/types";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
 import { useRouter } from "vue-router";
+import StoreInsight from "src/components/Store/StoreInsight.vue";
 
 const props = defineProps({
   storeId: {
@@ -56,6 +57,8 @@ const showAddNewOutboundModal = ref(false);
 
 const page = ref(1);
 
+const currentTab = ref("user");
+
 const onConfirmDeleteStore = async () => {
   try {
     await store.stores.deleteStore(props.storeId);
@@ -94,6 +97,7 @@ watch(page, async () => {
 onMounted(async () => {
   if (!storeManagers.value && store.auth.userRole == USER_ROLE.OWNER)
     await store.auth.getAllStoreUsers(props.storeId);
+  else currentTab.value = "outbound"
 
   const req: GetAllOutboundsQuery = {
     page: 1,
@@ -129,7 +133,23 @@ onMounted(async () => {
       </div>
       <q-separator size="1px" class="tw-mb-10 tw-mt-2" color="primary" />
 
-      <q-card flat bordered class="tw-border-2 card-container">
+      <q-tabs
+        v-if="store.auth.userRole == USER_ROLE.OWNER"
+        v-model="currentTab"
+        align="left"
+        class="tw-my-4"
+      >
+        <q-tab no-caps class="tab-content" name="user" label="User" />
+        <q-tab no-caps class="tab-content" name="outbound" label="Penjualan" />
+        <q-tab
+          no-caps
+          class="tab-content"
+          name="insight"
+          label="Insight"
+        />
+      </q-tabs>
+
+      <q-card v-if="currentTab == 'user'" flat bordered class="tw-border-2 card-container">
         <div class="tw-flex tw-items-center tw-p-4">
           <span
             class="text-grey-10 tw-font-bold text-body-large"
@@ -159,7 +179,7 @@ onMounted(async () => {
       </q-card>
     </template>
 
-    <q-card flat bordered class="tw-border-2 tw-mt-8 tw-pb-2 card-container">
+    <q-card v-if="currentTab == 'outbound'" flat bordered class="tw-border-2 tw-mt-8 tw-pb-2 card-container">
       <div
         class="tw-flex tw-items-center tw-p-4"
         :class="$q.screen.lt.sm ? 'text-mobile tw-mb-2' : 'tw-mb-4'"
@@ -191,6 +211,8 @@ onMounted(async () => {
       />
     </q-card>
 
+    <StoreInsight v-if="currentTab == 'insight'" :store-id="props.storeId" />
+
     <AddNewUserAccountModal
       v-if="showAddNewStoreManagerModal"
       v-model="showAddNewStoreManagerModal"
@@ -212,6 +234,16 @@ onMounted(async () => {
   </div>
 </template>
 <style scoped lang="scss">
+.tab-content {
+  :deep(.q-tab__label) {
+    font-size: 20px;
+    line-height: 24px;
+    @media (max-width: 600px) {
+      font-size: 18px;
+      line-height: 20px;
+    }
+  }
+}
 .card-container {
   border-color: $grey-6;
   border-radius: 24px;

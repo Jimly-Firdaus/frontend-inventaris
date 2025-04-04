@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { DateTime } from "luxon";
 
-defineProps<{
+const props = defineProps<{
   selectedTimeframe: string;
+  useDefault?: boolean;
 }>();
+
+const now = DateTime.now().toFormat("yyyy/MM/dd")
+const sevenDaysAgo = DateTime.now().minus({ days: 7 }).toFormat("yyyy/MM/dd")
 
 const _selectedTimeframe = defineModel<string>("selectedTimeframe");
 const timeframe = ref<{ from: string; to: string } | null>(null);
@@ -18,6 +22,15 @@ watch(timeframe, () => {
       "yyyy/MM/dd",
     ).toFormat("dd MMM, yyyy")}`;
 });
+
+onMounted(() => {
+  if(props.useDefault) {
+    timeframe.value = {
+      from: sevenDaysAgo,
+      to: now,
+    }
+  }
+})
 </script>
 <template>
   <q-btn-dropdown

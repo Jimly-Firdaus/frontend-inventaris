@@ -8,11 +8,6 @@ const routes: RouteRecordRaw[] = [
     children: [
       // owner role route
       {
-        name: "OwnerDashboardPage",
-        path: "/dashboard",
-        component: () => import("pages/Owner/DashboardPage.vue"),
-      },
-      {
         name: "ManageStoresPage",
         path: "/manage/stores",
         meta: {
@@ -45,13 +40,6 @@ const routes: RouteRecordRaw[] = [
           role: [USER_ROLE.OWNER, USER_ROLE.WAREHOUSE_MANAGER]
         },
         component: () => import("pages/ManageProductsPage.vue"),
-      },
-
-      // store manager route
-      {
-        name: "ManagePurchasePage",
-        path: "/manage/purchase",
-        component: () => import("pages/StoreManager/ManagePurchasePage.vue"),
       },
     ],
   },

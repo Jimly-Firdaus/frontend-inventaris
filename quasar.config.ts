@@ -13,6 +13,7 @@ export default defineConfig((/* ctx */) => {
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
       'axios',
+      'apexcharts',
       'tanstack-query'
     ],
 

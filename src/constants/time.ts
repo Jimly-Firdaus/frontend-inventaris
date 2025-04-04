@@ -1,0 +1,17 @@
+export enum INSIGHT_INTERVAL {
+  ONE_DAY = "1d",
+  ONE_WEEK = "1w",
+  ONE_MONTH = "1m",
+  THREE_MONTH = "3m",
+  SIX_MONTH = "6m",
+  ONE_YEAR = "1y",
+}
+
+export const INSIGHT_INTERVAL_LABEL = {
+  [INSIGHT_INTERVAL.ONE_DAY]: "1 Hari",
+  [INSIGHT_INTERVAL.ONE_WEEK]: "1 Minggu",
+  [INSIGHT_INTERVAL.ONE_MONTH]: "1 Bulan",
+  [INSIGHT_INTERVAL.THREE_MONTH]: "3 Bulan",
+  [INSIGHT_INTERVAL.SIX_MONTH]: "6 Bulan",
+  [INSIGHT_INTERVAL.ONE_YEAR]: "1 Tahun",
+};

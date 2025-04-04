@@ -17,6 +17,7 @@ declare module 'vue' {
 // "export default () => {}" function below (which runs individually
 // for each client)
 const api = axios.create({ baseURL: "http://52.220.242.12:8080/api" });
+// const api = axios.create({ baseURL: "https://52.220.242.12:8080/api" });
 
 api.interceptors.request.use(
   (config) => {
