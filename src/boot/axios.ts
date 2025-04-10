@@ -29,6 +29,20 @@ api.interceptors.request.use(
   (error) => Promise.reject(error instanceof Error ? error : new Error(String(error)))
 );
 
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const authStore = useAuthStore();
+
+    // Check if the error is due to an expired access token
+    if (error.response?.status === 401) {
+      authStore.user = null;
+      window.location.href = "/login"; // Redirect to login
+    }
+    return Promise.reject(new Error(error.response?.data?.message || error.message || 'Request failed'));
+  }
+);
+
 export default defineBoot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
 
