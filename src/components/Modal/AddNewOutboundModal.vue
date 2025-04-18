@@ -198,7 +198,7 @@ const onAddNewOutbound = async () => {
         <q-btn
           :disable="!selectedProduct || newOutbound.quantity <= 0"
           no-caps
-          :label="$q.screen.lt.sm ? 'Tambah' : 'Tambah Barang'"
+          :label="$q.screen.lt.sm ? 'Tambah' : 'Tambah Pengeluaran'"
           @click="showConfirmationModal = true"
           color="primary"
           :size="$q.screen.lt.sm ? 'md' : 'lg'"

@@ -33,7 +33,7 @@ const formattedDates = computed(
 
 const dataTitleForSold = ref({
   total: "Total",
-  retail: "Retail",
+  retail: "Eceran",
   wholesell: "Grosir",
 });
 
@@ -105,7 +105,7 @@ const chartOptionsSold = computed(() => ({
 
 const dataTitleForSales = ref({
   total: "Total",
-  retail: "Retail",
+  retail: "Eceran",
   wholesell: "Grosir",
 });
 
@@ -152,6 +152,15 @@ const chartOptionsSales = computed(() => ({
   yaxis: {
     title: {
       text: "Total Harga Terjual",
+    },
+    labels: {
+      formatter: (val: number) => {
+        return new Intl.NumberFormat("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          minimumFractionDigits: 0,
+        }).format(val);
+      },
     },
   },
   tooltip: {
