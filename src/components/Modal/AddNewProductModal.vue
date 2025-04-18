@@ -8,6 +8,9 @@ import axios from "axios";
 const $q = useQuasar();
 const store = useStore();
 const modelValue = defineModel<boolean>({ required: true, default: false });
+const currentNameFilter = defineModel<string>("currentNameFilter", {
+  required: true,
+});
 
 const newProduct = ref<CreateProductRequest>({
   name: "",
@@ -29,6 +32,7 @@ const onAddNewProduct = async () => {
         classes: "q-notify-font",
       });
     }
+    currentNameFilter.value = "";
   } catch (err: unknown) {
     console.error(err);
     if (axios.isAxiosError(err) && err.response?.data?.message) {

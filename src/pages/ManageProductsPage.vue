@@ -320,6 +320,7 @@ onMounted(async () => {
     <AddNewProductModal
       v-if="showAddNewProductModal"
       v-model="showAddNewProductModal"
+      v-model:current-name-filter="nameFilter"
     />
   </q-page>
 </template>
