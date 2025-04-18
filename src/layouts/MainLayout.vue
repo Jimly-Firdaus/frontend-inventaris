@@ -26,7 +26,7 @@ function toggleLeftDrawer() {
 
 const updateDrawerActiveTab = () => {
   if (store.auth.user) {
-    const activeIdx = currentTabs.value.findIndex(
+    const activeIdx = currentTabs.value?.findIndex(
       (t) => t.routeName == route.name,
     );
     currentActiveTab.value = activeIdx + 1;

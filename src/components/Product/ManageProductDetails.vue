@@ -4,6 +4,7 @@ import type { UpdateProductRequest } from "src/stores/product/types";
 import { useRouter } from "vue-router";
 import BackButton from "src/components/Button/BackButton.vue";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
+import { AxiosError } from "axios";
 
 const props = defineProps({
   productId: {
@@ -38,8 +39,8 @@ const productPrice = ref({
 const onSaveProductChanges = async () => {
   try {
     $q.loading.show({
-    message: "Loading...",
-  });
+      message: "Loading...",
+    });
     const req = {
       name: productPrice.value.name,
       buy_price:
@@ -63,13 +64,21 @@ const onSaveProductChanges = async () => {
       color: "primary",
       classes: "q-notify-font",
     });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error(err);
-    $q.notify({
-      message: "Terjadi kesalahan saat mengubah barang.",
-      color: "negative",
-      classes: "q-notify-font",
-    });
+    if (err instanceof AxiosError && err.response?.data?.message) {
+      $q.notify({
+        message: `Terjadi kesalahan saat mengubah barang: ${err.response.data.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    } else if (err instanceof Error) {
+      $q.notify({
+        message: `Terjadi kesalahan saat mengubah barang: ${err.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    }
   } finally {
     $q.loading.hide();
   }
@@ -88,13 +97,21 @@ const onConfirm = async () => {
         color: "primary",
         classes: "q-notify-font",
       });
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
-      $q.notify({
-        message: "Terjadi kesalahan saat menghapus barang.",
-        color: "negative",
-        classes: "q-notify-font",
-      });
+      if (err instanceof AxiosError && err.response?.data?.message) {
+        $q.notify({
+          message: `Terjadi kesalahan saat menghapus barang: ${err.response.data.message}`,
+          color: "negative",
+          classes: "q-notify-font",
+        });
+      } else if (err instanceof Error) {
+        $q.notify({
+          message: `Terjadi kesalahan saat menghapus barang: ${err.message}`,
+          color: "negative",
+          classes: "q-notify-font",
+        });
+      }
     } finally {
       $q.loading.hide();
       await router.replace({

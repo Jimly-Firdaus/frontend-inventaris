@@ -8,6 +8,7 @@ import { USER_ROLE } from "src/constants/user";
 import AddProductStockModal from "src/components/Modal/AddProductStockModal.vue";
 import type { GetAllProductsQuery } from "src/stores/product/types";
 import { formatWithThousandSeparator } from "src/util/number";
+import { AxiosError } from "axios";
 
 const $q = useQuasar();
 const store = useStore();
@@ -117,13 +118,21 @@ const onRequest = async (props: {
     await store.products.getAllProducts(req);
     totalPages.value = store.products.productsMeta?.total_page ?? 0;
     totalData.value = store.products.productsMeta?.total_item ?? 0;
-  } catch (err) {
+  } catch (err: unknown) {
     console.error(err);
-    $q.notify({
-      message: "Terjadi kesalahan saat mengambil data.",
-      color: "negative",
-      classes: "q-notify-font",
-    });
+    if (err instanceof AxiosError && err.response?.data?.message) {
+      $q.notify({
+        message: `Terjadi kesalahan saat mengambil data: ${err.response.data.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    } else if (err instanceof Error) {
+      $q.notify({
+        message: `Terjadi kesalahan saat mengambil data: ${err.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    }
   } finally {
     $q.loading.hide();
   }
@@ -311,6 +320,7 @@ onMounted(async () => {
     <AddNewProductModal
       v-if="showAddNewProductModal"
       v-model="showAddNewProductModal"
+      v-model:current-name-filter="nameFilter"
     />
   </q-page>
 </template>

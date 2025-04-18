@@ -1,9 +1,9 @@
-import { defineBoot } from '#q-app/wrappers';
-import axios, { type AxiosInstance } from 'axios';
+import { defineBoot } from "#q-app/wrappers";
+import axios, { type AxiosInstance } from "axios";
 import { useAuthStore } from "src/stores/auth";
+import { useRoute } from "vue-router";
 
-
-declare module 'vue' {
+declare module "vue" {
   interface ComponentCustomProperties {
     $axios: AxiosInstance;
     $api: AxiosInstance;
@@ -16,7 +16,7 @@ declare module 'vue' {
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({ baseURL: "https://api.jchow.site/api" });
+const api = axios.create({ baseURL: "https://api.tokohello.com/api" });
 
 api.interceptors.request.use(
   (config) => {
@@ -26,21 +26,27 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error instanceof Error ? error : new Error(String(error)))
+  (error) =>
+    Promise.reject(error instanceof Error ? error : new Error(String(error))),
 );
 
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const authStore = useAuthStore();
+    const route = useRoute();
 
     // Check if the error is due to an expired access token
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && route.name !== "LoginPage") {
       authStore.user = null;
       window.location.href = "/login"; // Redirect to login
     }
-    return Promise.reject(new Error(error.response?.data?.message || error.message || 'Request failed'));
-  }
+    return Promise.reject(
+      new Error(
+        error.response?.data?.message || error.message || "Request failed",
+      ),
+    );
+  },
 );
 
 export default defineBoot(({ app }) => {

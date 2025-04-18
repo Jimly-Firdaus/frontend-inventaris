@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useQuasar } from "quasar";
 import { useStore } from "src/stores";
-// import type { CreateInboundData } from "src/stores/product/types";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
+import { AxiosError } from "axios";
 
 const props = defineProps({
   id: {
@@ -37,17 +37,25 @@ const onUpdateInboundOrOutbound = async () => {
     modelValue.value = false;
 
     $q.notify({
-      message: `Berhasil mengubah data ${props.isInbound ? 'pemasukan' : 'pengeluaran'} stok barang!`,
+      message: `Berhasil mengubah data ${props.isInbound ? "pemasukan" : "pengeluaran"} stok barang!`,
       color: "primary",
       classes: "q-notify-font",
     });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error(err);
-    $q.notify({
-      message: `Terjadi kesalahan saat mengubah data ${props.isInbound ? 'pemasukan' : 'pengeluaran'} stok barang`,
-      color: "negative",
-      classes: "q-notify-font",
-    });
+    if (err instanceof AxiosError && err.response?.data?.message) {
+      $q.notify({
+        message: `Terjadi kesalahan saat mengubah data ${props.isInbound ? "pemasukan" : "pengeluaran"} stok barang: ${err.response.data.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    } else if (err instanceof Error) {
+      $q.notify({
+        message: `Terjadi kesalahan saat mengubah data ${props.isInbound ? "pemasukan" : "pengeluaran"} stok barang: ${err.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    }
   }
 };
 </script>
@@ -88,9 +96,7 @@ const onUpdateInboundOrOutbound = async () => {
           class="tw-rounded-2xl text-grey-10"
         />
         <q-btn
-          :disable="
-            newStock.length == 0 || parseInt(newStock) <= 0
-          "
+          :disable="newStock.length == 0 || parseInt(newStock) <= 0"
           no-caps
           :label="$q.screen.lt.sm ? 'Ubah' : 'Ubah Stok'"
           @click="showConfirmationModal = true"

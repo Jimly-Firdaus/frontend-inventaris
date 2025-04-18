@@ -115,6 +115,12 @@ const onAddNewOutbound = async () => {
         color: "negative",
         classes: "q-notify-font",
       });
+    } else if (err instanceof Error) {
+      $q.notify({
+        message: `Terjadi kesalahan saat menambahkan transaksi baru: ${err.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
     } else {
       $q.notify({
         message: `Terjadi kesalahan saat menambahkan transaksi baru`,
@@ -192,7 +198,7 @@ const onAddNewOutbound = async () => {
         <q-btn
           :disable="!selectedProduct || newOutbound.quantity <= 0"
           no-caps
-          :label="$q.screen.lt.sm ? 'Tambah' : 'Tambah Barang'"
+          :label="$q.screen.lt.sm ? 'Tambah' : 'Tambah Pengeluaran'"
           @click="showConfirmationModal = true"
           color="primary"
           :size="$q.screen.lt.sm ? 'md' : 'lg'"
