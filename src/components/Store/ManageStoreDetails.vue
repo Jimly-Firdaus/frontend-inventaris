@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { useStore } from "src/stores";
-// import type { GetAllStoresQuery } from "src/stores/store/types";
 import AddNewUserAccountModal from "src/components/Modal/AddNewUserAccountModal.vue";
-// import { useRoute } from "vue-router";
 import BackButton from "src/components/Button/BackButton.vue";
 import UserDataTable from "src/components/Table/UserDataTable.vue";
 import { USER_ROLE } from "src/constants/user";
@@ -12,6 +10,7 @@ import type { GetAllOutboundsQuery } from "src/stores/product/types";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
 import { useRouter } from "vue-router";
 import StoreInsight from "src/components/Store/StoreInsight.vue";
+import { AxiosError } from "axios";
 
 const props = defineProps({
   storeId: {
@@ -69,13 +68,21 @@ const onConfirmDeleteStore = async () => {
       color: "primary",
       classes: "q-notify-font",
     });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error(err);
-    $q.notify({
-      message: "Terjadi kesalahan saat menghapus toko.",
-      color: "negative",
-      classes: "q-notify-font",
-    });
+    if (err instanceof AxiosError && err.response?.data?.message) {
+      $q.notify({
+        message: `Terjadi kesalahan saat menghapus toko: ${err.response.data.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    } else if (err instanceof Error) {
+      $q.notify({
+        message: `Terjadi kesalahan saat menghapus toko: ${err.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    }
   }
 };
 
@@ -100,7 +107,7 @@ onMounted(async () => {
   });
   if (!storeManagers.value && store.auth.userRole == USER_ROLE.OWNER)
     await store.auth.getAllStoreUsers(props.storeId);
-  else currentTab.value = "outbound"
+  else currentTab.value = "outbound";
 
   const req: GetAllOutboundsQuery = {
     page: 1,
@@ -145,15 +152,15 @@ onMounted(async () => {
       >
         <q-tab no-caps class="tab-content" name="user" label="User" />
         <q-tab no-caps class="tab-content" name="outbound" label="Penjualan" />
-        <q-tab
-          no-caps
-          class="tab-content"
-          name="insight"
-          label="Insight"
-        />
+        <q-tab no-caps class="tab-content" name="insight" label="Insight" />
       </q-tabs>
 
-      <q-card v-if="currentTab == 'user'" flat bordered class="tw-border-2 card-container">
+      <q-card
+        v-if="currentTab == 'user'"
+        flat
+        bordered
+        class="tw-border-2 card-container"
+      >
         <div class="tw-flex tw-items-center tw-p-4">
           <span
             class="text-grey-10 tw-font-bold text-body-large"
@@ -183,7 +190,12 @@ onMounted(async () => {
       </q-card>
     </template>
 
-    <q-card v-if="currentTab == 'outbound'" flat bordered class="tw-border-2 tw-mt-8 tw-pb-2 card-container">
+    <q-card
+      v-if="currentTab == 'outbound'"
+      flat
+      bordered
+      class="tw-border-2 tw-mt-8 tw-pb-2 card-container"
+    >
       <div
         class="tw-flex tw-items-center tw-p-4"
         :class="$q.screen.lt.sm ? 'text-mobile tw-mb-2' : 'tw-mb-4'"

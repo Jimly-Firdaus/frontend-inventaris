@@ -3,6 +3,7 @@ import { useQuasar } from "quasar";
 import { useStore } from "src/stores";
 import type { CreateProductRequest } from "src/stores/product/types";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
+import axios from "axios";
 
 const $q = useQuasar();
 const store = useStore();
@@ -28,13 +29,21 @@ const onAddNewProduct = async () => {
         classes: "q-notify-font",
       });
     }
-  } catch (err) {
+  } catch (err: unknown) {
     console.error(err);
-    $q.notify({
-      message: "Terjadi kesalahan saat menambahkan barang baru.",
-      color: "negative",
-      classes: "q-notify-font",
-    });
+    if (axios.isAxiosError(err) && err.response?.data?.message) {
+      $q.notify({
+        message: `Terjadi kesalahan saat menambahkan barang baru: ${err.response.data.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    } else if (err instanceof Error) {
+      $q.notify({
+        message: `Terjadi kesalahan saat menambahkan barang baru: ${err.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    }
   }
 };
 </script>

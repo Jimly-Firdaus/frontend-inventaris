@@ -4,6 +4,7 @@ import { useStore } from "src/stores";
 import type { CreateUserRequest } from "src/stores/auth/types";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
 import type { USER_ROLE } from "src/constants/user";
+import { AxiosError } from "axios";
 
 const props = defineProps({
   userRole: {
@@ -39,13 +40,21 @@ const onAddNewUserAccount = async () => {
       color: "primary",
       classes: "q-notify-font",
     });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error(err);
-    $q.notify({
-      message: "Terjadi kesalahan saat menambahkan user baru.",
-      color: "negative",
-      classes: "q-notify-font",
-    });
+    if (err instanceof AxiosError && err.response?.data?.message) {
+      $q.notify({
+        message: `Terjadi kesalahan saat menambahkan user baru: ${err.response.data.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    } else if (err instanceof Error) {
+      $q.notify({
+        message: `Terjadi kesalahan saat menambahkan user baru: ${err.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    }
   }
 };
 </script>

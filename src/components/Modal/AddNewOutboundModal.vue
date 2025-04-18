@@ -115,6 +115,12 @@ const onAddNewOutbound = async () => {
         color: "negative",
         classes: "q-notify-font",
       });
+    } else if (err instanceof Error) {
+      $q.notify({
+        message: `Terjadi kesalahan saat menambahkan transaksi baru: ${err.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
     } else {
       $q.notify({
         message: `Terjadi kesalahan saat menambahkan transaksi baru`,

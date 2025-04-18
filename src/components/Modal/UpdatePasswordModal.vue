@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useQuasar } from "quasar";
 import { useStore } from "src/stores";
-// import type { CreateStoreRequest } from "src/stores/store/types";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
+import { AxiosError } from "axios";
 
 const props = defineProps({
   userId: {
@@ -28,15 +28,22 @@ const onUpdateUserPassword = async () => {
       color: "primary",
       classes: "q-notify-font",
     });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error(err);
-    $q.notify({
-      message: "Terjadi kesalahan saat mengubah password.",
-      color: "negative",
-      classes: "q-notify-font",
-    });
+    if (err instanceof AxiosError && err.response?.data?.message) {
+      $q.notify({
+        message: `Terjadi kesalahan saat mengubah password: ${err.response.data.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    } else if (err instanceof Error) {
+      $q.notify({
+        message: `Terjadi kesalahan saat mengubah password: ${err.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    }
   }
-
 };
 </script>
 <template>
