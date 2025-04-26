@@ -79,12 +79,6 @@ const onAddNewProduct = async () => {
           label="Jumlah Stok"
           type="number"
         />
-        <!-- <q-input
-          v-model="newProduct.buy_price"
-          outlined
-          label="Modal"
-          type="number"
-        />
         <q-input
           v-model="newProduct.wholesale_sell_price"
           outlined
@@ -96,7 +90,7 @@ const onAddNewProduct = async () => {
           outlined
           label="Harga Eceran"
           type="number"
-        /> -->
+        />
       </q-card-section>
       <q-card-section class="row justify-center tw-gap-x-4">
         <q-btn

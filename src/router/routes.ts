@@ -31,6 +31,14 @@ const routes: RouteRecordRaw[] = [
         },
         component: () => import("pages/Owner/ManageWarehouseAccountPage.vue"),
       },
+      {
+        name: "ExpenseInsightPage",
+        path: "/insight",
+        meta: {
+          role: [USER_ROLE.OWNER]
+        },
+        component: () => import("pages/Owner/ExpenseInsightPage.vue"),
+      },
 
       // warehouse manager route
       {
@@ -40,6 +48,14 @@ const routes: RouteRecordRaw[] = [
           role: [USER_ROLE.OWNER, USER_ROLE.WAREHOUSE_MANAGER]
         },
         component: () => import("pages/ManageProductsPage.vue"),
+      },
+      {
+        name: "OutboundPage",
+        path: "/outbounds",
+        meta: {
+          role: [USER_ROLE.WAREHOUSE_MANAGER]
+        },
+        component: () => import("pages/WarehouseManager/OutboundPage.vue"),
       },
     ],
   },
