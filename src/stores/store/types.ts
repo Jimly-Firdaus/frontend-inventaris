@@ -1,4 +1,5 @@
 import type { INSIGHT_INTERVAL } from "src/constants/time";
+import type { PRODUCT_PRICE_TYPE } from "src/constants/price";
 
 export interface Pagination {
   page: number;
@@ -79,4 +80,27 @@ export interface OutboundInsight {
   from: string;
   to: string;
   data: OutboundInsightData[];
+}
+
+export interface GetAllInvoiceResponseData {
+  id: string;
+  customer_name: string;
+  invoice_items: InvoiceItem[];
+  // created_by: string;
+  created_at: string;
+  // updated_by: string;
+  // updated_at: string;
+}
+
+export interface InvoiceItem {
+  id: string;
+  invoice_id: string;
+  product_id: string;
+  product_name: string;
+  quantity: number;
+  price_type: PRODUCT_PRICE_TYPE;
+  price: number;
+  tiktok_payment_amount: number;
+  shopee_payment_amount: number;
+  transfer_payment_amount: number;
 }

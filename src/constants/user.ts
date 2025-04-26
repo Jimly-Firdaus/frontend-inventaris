@@ -26,6 +26,11 @@ export const TABS_AVAILABLE_BY_USER_ROLE = {
       tabLabel: "Akun Gudang",
       routeName: "ManageWarehouseAccountPage",
     },
+    {
+      id: 5,
+      tabLabel: "Insight Expense",
+      routeName: "ExpenseInsightPage",
+    },
   ],
   [USER_ROLE.WAREHOUSE_MANAGER]: [
     {
@@ -37,6 +42,11 @@ export const TABS_AVAILABLE_BY_USER_ROLE = {
       id: 2,
       tabLabel: "Pemasukan Barang",
       routeName: "TransactionsPage",
+    },
+    {
+      id: 3,
+      tabLabel: "Pengeluaran Barang",
+      routeName: "OutboundPage",
     },
   ],
   [USER_ROLE.STORE_MANAGER]: [
