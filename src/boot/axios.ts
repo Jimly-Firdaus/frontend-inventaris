@@ -1,7 +1,6 @@
 import { defineBoot } from "#q-app/wrappers";
 import axios, { type AxiosInstance } from "axios";
 import { useAuthStore } from "src/stores/auth";
-import { useRoute } from "vue-router";
 
 declare module "vue" {
   interface ComponentCustomProperties {
@@ -34,10 +33,13 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const authStore = useAuthStore();
-    const route = useRoute();
+    // const route = useRoute();
+    const currentPath = window.location.pathname;
+
+    console.log(currentPath);
 
     // Check if the error is due to an expired access token
-    if (error.response?.status === 401 && route.name !== "LoginPage") {
+    if (error.response?.status === 401 && !currentPath.includes("/login")) {
       authStore.user = null;
       window.location.href = "/login"; // Redirect to login
     }
