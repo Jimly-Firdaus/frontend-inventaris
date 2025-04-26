@@ -5,6 +5,7 @@ import { useRouter } from "vue-router";
 import BackButton from "src/components/Button/BackButton.vue";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
 import { AxiosError } from "axios";
+import { USER_ROLE } from "src/constants/user";
 
 const props = defineProps({
   productId: {
@@ -171,7 +172,7 @@ onMounted(async () => {
           Total Stok Barang: {{ selectedProduct?.stock }}
         </p>
       </q-card-section>
-      <q-card-section>
+      <q-card-section v-if="store.auth.userRole == USER_ROLE.OWNER">
         <div
           class="tw-flex tw-items-center text-body-medium"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"

@@ -45,6 +45,24 @@ const ownerExtraColumns: QTableProps["columns"] = [
     label: "Modal",
     field: "buy_price",
   },
+];
+
+const storeManagerExtraColumns: QTableProps["columns"] = [
+  {
+    name: "retail_store_stock",
+    align: "left",
+    label: "Eceran",
+    field: "retail_store_stock",
+  },
+  {
+    name: "wholesale_store_stock",
+    align: "left",
+    label: "Grosir",
+    field: "wholesale_store_stock",
+  },
+];
+
+const actionsColumn: QTableProps["columns"] = [
   {
     name: "wholesale_sell_price",
     align: "left",
@@ -57,9 +75,6 @@ const ownerExtraColumns: QTableProps["columns"] = [
     label: "Harga Eceran",
     field: "retail_sell_price",
   },
-];
-
-const actionsColumn: QTableProps["columns"] = [
   {
     name: "action",
     align: "left",
@@ -71,6 +86,9 @@ const actionsColumn: QTableProps["columns"] = [
 const columns = computed(() => [
   ...baseColumns,
   ...(store.auth.userRole === USER_ROLE.OWNER ? ownerExtraColumns : []),
+  ...(store.auth.userRole === USER_ROLE.STORE_MANAGER
+    ? storeManagerExtraColumns
+    : []),
   ...(store.auth.userRole &&
   [USER_ROLE.OWNER, USER_ROLE.WAREHOUSE_MANAGER].includes(store.auth.userRole)
     ? actionsColumn
@@ -93,7 +111,7 @@ const onUpdateStock = (productId: string) => {
 // const inbounds = computed(() => store.products.inbounds);
 
 const onClickProduct = async (productId: string) => {
-  if (store.auth.userRole != USER_ROLE.OWNER) return;
+  if (store.auth.userRole == USER_ROLE.STORE_MANAGER) return;
   await router.replace({
     query: {
       productId: productId,
@@ -216,14 +234,16 @@ onMounted(async () => {
             <q-td key="stock" :props="props">
               {{ props.row.stock }}
             </q-td>
-            <template v-if="store.auth.userRole == USER_ROLE.OWNER">
-              <q-td key="buy_price" :props="props">
-                {{
-                  props.row.buy_price
-                    ? formatWithThousandSeparator(props.row.buy_price)
-                    : undefined
-                }}
-              </q-td>
+            <template v-if="store.auth.userRole != USER_ROLE.STORE_MANAGER">
+              <template v-if="store.auth.userRole == USER_ROLE.OWNER">
+                <q-td key="buy_price" :props="props">
+                  {{
+                    props.row.buy_price
+                      ? formatWithThousandSeparator(props.row.buy_price)
+                      : undefined
+                  }}
+                </q-td>
+              </template>
               <q-td key="wholesale_sell_price" :props="props">
                 {{
                   props.row.wholesale_sell_price
@@ -238,8 +258,26 @@ onMounted(async () => {
                   ? formatWithThousandSeparator(props.row.retail_sell_price)
                   : undefined
               }}</q-td>
+              <q-td key="action" :props="props">
+                <q-btn
+                  dense
+                  color="primary"
+                  no-caps
+                  @click.stop="onUpdateStock(props.row.id)"
+                  :size="$q.screen.lt.sm ? 'sm' : 'md'"
+                  icon="add"
+                  label="Tambah Stok"
+                  class="tw-rounded-xl tw-pr-2"
+                />
+              </q-td>
             </template>
-            <template v-if="store.auth.userRole != USER_ROLE.STORE_MANAGER">
+            <template v-else>
+              <q-td key="retail_store_stock" :props="props">
+                {{ props.row.retail_store_stock ?? "0" }}
+              </q-td>
+              <q-td key="wholesale_store_stock" :props="props">
+                {{ props.row.wholesale_store_stock ?? "0" }}
+              </q-td>
               <q-td key="action" :props="props">
                 <q-btn
                   dense
