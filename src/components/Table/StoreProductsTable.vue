@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import type {
-  // GetAllProductsQuery,
-  GetAllProductsResponseData,
-} from "src/stores/product/types";
+import type { GetAllProductsResponseData } from "src/stores/product/types";
 import type { QTableProps } from "quasar";
-// import { useStore } from "src/stores";
-// import { AxiosError } from "axios";
+import { formatWithThousandSeparator } from "src/util/number";
 
 const props = defineProps({
   products: {
@@ -24,19 +20,21 @@ const props = defineProps({
   loading: Boolean,
   isEditable: Boolean,
   nameFilter: String,
+  insightView: Boolean,
 });
 
-// const $q = useQuasar();
-// const store = useStore();
 const page = defineModel<number>({ required: true });
 
-const columns: QTableProps["columns"] = [
+const baseColumns: QTableProps["columns"] = [
   {
     name: "product_name",
     align: "left",
     label: "Nama Barang",
     field: "product_name",
   },
+];
+
+const nonInsightColumns: QTableProps["columns"] = [
   {
     name: "retail_quantity",
     align: "left",
@@ -50,6 +48,27 @@ const columns: QTableProps["columns"] = [
     field: "wholesale_quantity",
   },
 ];
+
+const insightColumns: QTableProps["columns"] = [
+  {
+    name: "quantity",
+    align: "left",
+    label: "Jumlah",
+    field: "quantity",
+  },
+  {
+    name: "buy_price",
+    align: "left",
+    label: "Modal",
+    field: "buy_price",
+  },
+];
+
+const columns = computed(() => [
+  ...baseColumns,
+  ...(props.insightView ? insightColumns : []),
+  ...(!props.insightView ? nonInsightColumns : []),
+]);
 </script>
 <template>
   <q-table
@@ -66,14 +85,24 @@ const columns: QTableProps["columns"] = [
     <template v-slot:body="props">
       <q-tr :props="props" class="tw-cursor-pointer">
         <q-td key="product_name" :props="props">
-          {{ props.row.product_name }}
+          {{ props.row.product_name ?? props.row.name }}
         </q-td>
-        <q-td key="retail_quantity" :props="props">
-          {{ props.row.retail_quantity ?? "0" }}
-        </q-td>
-        <q-td key="wholesale_quantity" :props="props">
-          {{ props.row.wholesale_quantity ?? "0" }}
-        </q-td>
+        <template v-if="!insightView">
+          <q-td key="retail_quantity" :props="props">
+            {{ props.row.retail_quantity ?? "0" }}
+          </q-td>
+          <q-td key="wholesale_quantity" :props="props">
+            {{ props.row.wholesale_quantity ?? "0" }}
+          </q-td>
+        </template>
+        <template v-else>
+          <q-td key="quantity" :props="props">
+            {{ props.row.stock ?? "0" }}
+          </q-td>
+          <q-td key="buy_price" :props="props">
+            {{ formatWithThousandSeparator(props.row.buy_price) ?? "0" }}
+          </q-td>
+        </template>
       </q-tr>
     </template>
     <template #no-data>

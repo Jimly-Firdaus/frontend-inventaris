@@ -28,7 +28,7 @@ export const TABS_AVAILABLE_BY_USER_ROLE = {
     },
     {
       id: 5,
-      tabLabel: "Insight Expense",
+      tabLabel: "Insight Modal",
       routeName: "ExpenseInsightPage",
     },
   ],
