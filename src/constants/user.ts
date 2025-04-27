@@ -35,13 +35,13 @@ export const TABS_AVAILABLE_BY_USER_ROLE = {
   [USER_ROLE.WAREHOUSE_MANAGER]: [
     {
       id: 1,
-      tabLabel: "Barang",
-      routeName: "ManageProductsPage",
+      tabLabel: "Pemasukan Barang",
+      routeName: "TransactionsPage",
     },
     {
       id: 2,
-      tabLabel: "Pemasukan Barang",
-      routeName: "TransactionsPage",
+      tabLabel: "Barang",
+      routeName: "ManageProductsPage",
     },
     {
       id: 3,

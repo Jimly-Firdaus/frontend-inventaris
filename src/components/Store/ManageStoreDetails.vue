@@ -12,6 +12,9 @@ import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
 import { useRouter } from "vue-router";
 import StoreInsight from "src/components/Store/StoreInsight.vue";
 import { AxiosError } from "axios";
+import BaseCalendar from "src/components/BaseComponents/BaseCalendar.vue";
+import { DateTime } from "luxon";
+import type { GetAllInvoicesQuery } from "src/stores/store/types";
 
 const props = defineProps({
   storeId: {
@@ -25,15 +28,7 @@ const props = defineProps({
 const $q = useQuasar();
 const store = useStore();
 const router = useRouter();
-// const outbounds = computed(() => {
-//   if (store.auth.userRole == USER_ROLE.OWNER)
-//     return (
-//       store.products.outbounds?.filter(
-//         (o) => o.store_name == props.storeName,
-//       ) ?? []
-//     );
-//   else return store.products.outbounds ?? [];
-// });
+
 const invoices = computed(() => store.stores.invoices);
 
 const storeManagers = computed(
@@ -48,6 +43,8 @@ const filter = ref({
   productName: "",
 });
 
+const selectedTimeframe = ref("");
+
 const filteredStoreManagers = computed(() => {
   if (filter.value.username.length > 0)
     return (
@@ -56,26 +53,6 @@ const filteredStoreManagers = computed(() => {
       ) ?? []
     );
   else return storeManagers.value ?? [];
-});
-
-const filteredInvoices = computed(() => {
-  if (filter.value.customerName.length > 0)
-    return (
-      invoices.value?.filter((i) =>
-        i.customer.includes(filter.value.customerName),
-      ) ?? []
-    );
-  else return invoices.value ?? [];
-});
-
-const filteredProducts = computed(() => {
-  if (filter.value.productName.length > 0)
-    return (
-      storeProducts.value?.filter((sp) =>
-        sp.product_name?.includes(filter.value.productName),
-      ) ?? []
-    );
-  else return storeProducts.value ?? [];
 });
 
 const showConfirmationModal = ref(false);
@@ -122,6 +99,7 @@ const onConfirmDeleteStore = async () => {
 const refreshData = async () => {
   if (currentTab.value == "products") {
     const req: GetAllProductsQuery = {
+      name: filter.value.productName,
       page: page.value.productsPage,
       limit: 10,
     };
@@ -133,12 +111,43 @@ const refreshData = async () => {
 };
 
 watch(
-  page,
+  [() => filter.value.productName, () => page.value.productsPage],
   async () => {
     await refreshData();
   },
   { deep: true },
 );
+
+watch([() => filter.value.customerName, () => page.value.salesPage, selectedTimeframe], async () => {
+  let req: GetAllInvoicesQuery = {
+    store_id: store.auth.user?.store_id ?? props.storeId ?? "",
+    page: page.value.salesPage,
+    limit: 10,
+    order_by: "created_at",
+    asc: false,
+    customer: filter.value.customerName,
+  };
+  if (selectedTimeframe.value) {
+    const customDates = selectedTimeframe.value.split(" - ");
+    if (customDates[0] && customDates[1]) {
+      const customStart = DateTime.fromFormat(
+        customDates[0].trim(),
+        "dd LLL, yyyy",
+      ).toISO();
+      const customEnd = DateTime.fromFormat(
+        customDates[1].trim(),
+        "dd LLL, yyyy",
+      ).toISO();
+
+      req = {
+        ...req,
+        created_at_gte: customStart!,
+        created_at_lte: customEnd!,
+      };
+    }
+  }
+  await store.stores.getAllInvoices(req);
+});
 
 onMounted(async () => {
   $q.loading.show({
@@ -160,7 +169,15 @@ onMounted(async () => {
     req.store_id = props.storeId;
     await store.stores.getAllStoreProducts(req);
   }
-  store.stores.getAllInvoices();
+
+  const invoiceReq: GetAllInvoicesQuery = {
+    page: 1,
+    limit: 10,
+    order_by: "created_at",
+    asc: false,
+    store_id: store.auth.user?.store_id ?? props.storeId ?? "",
+  };
+  await store.stores.getAllInvoices(invoiceReq);
 
   $q.loading.hide();
 });
@@ -195,7 +212,7 @@ onMounted(async () => {
       >
         <q-tab no-caps class="tab-content" name="user" label="User" />
         <q-tab no-caps class="tab-content" name="sales" label="Penjualan" />
-        <q-tab no-caps class="tab-content" name="product" label="Barang" />
+        <q-tab no-caps class="tab-content" name="products" label="Barang" />
         <q-tab no-caps class="tab-content" name="insight" label="Insight" />
       </q-tabs>
 
@@ -261,15 +278,21 @@ onMounted(async () => {
         />
       </div>
 
-      <q-input
-        v-model="filter.customerName"
-        outlined
-        label="Cari Nama Pembeli"
-        class="tw-mt-4 text-body-medium tw-px-2"
-        :class="$q.screen.lt.sm ? 'text-mobile tw-mb-4' : 'tw-mb-12'"
-      />
+      <div
+        class="tw-my-4 tw-flex tw-flex-col md:tw-flex-row md:tw-items-center tw-gap-x-4 tw-gap-y-4 tw-px-2"
+      >
+        <q-input
+          v-model="filter.customerName"
+          outlined
+          label="Cari Nama Pembeli"
+          class="text-body-medium tw-w-full tw-max-w-[500px]"
+          :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+        />
+        <BaseCalendar v-model:selected-timeframe="selectedTimeframe" />
+      </div>
+
       <SalesTable
-        :invoices="filteredInvoices"
+        :invoices="invoices"
         :total-pages="store.stores.invoicesMeta?.total_page ?? 0"
         :total-data="store.stores.invoicesMeta?.total_item ?? 0"
         :rows-per-page="10"
@@ -278,7 +301,7 @@ onMounted(async () => {
     </q-card>
 
     <q-card
-      v-if="currentTab == 'product'"
+      v-if="currentTab == 'products'"
       flat
       bordered
       class="tw-border-2 tw-mt-8 tw-pb-2 card-container"
@@ -303,11 +326,11 @@ onMounted(async () => {
         :class="$q.screen.lt.sm ? 'text-mobile tw-mb-4' : 'tw-mb-12'"
       />
       <StoreProductsTable
-        :products="filteredProducts"
+        :products="storeProducts"
         :total-pages="store.stores.storeProductsMeta?.total_page ?? 0"
         :total-data="store.stores.storeProductsMeta?.total_item ?? 0"
         :rows-per-page="10"
-        v-model="page.salesPage"
+        v-model="page.productsPage"
       />
     </q-card>
 

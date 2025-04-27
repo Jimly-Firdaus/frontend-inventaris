@@ -5,12 +5,14 @@ import {
   type PRODUCT_PRICE_TYPE,
   PRODUCT_PRICE_TYPE_LABEL,
 } from "src/constants/price";
-// import { DateTime } from "luxon";
+import { DateTime } from "luxon";
 import { formatWithThousandSeparator } from "src/util/number";
 import UpdateOrAddInvoiceItemModal from "src/components/Modal/UpdateOrAddInvoiceItemModal.vue";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
 import { useStore } from "src/stores";
 import { AxiosError } from "axios";
+import type { GetAllInvoiceItemsQuery } from "src/stores/store/types";
+import UpdateInvoiceCustomerNameModal from "src/components/Modal/UpdateInvoiceCustomerNameModal.vue";
 
 const props = defineProps({
   invoices: {
@@ -48,6 +50,12 @@ const invoiceColumns: QTableProps["columns"] = [
     label: "Dibuat Pada",
     field: "created_at",
     sortable: true,
+    sort: (a, b) =>
+      new Date(a).getTime() === new Date(b).getTime()
+        ? 0
+        : new Date(b).getTime() - new Date(a).getTime() > 0
+          ? 1
+          : -1,
   },
   {
     name: "delete_invoice",
@@ -107,6 +115,11 @@ const invoiceItemsColumns: QTableProps["columns"] = [
     sortable: false,
   },
 ];
+
+const isLoadingInvoiceItemsTable = ref(false);
+
+// Invoice update modal
+const showUpdateInvoiceCustomerNameModal = ref(false);
 
 // Expanded control
 const expanded = ref<string[]>([]);
@@ -193,6 +206,16 @@ const onAddInvoiceItem = () => {
   showUpdateInvoiceItemModal.value = true;
 };
 
+const onExpandInvoice = async (invoiceId: string) => {
+  isLoadingInvoiceItemsTable.value = true;
+  const req: GetAllInvoiceItemsQuery = {
+    order_by: "created_at",
+    asc: false,
+  };
+  await store.stores.getAllInvoiceItems(invoiceId, req);
+  isLoadingInvoiceItemsTable.value = false;
+};
+
 onMounted(async () => {
   await store.products.getAllProducts();
 });
@@ -221,7 +244,10 @@ onMounted(async () => {
       <q-tr
         :props="props"
         class="tw-cursor-pointer"
-        @click="props.expand = !props.expand"
+        @click="
+          onExpandInvoice(props.row.id);
+          props.expand = !props.expand;
+        "
       >
         <q-td auto-width>
           <q-btn
@@ -235,9 +261,22 @@ onMounted(async () => {
         </q-td>
         <q-td key="customer" :props="props">
           {{ props.row.customer }}
+          <q-btn
+            flat
+            icon="edit"
+            class="tw-ml-1"
+            @click="
+              selectedInvoice = props.row;
+              showUpdateInvoiceCustomerNameModal = true;
+            "
+          />
         </q-td>
         <q-td key="created_at" :props="props">
-          {{ props.row.created_at }}
+          {{
+            DateTime.fromISO(props.row.created_at).toFormat(
+              "dd LLL yyyy, HH:mm",
+            )
+          }}
         </q-td>
         <q-td key="delete_invoice" :props="props">
           <q-btn
@@ -256,7 +295,7 @@ onMounted(async () => {
           />
         </q-td>
       </q-tr>
-      <q-tr v-show="props.expand" class="bg-grey-4">
+      <q-tr v-if="props.row.items" v-show="props.expand" class="bg-grey-4">
         <q-td colspan="100%">
           <div class="q-gutter-md tw-w-full">
             <q-table
@@ -267,7 +306,7 @@ onMounted(async () => {
               hide-pagination
               virtual-scroll
               bordered
-              class=""
+              :loading="isLoadingInvoiceItemsTable"
             >
               <template v-slot:body="itemProps">
                 <q-tr :props="itemProps">
@@ -411,6 +450,12 @@ onMounted(async () => {
     :invoice-item="selectedInvoiceItem"
     :invoice-id="selectedInvoice?.id ?? ''"
     :is-update="isUpdatingInvoiceItem"
+  />
+  <UpdateInvoiceCustomerNameModal
+    v-if="showUpdateInvoiceCustomerNameModal"
+    :invoice-id="selectedInvoice?.id ?? ''"
+    :current-name="selectedInvoice?.customer ?? ''"
+    v-model="showUpdateInvoiceCustomerNameModal"
   />
   <ConfirmationModal
     :copy-text="`Apakah Anda yakin ingin menghapus${isDeletingInvoice ? '' : ' data'} invoice?`"

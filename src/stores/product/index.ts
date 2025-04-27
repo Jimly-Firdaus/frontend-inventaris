@@ -37,7 +37,7 @@ export const useProductsStore = defineStore("products", () => {
       },
     );
 
-    products.value = res.data.data.data;
+    products.value = res.data.data.data ?? [];
     productsMeta.value = res.data.data.meta;
   };
 
@@ -96,7 +96,7 @@ export const useProductsStore = defineStore("products", () => {
       },
     );
 
-    inbounds.value = res.data.data.data;
+    inbounds.value = res.data.data.data ?? [];
     inboundsMeta.value = res.data.data.meta;
   };
 
@@ -124,7 +124,7 @@ export const useProductsStore = defineStore("products", () => {
       },
     );
 
-    outbounds.value = res.data.data.data;
+    outbounds.value = res.data.data.data ?? [];
     outboundsMeta.value = res.data.data.meta;
   };
 
@@ -136,7 +136,7 @@ export const useProductsStore = defineStore("products", () => {
       },
     );
 
-    outbounds.value = res.data.data.data;
+    outbounds.value = res.data.data.data ?? [];
     outboundsMeta.value = res.data.data.meta;
   };
 

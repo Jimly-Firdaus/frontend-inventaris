@@ -33,10 +33,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const authStore = useAuthStore();
-    // const route = useRoute();
     const currentPath = window.location.pathname;
-
-    console.log(currentPath);
 
     // Check if the error is due to an expired access token
     if (error.response?.status === 401 && !currentPath.includes("/login")) {

@@ -65,7 +65,7 @@ export const useAuthStore = defineStore("auth", () => {
       },
     );
 
-    users.value = res.data.data.data;
+    users.value = res.data.data.data ?? [];
     usersMeta.value = res.data.data.meta;
   };
 
@@ -79,7 +79,7 @@ export const useAuthStore = defineStore("auth", () => {
       },
     );
 
-    storeManagers.value[storeId] = res.data.data.data;
+    storeManagers.value[storeId] = res.data.data.data ?? [];
     storeManagersMeta.value[storeId] = res.data.data.meta;
   };
 

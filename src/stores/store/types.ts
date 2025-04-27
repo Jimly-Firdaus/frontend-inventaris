@@ -84,9 +84,9 @@ export interface OutboundInsight {
 
 export interface Invoice {
   id: string;
-  customer: string;
-  items: InvoiceItem[];
   store_id: string;
+  customer: string;
+  items?: InvoiceItem[];
   // created_by: string;
   created_at: string;
   // updated_by: string;
@@ -119,4 +119,32 @@ export interface CreateInvoiceItemReq {
   amount_paid_tiktok: number;
   amount_paid_shopee: number;
   amount_paid_transfer: number;
+}
+
+export interface GetAllInvoicesQuery {
+  store_id: string;
+  customer?: string;
+  created_at_lte?: string | undefined;
+  created_at_gte?: string | undefined;
+  page?: number;
+	limit?: number;
+  order_by?: string;
+  asc?: boolean;
+}
+
+export interface GetAllInvoiceResponse {
+	data: Invoice[];
+	meta?: PaginationMeta;
+}
+
+export interface GetAllInvoiceItemsQuery {
+  page?: number;
+	limit?: number;
+  order_by?: string;
+  asc?: boolean;
+}
+
+export interface GetAllInvoiceItemsResponse {
+	data: InvoiceItem[];
+	meta?: PaginationMeta;
 }
