@@ -8,21 +8,27 @@ import type {
   PaginationMeta,
   GetOutboundInsightQuery,
   OutboundInsight,
-  GetAllInvoiceResponseData,
+  Invoice,
   InvoiceItem,
+  CreateInvoiceReq,
+  CreateInvoiceItemReq,
 } from "./types";
 import { PRODUCT_PRICE_TYPE } from "src/constants/price";
 import type { AxiosResponse } from "axios";
-import type { GetAllProductsQuery, GetAllProductsResponse, GetAllProductsResponseData } from "src/stores/product/types";
+import type {
+  GetAllProductsQuery,
+  GetAllProductsResponse,
+  GetAllProductsResponseData,
+} from "src/stores/product/types";
 
 export const useStoresStore = defineStore("stores", () => {
   const stores = ref<GetAllStoresResponseData[]>([]);
   const storesMeta = ref<PaginationMeta>();
   const storeInsights = ref<{ [storeId: string]: OutboundInsight }>({});
-  const invoices = ref<GetAllInvoiceResponseData[]>([]);
+  const invoices = ref<Invoice[]>([]);
   const invoicesMeta = ref<PaginationMeta>();
 
-  const storeProducts = ref<GetAllProductsResponseData[]>([])
+  const storeProducts = ref<GetAllProductsResponseData[]>([]);
   const storeProductsMeta = ref<PaginationMeta>();
 
   const getAllInvoices = (storeId?: string) => {
@@ -31,8 +37,9 @@ export const useStoresStore = defineStore("stores", () => {
       {
         id: "inv-001",
         created_at: "2025-04-26T10:00:00Z",
-        customer_name: "Andy",
-        invoice_items: [
+        customer: "Andy",
+        store_id: "AXAXA",
+        items: [
           {
             id: "item-001",
             invoice_id: "inv-001",
@@ -41,9 +48,9 @@ export const useStoresStore = defineStore("stores", () => {
             quantity: 2,
             price: 5000,
             price_type: PRODUCT_PRICE_TYPE.RETAIL,
-            tiktok_payment_amount: 0,
-            shopee_payment_amount: 0,
-            transfer_payment_amount: 0,
+            amount_paid_tiktok: 0,
+            amount_paid_shopee: 0,
+            amount_paid_transfer: 0,
           },
           {
             id: "item-002",
@@ -53,17 +60,18 @@ export const useStoresStore = defineStore("stores", () => {
             quantity: 1,
             price: 8000,
             price_type: PRODUCT_PRICE_TYPE.WHOLESALE,
-            tiktok_payment_amount: 0,
-            shopee_payment_amount: 0,
-            transfer_payment_amount: 0,
+            amount_paid_tiktok: 0,
+            amount_paid_shopee: 0,
+            amount_paid_transfer: 0,
           },
         ],
       },
       {
         id: "inv-002",
         created_at: "2025-04-26T11:00:00Z",
-        customer_name: "Budi",
-        invoice_items: [
+        customer: "Budi",
+        store_id: "AXAXA",
+        items: [
           {
             id: "item-003",
             invoice_id: "inv-002",
@@ -72,9 +80,9 @@ export const useStoresStore = defineStore("stores", () => {
             quantity: 5,
             price: 4000,
             price_type: PRODUCT_PRICE_TYPE.RETAIL,
-            tiktok_payment_amount: 0,
-            shopee_payment_amount: 0,
-            transfer_payment_amount: 0,
+            amount_paid_tiktok: 0,
+            amount_paid_shopee: 0,
+            amount_paid_transfer: 0,
           },
           {
             id: "item-004",
@@ -84,9 +92,9 @@ export const useStoresStore = defineStore("stores", () => {
             quantity: 3,
             price: 15000,
             price_type: PRODUCT_PRICE_TYPE.WHOLESALE,
-            tiktok_payment_amount: 0,
-            shopee_payment_amount: 0,
-            transfer_payment_amount: 0,
+            amount_paid_tiktok: 0,
+            amount_paid_shopee: 0,
+            amount_paid_transfer: 0,
           },
           {
             id: "item-005",
@@ -96,17 +104,18 @@ export const useStoresStore = defineStore("stores", () => {
             quantity: 4,
             price: 55000,
             price_type: PRODUCT_PRICE_TYPE.RETAIL,
-            tiktok_payment_amount: 0,
-            shopee_payment_amount: 0,
-            transfer_payment_amount: 0,
+            amount_paid_tiktok: 0,
+            amount_paid_shopee: 0,
+            amount_paid_transfer: 0,
           },
         ],
       },
       {
         id: "inv-003",
         created_at: "2025-04-26T12:00:00Z",
-        customer_name: "Rocky",
-        invoice_items: [
+        store_id: "AXAXA",
+        customer: "Rocky",
+        items: [
           {
             id: "item-006",
             invoice_id: "inv-003",
@@ -115,9 +124,9 @@ export const useStoresStore = defineStore("stores", () => {
             quantity: 1,
             price: 20000,
             price_type: PRODUCT_PRICE_TYPE.WHOLESALE,
-            tiktok_payment_amount: 0,
-            shopee_payment_amount: 0,
-            transfer_payment_amount: 0,
+            amount_paid_tiktok: 0,
+            amount_paid_shopee: 0,
+            amount_paid_transfer: 0,
           },
           {
             id: "item-007",
@@ -127,24 +136,27 @@ export const useStoresStore = defineStore("stores", () => {
             quantity: 6,
             price: 35000,
             price_type: PRODUCT_PRICE_TYPE.WHOLESALE,
-            tiktok_payment_amount: 0,
-            shopee_payment_amount: 0,
-            transfer_payment_amount: 0,
+            amount_paid_tiktok: 0,
+            amount_paid_shopee: 0,
+            amount_paid_transfer: 0,
           },
         ],
       },
     ];
   };
 
-  const addInvoiceItem = (invoiceId: string, newInvoiceItem: InvoiceItem) => {
-    const invoice = invoices.value.find((inv) => inv.id === invoiceId);
-    if (!invoice) {
-      console.error("Invoice not found");
-      return;
-    }
-
-    invoice.invoice_items.push(newInvoiceItem);
+  const addInvoiceItem = async (
+    invoiceId: string,
+    newInvoiceItemReq: CreateInvoiceItemReq,
+  ) => {
+    await api.post(`/invoices/${invoiceId}`, {
+      items: [newInvoiceItemReq],
+    });
   };
+
+  const addInvoice = async (newInvoiceReq: CreateInvoiceReq) => {
+    await api.post(`/invoices`, newInvoiceReq);
+  }
 
   const updateInvoiceItem = (
     invoiceItemId: string,
@@ -157,7 +169,7 @@ export const useStoresStore = defineStore("stores", () => {
       return;
     }
 
-    const item = invoice.invoice_items.find((it) => it.id === invoiceItemId);
+    const item = invoice.items.find((it) => it.id === invoiceItemId);
     if (!item) {
       console.error("Invoice item not found");
       return;
@@ -168,9 +180,7 @@ export const useStoresStore = defineStore("stores", () => {
 
   const deleteInvoiceItem = (invoiceItemId: string) => {
     invoices.value.forEach((invoice) => {
-      invoice.invoice_items = invoice.invoice_items.filter(
-        (item) => item.id !== invoiceItemId,
-      );
+      invoice.items = invoice.items.filter((item) => item.id !== invoiceItemId);
     });
   };
 
@@ -244,6 +254,7 @@ export const useStoresStore = defineStore("stores", () => {
     addInvoiceItem,
     updateInvoiceItem,
     deleteInvoiceItem,
+    addInvoice,
     deleteInvoice,
 
     getAllStoreProducts,

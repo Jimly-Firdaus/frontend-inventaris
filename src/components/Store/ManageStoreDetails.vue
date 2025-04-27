@@ -4,7 +4,7 @@ import AddNewUserAccountModal from "src/components/Modal/AddNewUserAccountModal.
 import BackButton from "src/components/Button/BackButton.vue";
 import UserDataTable from "src/components/Table/UserDataTable.vue";
 import { USER_ROLE } from "src/constants/user";
-import AddNewOutboundModal from "src/components/Modal/AddNewOutboundModal.vue";
+import AddInvoiceModal from "src/components/Modal/AddInvoiceModal.vue";
 import SalesTable from "src/components/Table/SalesTable.vue";
 import StoreProductsTable from "src/components/Table/StoreProductsTable.vue";
 import type { GetAllProductsQuery } from "src/stores/product/types";
@@ -62,7 +62,7 @@ const filteredInvoices = computed(() => {
   if (filter.value.customerName.length > 0)
     return (
       invoices.value?.filter((i) =>
-        i.customer_name.includes(filter.value.customerName),
+        i.customer.includes(filter.value.customerName),
       ) ?? []
     );
   else return invoices.value ?? [];
@@ -80,7 +80,7 @@ const filteredProducts = computed(() => {
 
 const showConfirmationModal = ref(false);
 const showAddNewStoreManagerModal = ref(false);
-const showAddNewOutboundModal = ref(false);
+const showAddInvoiceModal = ref(false);
 
 const page = ref({
   salesPage: 1,
@@ -254,7 +254,7 @@ onMounted(async () => {
           no-caps
           :label="$q.screen.lt.sm ? '' : 'Tambah Invoice'"
           icon="add"
-          @click="showAddNewOutboundModal = true"
+          @click="showAddInvoiceModal = true"
           :size="$q.screen.lt.sm ? 'md' : 'lg'"
           class="tw-rounded-3xl"
           color="primary"
@@ -324,12 +324,11 @@ onMounted(async () => {
         :store-id="props.storeId"
         :store-name="props.storeName"
       />
-      <AddNewOutboundModal
-        v-model="showAddNewOutboundModal"
-        :store-id="props.storeId"
-        :store-name="props.storeName"
-      />
     </template>
+    <AddInvoiceModal
+      v-model="showAddInvoiceModal"
+      :store-id="store.auth.user?.store_id ?? props.storeId ?? ''"
+    />
     <ConfirmationModal
       copy-text="Apakah Anda yakin ingin menghapus toko ini?"
       v-model="showConfirmationModal"

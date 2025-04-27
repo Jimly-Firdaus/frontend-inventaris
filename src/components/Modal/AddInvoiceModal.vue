@@ -3,7 +3,7 @@ import { useQuasar } from "quasar";
 import { useStore } from "src/stores";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
 import { AxiosError } from "axios";
-import type { InvoiceItem, CreateInvoiceItemReq } from "src/stores/store/types";
+import type { CreateInvoiceItemReq, CreateInvoiceReq } from "src/stores/store/types";
 import type { GetAllProductsQuery } from "src/stores/product/types";
 import {
   PRODUCT_PRICE_TYPE,
@@ -11,9 +11,7 @@ import {
 } from "src/constants/price";
 
 const props = defineProps({
-  invoiceItem: Object as PropType<InvoiceItem | undefined>,
-  invoiceId: String,
-  isUpdate: Boolean,
+  storeId: String,
 });
 
 const $q = useQuasar();
@@ -37,6 +35,12 @@ const priceTypeOpts = computed(() =>
 );
 const selectedPriceType = ref(priceTypeOpts.value[0]);
 
+const newInvoice = ref<CreateInvoiceReq>({
+  store_id: "",
+  customer: "",
+  items: [],
+})
+
 const newInvoiceItem = ref<CreateInvoiceItemReq>({
   product_id: "",
   quantity: 0,
@@ -55,17 +59,9 @@ const invoiceItemFields = ref({
   amount_paid_transfer: 0,
 });
 
-const allowUpdate = computed(
+const allowAddNewInvoice = computed(
   () =>
-    (props.invoiceItem &&
-      (invoiceItemFields.value.quantity != props.invoiceItem.quantity ||
-        invoiceItemFields.value.amount_paid_tiktok !=
-          props.invoiceItem.amount_paid_tiktok ||
-        invoiceItemFields.value.amount_paid_shopee !=
-          props.invoiceItem.amount_paid_shopee ||
-        invoiceItemFields.value.amount_paid_transfer !=
-          props.invoiceItem.amount_paid_transfer)) ||
-    (!props.isUpdate && selectedProduct.value && selectedPriceType.value),
+    (newInvoice.value.customer.trim().length && selectedProduct.value && selectedPriceType.value)
 );
 
 const filterProductName = (
@@ -91,11 +87,9 @@ const filterProductName = (
   });
 };
 
-const onAddNewInvoiceItem = async () => {
+const onAddNewInvoice = async () => {
   try {
     if (
-      !props.isUpdate &&
-      props.invoiceId &&
       selectedProduct.value &&
       selectedPriceType.value
     ) {
@@ -110,11 +104,16 @@ const onAddNewInvoiceItem = async () => {
         ),
       });
 
-      await store.stores.addInvoiceItem(props.invoiceId, newInvoiceItem.value);
+      Object.assign(newInvoice.value, {
+        store_id: props.storeId,
+        items: [newInvoiceItem.value]
+      })
+
+      await store.stores.addInvoice(newInvoice.value);
       modelValue.value = false;
 
       $q.notify({
-        message: "Berhasil menambah data invoice!",
+        message: "Berhasil menambah invoice!",
         color: "primary",
         classes: "q-notify-font",
       });
@@ -123,73 +122,19 @@ const onAddNewInvoiceItem = async () => {
     console.error(err);
     if (err instanceof AxiosError && err.response?.data?.message) {
       $q.notify({
-        message: `Terjadi kesalahan saat menambah data invoice: ${err.response.data.message}`,
+        message: `Terjadi kesalahan saat menambah invoice: ${err.response.data.message}`,
         color: "negative",
         classes: "q-notify-font",
       });
     } else if (err instanceof Error) {
       $q.notify({
-        message: `Terjadi kesalahan saat menambah data invoice: ${err.message}`,
+        message: `Terjadi kesalahan saat menambah invoice: ${err.message}`,
         color: "negative",
         classes: "q-notify-font",
       });
     }
   }
 };
-
-const onUpdateInvoiceItem = () => {
-  try {
-    if (props.invoiceItem) {
-      const updatedInvoiceItem = props.invoiceItem;
-      Object.assign(updatedInvoiceItem, {
-        quantity: Number(invoiceItemFields.value.quantity),
-        amount_paid_tiktok: Number(invoiceItemFields.value.amount_paid_tiktok),
-        amount_paid_shopee: Number(invoiceItemFields.value.amount_paid_shopee),
-        amount_paid_transfer: Number(
-          invoiceItemFields.value.amount_paid_transfer,
-        ),
-      });
-      store.stores.updateInvoiceItem(
-        props.invoiceItem.id,
-        props.invoiceItem.invoice_id,
-        updatedInvoiceItem,
-      );
-      modelValue.value = false;
-
-      $q.notify({
-        message: "Berhasil mengubah data invoice!",
-        color: "primary",
-        classes: "q-notify-font",
-      });
-    }
-  } catch (err: unknown) {
-    console.error(err);
-    if (err instanceof AxiosError && err.response?.data?.message) {
-      $q.notify({
-        message: `Terjadi kesalahan saat mengubah data invoice: ${err.response.data.message}`,
-        color: "negative",
-        classes: "q-notify-font",
-      });
-    } else if (err instanceof Error) {
-      $q.notify({
-        message: `Terjadi kesalahan saat mengubah data invoice: ${err.message}`,
-        color: "negative",
-        classes: "q-notify-font",
-      });
-    }
-  }
-};
-
-onMounted(() => {
-  if (props.invoiceItem && props.isUpdate) {
-    invoiceItemFields.value = {
-      quantity: props.invoiceItem.quantity,
-      amount_paid_tiktok: props.invoiceItem.amount_paid_tiktok,
-      amount_paid_shopee: props.invoiceItem.amount_paid_shopee,
-      amount_paid_transfer: props.invoiceItem.amount_paid_transfer,
-    };
-  }
-});
 </script>
 <template>
   <q-dialog v-model="modelValue">
@@ -199,12 +144,20 @@ onMounted(() => {
           class="tw-mb-0 text-body-large tw-font-bold text-center text-grey-10"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
         >
-          {{ props.isUpdate ? "Ubah Data Invoice" : "Tambah Data Invoice" }}
+          Tambah Invoice
         </p>
       </q-card-section>
       <q-card-section>
-        <template v-if="!props.isUpdate">
-          <q-select
+        <q-input
+          v-model="newInvoice.customer"
+          outlined
+          label="Nama Pembeli"
+          lazy-rules
+          :rules="[(val: string) => !!val || 'Nama pembeli tidak boleh kosong!']"
+          class="text-body-medium tw-mt-5"
+          :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+        />
+        <q-select
             filled
             v-model="selectedProduct"
             use-input
@@ -232,7 +185,6 @@ onMounted(() => {
             class="tw-w-[150px] text-body-small selector"
             :class="$q.screen.lt.sm ? 'text-mobile' : ''"
           />
-        </template>
         <q-input
           v-model="invoiceItemFields.quantity"
           outlined
@@ -300,9 +252,9 @@ onMounted(() => {
           class="tw-rounded-2xl text-grey-10"
         />
         <q-btn
-          :disable="!allowUpdate"
+          :disable="!allowAddNewInvoice"
           no-caps
-          :label="props.isUpdate ? 'Ubah' : 'Tambah'"
+          label="Tambah Invoice"
           @click="showConfirmationModal = true"
           color="primary"
           :size="$q.screen.lt.sm ? 'md' : 'lg'"
@@ -312,9 +264,9 @@ onMounted(() => {
     </q-card>
 
     <ConfirmationModal
-      :copy-text="`Apakah Anda yakin ingin ${props.isUpdate ? 'mengubah' : 'menambah'} data invoice?`"
+      :copy-text="`Apakah Anda yakin ingin menambah invoice?`"
       v-model="showConfirmationModal"
-      @continue="props.isUpdate ? onUpdateInvoiceItem() : onAddNewInvoiceItem()"
+      @continue="onAddNewInvoice"
     />
   </q-dialog>
 </template>

@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import type { QTableProps } from "quasar";
-import type {
-  GetAllInvoiceResponseData,
-  InvoiceItem,
-} from "src/stores/store/types";
+import type { Invoice, InvoiceItem } from "src/stores/store/types";
 import {
   type PRODUCT_PRICE_TYPE,
   PRODUCT_PRICE_TYPE_LABEL,
@@ -17,7 +14,7 @@ import { AxiosError } from "axios";
 
 const props = defineProps({
   invoices: {
-    type: Array as PropType<GetAllInvoiceResponseData[]>,
+    type: Array as PropType<Invoice[]>,
     required: true,
   },
   totalPages: {
@@ -40,10 +37,10 @@ const page = defineModel<number>({ required: true });
 
 const invoiceColumns: QTableProps["columns"] = [
   {
-    name: "customer_name",
+    name: "customer",
     align: "left",
     label: "Nama Pembeli",
-    field: "customer_name",
+    field: "customer",
   },
   {
     name: "created_at",
@@ -81,21 +78,21 @@ const invoiceItemsColumns: QTableProps["columns"] = [
     field: "price_type",
   },
   {
-    name: "tiktok_payment_amount",
+    name: "amount_paid_tiktok",
     align: "left",
     label: "Tiktok",
-    field: "tiktok_payment_amount",
+    field: "amount_paid_tiktok",
   },
   {
-    name: "shopee_payment_amount",
+    name: "amount_paid_shopee",
     label: "Shopee",
-    field: "shopee_payment_amount",
+    field: "amount_paid_shopee",
     sortable: false,
   },
   {
-    name: "transfer_payment_amount",
+    name: "amount_paid_transfer",
     label: "Transfer",
-    field: "transfer_payment_amount",
+    field: "amount_paid_transfer",
   },
   {
     name: "remaining_payment_amount",
@@ -117,7 +114,7 @@ const expanded = ref<string[]>([]);
 const showConfirmationModal = ref(false);
 const isDeletingInvoice = ref(false);
 
-const selectedInvoice = ref<GetAllInvoiceResponseData>();
+const selectedInvoice = ref<Invoice>();
 
 // Invoice item update modal
 const showUpdateInvoiceItemModal = ref(false);
@@ -236,8 +233,8 @@ onMounted(async () => {
             :icon="props.expand ? 'expand_less' : 'expand_more'"
           />
         </q-td>
-        <q-td key="customer_name" :props="props">
-          {{ props.row.customer_name }}
+        <q-td key="customer" :props="props">
+          {{ props.row.customer }}
         </q-td>
         <q-td key="created_at" :props="props">
           {{ props.row.created_at }}
@@ -263,7 +260,7 @@ onMounted(async () => {
         <q-td colspan="100%">
           <div class="q-gutter-md tw-w-full">
             <q-table
-              :rows="props.row.invoice_items"
+              :rows="props.row.items"
               :columns="invoiceItemsColumns"
               dense
               flat
@@ -287,24 +284,24 @@ onMounted(async () => {
                       ]
                     }}
                   </q-td>
-                  <q-td key="tiktok_payment_amount" :props="itemProps">
+                  <q-td key="amount_paid_tiktok" :props="itemProps">
                     {{
                       formatWithThousandSeparator(
-                        itemProps.row.tiktok_payment_amount,
+                        itemProps.row.amount_paid_tiktok,
                       )
                     }}
                   </q-td>
-                  <q-td key="shopee_payment_amount" :props="itemProps">
+                  <q-td key="amount_paid_shopee" :props="itemProps">
                     {{
                       formatWithThousandSeparator(
-                        itemProps.row.shopee_payment_amount,
+                        itemProps.row.amount_paid_shopee,
                       )
                     }}
                   </q-td>
-                  <q-td key="transfer_payment_amount" :props="itemProps">
+                  <q-td key="amount_paid_transfer" :props="itemProps">
                     {{
                       formatWithThousandSeparator(
-                        itemProps.row.transfer_payment_amount,
+                        itemProps.row.amount_paid_transfer,
                       )
                     }}
                   </q-td>
@@ -312,9 +309,9 @@ onMounted(async () => {
                     {{
                       formatWithThousandSeparator(
                         itemProps.row.price * itemProps.row.quantity -
-                          (itemProps.row.tiktok_payment_amount +
-                            itemProps.row.shopee_payment_amount +
-                            itemProps.row.transfer_payment_amount),
+                          (itemProps.row.amount_paid_tiktok +
+                            itemProps.row.amount_paid_shopee +
+                            itemProps.row.amount_paid_transfer),
                       )
                     }}
                   </q-td>
