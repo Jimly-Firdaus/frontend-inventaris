@@ -93,17 +93,20 @@ const invoiceItemsColumns: QTableProps["columns"] = [
   },
   {
     name: "amount_paid_shopee",
+    align: "left",
     label: "Shopee",
     field: "amount_paid_shopee",
     sortable: false,
   },
   {
     name: "amount_paid_transfer",
+    align: "left",
     label: "Transfer",
     field: "amount_paid_transfer",
   },
   {
     name: "remaining_payment_amount",
+    align: "left",
     label: "Sisa Pembayaran",
     field: "remaining_payment_amount",
     sortable: false,
@@ -140,12 +143,16 @@ const onEditInvoiceItems = (invoiceItem: InvoiceItem) => {
   showUpdateInvoiceItemModal.value = true;
   console.log("[EDIT] invoice item ", invoiceItem);
 };
-const onDeleteInvoiceItems = () => {
-  console.log("[EDIT] invoice item ", selectedInvoiceItem.value);
+const onDeleteInvoiceItems = async () => {
   if (selectedInvoiceItem.value) {
     try {
-      store.stores.deleteInvoiceItem(selectedInvoiceItem.value.id);
-      console.log("[EDIT] invoice item ", selectedInvoiceItem.value);
+      await store.stores.updateInvoiceItem(
+        selectedInvoiceItem.value.id,
+        selectedInvoiceItem.value.invoice_id,
+        {
+          quantity: 0,
+        },
+      );
 
       $q.notify({
         message: "Berhasil menghapus data invoice!",
@@ -171,11 +178,11 @@ const onDeleteInvoiceItems = () => {
   }
 };
 
-const onDeleteInvoice = () => {
+const onDeleteInvoice = async () => {
   console.log("[EDIT] invoice ", selectedInvoice.value);
   if (selectedInvoice.value) {
     try {
-      store.stores.deleteInvoice(selectedInvoice.value.id);
+      await store.stores.deleteInvoice(selectedInvoice.value.id);
 
       $q.notify({
         message: "Berhasil menghapus invoice!",
@@ -347,10 +354,11 @@ onMounted(async () => {
                   <q-td key="remaining_payment_amount" :props="itemProps">
                     {{
                       formatWithThousandSeparator(
-                        itemProps.row.price * itemProps.row.quantity -
-                          (itemProps.row.amount_paid_tiktok +
-                            itemProps.row.amount_paid_shopee +
-                            itemProps.row.amount_paid_transfer),
+                        Number(itemProps.row.price) *
+                          Number(itemProps.row.quantity) -
+                          (Number(itemProps.row.amount_paid_tiktok) +
+                            Number(itemProps.row.amount_paid_shopee) +
+                            Number(itemProps.row.amount_paid_transfer)),
                       )
                     }}
                   </q-td>

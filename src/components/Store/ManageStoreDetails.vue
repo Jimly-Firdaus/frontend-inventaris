@@ -149,6 +149,12 @@ watch([() => filter.value.customerName, () => page.value.salesPage, selectedTime
   await store.stores.getAllInvoices(req);
 });
 
+watch(currentTab, async () => {
+  if (currentTab.value == "products") {
+    await refreshData();
+  }
+})
+
 onMounted(async () => {
   $q.loading.show({
     message: "Loading...",

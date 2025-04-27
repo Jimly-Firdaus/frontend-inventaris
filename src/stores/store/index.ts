@@ -52,12 +52,6 @@ export const useStoresStore = defineStore("stores", () => {
     req: GetAllInvoiceItemsQuery,
   ) => {
     const invoiceIdx = invoices.value.findIndex((i) => i.id === invoiceId);
-    if (
-      invoiceIdx !== -1 &&
-      invoices.value &&
-      invoices.value[invoiceIdx]?.items?.length
-    )
-      return;
 
     const res: AxiosResponse<{ data: GetAllInvoiceItemsResponse }> =
       await api.get(`/invoices/${invoiceId}/items`, {
@@ -81,6 +75,11 @@ export const useStoresStore = defineStore("stores", () => {
     await api.post(`/invoices/${invoiceId}/items`, {
       items: [newInvoiceItemReq],
     });
+    const req: GetAllInvoiceItemsQuery = {
+      order_by: "created_at",
+      asc: false,
+    };
+    await getAllInvoiceItems(invoiceId, req);
   };
 
   const addInvoice = async (newInvoiceReq: CreateInvoiceReq) => {
@@ -97,24 +96,33 @@ export const useStoresStore = defineStore("stores", () => {
     }
   };
 
-  const updateInvoiceItem = (
+  const updateInvoiceItem = async (
     invoiceItemId: string,
     invoiceId: string,
     updatedFields: Partial<InvoiceItem>,
   ) => {
-    const invoice = invoices.value.find((inv) => inv.id === invoiceId);
-    if (!invoice) {
-      console.error("Invoice not found");
-      return;
-    }
+    await api.patch(
+      `/invoices/${invoiceId}/items/${invoiceItemId}`,
+      updatedFields,
+    );
 
-    const item = invoice.items?.find((it) => it.id === invoiceItemId);
-    if (!item) {
-      console.error("Invoice item not found");
-      return;
-    }
+    if (updatedFields?.quantity == 0) {
+      deleteInvoiceItem(invoiceItemId);
+    } else {
+      const invoice = invoices.value.find((inv) => inv.id === invoiceId);
+      if (!invoice) {
+        console.error("Invoice not found");
+        return;
+      }
 
-    Object.assign(item, updatedFields);
+      const item = invoice.items?.find((it) => it.id === invoiceItemId);
+      if (!item) {
+        console.error("Invoice item not found");
+        return;
+      }
+
+      Object.assign(item, updatedFields);
+    }
   };
 
   const deleteInvoiceItem = (invoiceItemId: string) => {
@@ -126,7 +134,9 @@ export const useStoresStore = defineStore("stores", () => {
     });
   };
 
-  const deleteInvoice = (invoiceId: string) => {
+  const deleteInvoice = async (invoiceId: string) => {
+    await api.delete(`/invoices/${invoiceId}`);
+
     const index = invoices.value.findIndex((inv) => inv.id === invoiceId);
     if (index !== -1) {
       invoices.value.splice(index, 1);

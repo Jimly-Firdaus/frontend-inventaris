@@ -50,43 +50,6 @@ const columns: QTableProps["columns"] = [
     field: "wholesale_quantity",
   },
 ];
-
-// const onRequest = async (reqProps: {
-//   pagination: { page: number; rowsPerPage: number };
-// }) => {
-//   $q.loading.show({
-//     message: "Loading...",
-//   });
-//   const { page, rowsPerPage } = reqProps.pagination;
-//   try {
-//     const req: GetAllProductsQuery = {
-//       name: props.nameFilter?.trim().length ? props.nameFilter : undefined,
-//       page: page,
-//       limit: rowsPerPage,
-//     };
-
-//     await store.products.getAllProducts(req);
-//     totalPages.value = store.products.productsMeta?.total_page ?? 0;
-//     totalData.value = store.products.productsMeta?.total_item ?? 0;
-//   } catch (err: unknown) {
-//     console.error(err);
-//     if (err instanceof AxiosError && err.response?.data?.message) {
-//       $q.notify({
-//         message: `Terjadi kesalahan saat mengambil data: ${err.response.data.message}`,
-//         color: "negative",
-//         classes: "q-notify-font",
-//       });
-//     } else if (err instanceof Error) {
-//       $q.notify({
-//         message: `Terjadi kesalahan saat mengambil data: ${err.message}`,
-//         color: "negative",
-//         classes: "q-notify-font",
-//       });
-//     }
-//   } finally {
-//     $q.loading.hide();
-//   }
-// };
 </script>
 <template>
   <q-table

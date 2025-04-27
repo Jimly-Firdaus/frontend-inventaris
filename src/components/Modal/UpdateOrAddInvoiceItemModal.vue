@@ -137,7 +137,7 @@ const onAddNewInvoiceItem = async () => {
   }
 };
 
-const onUpdateInvoiceItem = () => {
+const onUpdateInvoiceItem = async () => {
   try {
     if (props.invoiceItem) {
       const updatedInvoiceItem = props.invoiceItem;
@@ -149,7 +149,7 @@ const onUpdateInvoiceItem = () => {
           invoiceItemFields.value.amount_paid_transfer,
         ),
       });
-      store.stores.updateInvoiceItem(
+      await store.stores.updateInvoiceItem(
         props.invoiceItem.id,
         props.invoiceItem.invoice_id,
         updatedInvoiceItem,
