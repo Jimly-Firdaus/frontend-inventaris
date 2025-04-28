@@ -2,22 +2,22 @@ import type { Pagination, Sort, PaginationMeta } from "../store/types";
 import type { PRODUCT_PRICE_TYPE } from "src/constants/price";
 
 export interface GetAllProductsQuery {
-	name?: string | undefined;
-	page?: number;
-	limit?: number;
-	order_by?: string;
-	asc?: boolean;
+  name?: string | undefined;
+  page?: number;
+  limit?: number;
+  order_by?: string;
+  asc?: boolean;
   store_id?: string;
 }
 
 export interface GetAllProductsFilter {
-	name?: string;
-	pagination?: Pagination;
-	sort?: Sort;
+  name?: string;
+  pagination?: Pagination;
+  sort?: Sort;
 }
 
 export interface GetAllProductsResponseData {
-	id: string;
+  id: string;
   name: string;
   product_name?: string;
   buy_price?: string | undefined;
@@ -30,12 +30,12 @@ export interface GetAllProductsResponseData {
 }
 
 export interface GetAllProductsResponse {
-	data: GetAllProductsResponseData[];
-	meta?: PaginationMeta;
+  data: GetAllProductsResponseData[];
+  meta?: PaginationMeta;
 }
 
 export interface CreateProductRequest {
-	name: string;
+  name: string;
   stock: number;
   wholesale_sell_price?: number;
   retail_sell_price?: number;
@@ -43,13 +43,13 @@ export interface CreateProductRequest {
 
 export interface UpdateProductRequest {
   name?: string;
-	buy_price?: number;
+  buy_price?: number;
   wholesale_sell_price?: number;
   retail_sell_price?: number;
 }
 
 export interface CreateInboundData {
-	product_id: string;
+  product_id: string;
   quantity: number;
 }
 
@@ -62,16 +62,16 @@ export interface GetAllInboundsQuery {
   created_at_lte?: string | undefined;
   created_at_gte?: string | undefined;
   page?: number;
-	limit?: number;
+  limit?: number;
   order_by?: string;
   asc?: boolean;
 
   price_type?: PRODUCT_PRICE_TYPE;
-	store_name?: string;
+  store_name?: string;
 }
 
 export interface GetAllInboundsResponseData {
-	id: string;
+  id: string;
   product_id: string;
   product_name: string;
   quantity: number;
@@ -87,27 +87,27 @@ export interface GetAllInboundsResponse {
 }
 
 export interface CreateOutboundRequest {
-	product_id: string;
+  product_id: string;
   store_name: string;
-	to: string;
-	quantity: number
+  to: string;
+  quantity: number;
   price_type: PRODUCT_PRICE_TYPE;
 }
 
 export interface GetAllOutboundsQuery {
-	product_name?: string;
-	store_name?: string;
+  product_name?: string;
+  store_name?: string;
   store_id?: string;
-	quantity_lte?: number;
-	quantity_gte?: number;
-	price_type?: PRODUCT_PRICE_TYPE;
-	price_lte?: number;
-	price_gte?: number;
-	created_at_lte?: string | undefined;
-	created_at_gte?: string | undefined;
-	created_by_username?: string;
-	page?: number;
-	limit?: number;
+  quantity_lte?: number;
+  quantity_gte?: number;
+  price_type?: PRODUCT_PRICE_TYPE;
+  price_lte?: number;
+  price_gte?: number;
+  created_at_lte?: string | undefined;
+  created_at_gte?: string | undefined;
+  created_by_username?: string;
+  page?: number;
+  limit?: number;
   order_by?: string;
   asc?: boolean;
 }
@@ -128,8 +128,8 @@ export interface GetAllOutboundsResponseData {
 }
 
 export interface GetAllOutboundsResponse {
-	data: GetAllOutboundsResponseData[];
-	meta?: PaginationMeta;
+  data: GetAllOutboundsResponseData[];
+  meta?: PaginationMeta;
 }
 
 export interface CreateExpenseInsightReq {
@@ -150,7 +150,7 @@ export interface GetExpenseInsightResponse {
 export interface GetInboundsInsightQuery {
   period: string;
   page?: number;
-	limit?: number;
+  limit?: number;
   order_by?: string;
   asc?: boolean;
 }
@@ -164,5 +164,6 @@ export interface InboundsInsight {
 
 export interface GetInboundsInsightResponse {
   data: InboundsInsight[];
-	meta?: PaginationMeta;
+  meta?: PaginationMeta;
+  total: number;
 }

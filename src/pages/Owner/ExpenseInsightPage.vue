@@ -19,7 +19,7 @@ const inboundsInsight = computed(() => store.products.inboundsInsight);
 
 const totalOperationalCost = ref(0);
 const totalExpeditionCost = ref(0);
-const totalCapital = ref(0);
+const totalCapital = computed(() => store.products.inboundsInsightTotalCapital);
 const totalUpdated = ref({
   operationalCost: 0,
   expeditionCost: 0,
@@ -53,10 +53,10 @@ const months = [
 ];
 
 // Year options (from 2024 to current year)
-const years = Array.from({ length: currentYear - 2024 + 1 }, (_, i) => ({
-  label: (2024 + i).toString(),
-  value: 2024 + i,
-}));
+const years = Array.from(
+  { length: currentYear - 2024 + 1 },
+  (_, i) => 2024 + i,
+);
 
 const selectedMonth = ref(currentMonth);
 const selectedYear = ref(currentYear);
@@ -133,13 +133,6 @@ watch(
     };
 
     await store.products.getInboundsInsight(req);
-    totalCapital.value = 0;
-    inboundsInsight.value.forEach(
-      (ii) =>
-        (totalCapital.value =
-          totalCapital.value +
-          Number(ii.product_buy_price ?? 0) * (ii.quantity ?? 0)),
-    );
   },
   { deep: true },
 );
@@ -152,13 +145,6 @@ watch(page, async () => {
   };
 
   await store.products.getInboundsInsight(req);
-  totalCapital.value = 0;
-  inboundsInsight.value.forEach(
-    (ii) =>
-      (totalCapital.value =
-        totalCapital.value +
-        Number(ii.product_buy_price ?? 0) * (ii.quantity ?? 0)),
-  );
 });
 
 onMounted(async () => {
@@ -169,13 +155,6 @@ onMounted(async () => {
   };
 
   await store.products.getInboundsInsight(req);
-
-  inboundsInsight.value.forEach(
-    (ii) =>
-      (totalCapital.value =
-        totalCapital.value +
-        Number(ii.product_buy_price ?? 0) * (ii.quantity ?? 0)),
-  );
 
   await store.products.getExpenseInsight(selectedPeriod.value);
   totalExpeditionCost.value = expenseInsight.value.expeditionCost;
@@ -228,6 +207,7 @@ onMounted(async () => {
         />
         <q-select
           filled
+          emit-value
           v-model="selectedYear"
           :options="years"
           label="Tahun"

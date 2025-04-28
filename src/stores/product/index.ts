@@ -38,8 +38,9 @@ export const useProductsStore = defineStore("products", () => {
     expeditionCost: 0,
   });
 
-  const inboundsInsight = ref<InboundsInsight[]>([])
-  const inboundsInsightMeta = ref<PaginationMeta>()
+  const inboundsInsight = ref<InboundsInsight[]>([]);
+  const inboundsInsightMeta = ref<PaginationMeta>();
+  const inboundsInsightTotalCapital = ref(0);
 
   const getAllProducts = async (payload?: GetAllProductsQuery) => {
     const res: AxiosResponse<{ data: GetAllProductsResponse }> = await api.get(
@@ -176,12 +177,14 @@ export const useProductsStore = defineStore("products", () => {
   };
 
   const getInboundsInsight = async (payload: GetInboundsInsightQuery) => {
-    const res: AxiosResponse<{ data: GetInboundsInsightResponse }> = await api.get("/inbounds/aggregate", {
-      params: payload,
-    });
+    const res: AxiosResponse<{ data: GetInboundsInsightResponse }> =
+      await api.get("/inbounds/aggregate", {
+        params: payload,
+      });
 
     inboundsInsight.value = res.data.data.data ?? [];
     inboundsInsightMeta.value = res.data.data.meta;
+    inboundsInsightTotalCapital.value = Number(res.data.data.total ?? 0);
   };
 
   return {
@@ -193,6 +196,7 @@ export const useProductsStore = defineStore("products", () => {
     inboundsMeta,
     inboundsInsight,
     inboundsInsightMeta,
+    inboundsInsightTotalCapital,
 
     getAllProducts,
     createNewProduct,
