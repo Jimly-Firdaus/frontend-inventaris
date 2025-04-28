@@ -141,7 +141,6 @@ const onEditInvoiceItems = (invoiceItem: InvoiceItem) => {
   selectedInvoiceItem.value = invoiceItem;
   isUpdatingInvoiceItem.value = true;
   showUpdateInvoiceItemModal.value = true;
-  console.log("[EDIT] invoice item ", invoiceItem);
 };
 const onDeleteInvoiceItems = async () => {
   if (selectedInvoiceItem.value) {
@@ -179,7 +178,6 @@ const onDeleteInvoiceItems = async () => {
 };
 
 const onDeleteInvoice = async () => {
-  console.log("[EDIT] invoice ", selectedInvoice.value);
   if (selectedInvoice.value) {
     try {
       await store.stores.deleteInvoice(selectedInvoice.value.id);

@@ -131,3 +131,38 @@ export interface GetAllOutboundsResponse {
 	data: GetAllOutboundsResponseData[];
 	meta?: PaginationMeta;
 }
+
+export interface CreateExpenseInsightReq {
+  period: string;
+  expedition: number;
+  operational: number;
+}
+
+export interface GetExpenseInsightResponse {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  period: string;
+  expedition: number;
+  operational: number;
+}
+
+export interface GetInboundsInsightQuery {
+  period: string;
+  page?: number;
+	limit?: number;
+  order_by?: string;
+  asc?: boolean;
+}
+
+export interface InboundsInsight {
+  product_id: string;
+  product: string;
+  product_buy_price: number;
+  quantity: number;
+}
+
+export interface GetInboundsInsightResponse {
+  data: InboundsInsight[];
+	meta?: PaginationMeta;
+}

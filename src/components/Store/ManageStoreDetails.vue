@@ -219,7 +219,7 @@ onMounted(async () => {
         <q-tab no-caps class="tab-content" name="user" label="User" />
         <q-tab no-caps class="tab-content" name="sales" label="Penjualan" />
         <q-tab no-caps class="tab-content" name="products" label="Barang" />
-        <q-tab no-caps class="tab-content" name="insight" label="Insight" />
+        <!-- <q-tab no-caps class="tab-content" name="insight" label="Insight" /> -->
       </q-tabs>
 
       <q-card

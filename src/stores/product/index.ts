@@ -14,6 +14,11 @@ import type {
   GetAllOutboundsQuery,
   GetAllInboundsResponse,
   GetAllInboundsQuery,
+  CreateExpenseInsightReq,
+  GetExpenseInsightResponse,
+  GetInboundsInsightQuery,
+  GetInboundsInsightResponse,
+  InboundsInsight,
 } from "./types";
 import type { AxiosResponse } from "axios";
 import type { PaginationMeta } from "../store/types";
@@ -28,6 +33,14 @@ export const useProductsStore = defineStore("products", () => {
 
   const outbounds = ref<GetAllOutboundsResponseData[]>([]);
   const outboundsMeta = ref<PaginationMeta>();
+
+  const expenseInsight = ref({
+    operationalCost: 0,
+    expeditionCost: 0,
+  });
+
+  const inboundsInsight = ref<InboundsInsight[]>([])
+  const inboundsInsightMeta = ref<PaginationMeta>()
 
   const getAllProducts = async (payload?: GetAllProductsQuery) => {
     const res: AxiosResponse<{ data: GetAllProductsResponse }> = await api.get(
@@ -146,6 +159,33 @@ export const useProductsStore = defineStore("products", () => {
     });
   };
 
+  const createExpenseInsight = async (payload: CreateExpenseInsightReq) => {
+    await api.post("/expenses", payload);
+  };
+
+  const getExpenseInsight = async (period: string) => {
+    const res: AxiosResponse<{ data: GetExpenseInsightResponse }> =
+      await api.get("/expenses", {
+        params: {
+          period: period,
+        },
+      });
+
+    Object.assign(expenseInsight.value, {
+      operationalCost: res.data.data?.operational ?? 0,
+      expeditionCost: res.data.data?.expedition ?? 0,
+    });
+  };
+
+  const getInboundsInsight = async (payload: GetInboundsInsightQuery) => {
+    const res: AxiosResponse<{ data: GetInboundsInsightResponse }> = await api.get("/inbounds/aggregate", {
+      params: payload,
+    });
+
+    inboundsInsight.value = res.data.data.data ?? [];
+    inboundsInsightMeta.value = res.data.data.meta;
+  };
+
   return {
     products,
     productsMeta,
@@ -153,6 +193,8 @@ export const useProductsStore = defineStore("products", () => {
     outboundsMeta,
     inbounds,
     inboundsMeta,
+    inboundsInsight,
+    inboundsInsightMeta,
 
     getAllProducts,
     createNewProduct,
@@ -167,5 +209,10 @@ export const useProductsStore = defineStore("products", () => {
     getAllOutbounds,
     getAllOutboundsByStoreId,
     updateOutbound,
+
+    expenseInsight,
+    createExpenseInsight,
+    getExpenseInsight,
+    getInboundsInsight,
   };
 });

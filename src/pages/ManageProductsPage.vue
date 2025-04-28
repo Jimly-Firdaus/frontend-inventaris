@@ -108,7 +108,6 @@ const onUpdateStock = (productId: string) => {
   selectedProductIdForStockUpdate.value = productId;
   showAddProductStockModal.value = true;
 };
-// const inbounds = computed(() => store.products.inbounds);
 
 const onClickProduct = async (productId: string) => {
   if (store.auth.userRole == USER_ROLE.STORE_MANAGER) return;

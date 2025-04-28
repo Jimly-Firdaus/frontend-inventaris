@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { GetAllProductsResponseData } from "src/stores/product/types";
+import type { GetAllProductsResponseData, InboundsInsight } from "src/stores/product/types";
 import type { QTableProps } from "quasar";
 import { formatWithThousandSeparator } from "src/util/number";
 
 const props = defineProps({
   products: {
-    type: Array as PropType<GetAllProductsResponseData[]>,
+    type: Array as PropType<GetAllProductsResponseData[] | InboundsInsight[]>,
     required: true,
   },
   totalPages: {
@@ -85,7 +85,7 @@ const columns = computed(() => [
     <template v-slot:body="props">
       <q-tr :props="props" class="tw-cursor-pointer">
         <q-td key="product_name" :props="props">
-          {{ props.row.product_name ?? props.row.name }}
+          {{ props.row.product_name ?? props.row.name ?? props.row.product }}
         </q-td>
         <template v-if="!insightView">
           <q-td key="retail_quantity" :props="props">
@@ -97,17 +97,17 @@ const columns = computed(() => [
         </template>
         <template v-else>
           <q-td key="quantity" :props="props">
-            {{ props.row.stock ?? "0" }}
+            {{ props.row.quantity ?? "0" }}
           </q-td>
           <q-td key="buy_price" :props="props">
-            {{ formatWithThousandSeparator(props.row.buy_price) ?? "0" }}
+            {{ formatWithThousandSeparator(props.row.product_buy_price) ?? "0" }}
           </q-td>
         </template>
       </q-tr>
     </template>
     <template #no-data>
       <div class="full-width row flex-center q-gutter-sm q-pa-xl">
-        <span class="text-h6"> Tidak ada produk di toko ini. </span>
+        <span class="text-h6"> {{ insightView ? "Tidak ada pemasukan barang." : "Tidak ada produk di toko ini." }} </span>
         <q-icon size="2em" name="sentiment_dissatisfied" />
       </div>
     </template>
