@@ -27,6 +27,15 @@ const $q = useQuasar();
 const store = useStore();
 const modelValue = defineModel<boolean>({ required: true, default: false });
 
+const stores = computed(() => store.stores.stores);
+const selectedStore = ref<{ label: string; value: string }>();
+const availableStores = computed(() =>
+  stores.value.map((s) => ({
+    value: s.id,
+    label: s.name,
+  })),
+);
+
 const selectedProduct = ref<{ label: string; value: string }>();
 const availableProductsOpts = computed(() =>
   store.products.products.map((p) => ({
@@ -79,11 +88,12 @@ const filterProductName = (
 
 const onAddNewOutbound = async () => {
   try {
-    if (newOutbound.value && selectedProduct.value && selectedPriceType.value) {
+    if (newOutbound.value && selectedProduct.value && selectedPriceType.value && selectedStore.value) {
       newOutbound.value.product_id = selectedProduct.value.value;
       newOutbound.value.price_type = selectedPriceType.value
         .value as PRODUCT_PRICE_TYPE;
       newOutbound.value.quantity = Number(newOutbound.value.quantity);
+      newOutbound.value.to = selectedStore.value.value ?? "";
       await store.products.createProductOutbound(newOutbound.value);
       const req: GetAllOutboundsQuery = {
         page: 1,
@@ -183,6 +193,14 @@ const onAddNewOutbound = async () => {
           :options="priceTypeOpts"
           label="Tipe Harga Jual"
           class="tw-w-[150px] text-body-small selector"
+          :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+        />
+        <q-select
+          filled
+          v-model="selectedStore"
+          :options="availableStores"
+          label="Toko"
+          class="tw-w-[150px] text-body-small selector tw-mt-5"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
         />
       </q-card-section>

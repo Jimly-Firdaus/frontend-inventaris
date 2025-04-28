@@ -1,4 +1,5 @@
 import type { INSIGHT_INTERVAL } from "src/constants/time";
+import type { PRODUCT_PRICE_TYPE } from "src/constants/price";
 
 export interface Pagination {
   page: number;
@@ -79,4 +80,71 @@ export interface OutboundInsight {
   from: string;
   to: string;
   data: OutboundInsightData[];
+}
+
+export interface Invoice {
+  id: string;
+  store_id: string;
+  customer: string;
+  items?: InvoiceItem[];
+  // created_by: string;
+  created_at: string;
+  // updated_by: string;
+  // updated_at: string;
+}
+
+export interface InvoiceItem {
+  id: string;
+  invoice_id: string;
+  product_id: string;
+  product_name: string;
+  quantity: number;
+  price_type: PRODUCT_PRICE_TYPE;
+  price: number;
+  amount_paid_tiktok: number;
+  amount_paid_shopee: number;
+  amount_paid_transfer: number;
+}
+
+export interface CreateInvoiceReq {
+  store_id: string;
+  customer: string;
+  items: CreateInvoiceItemReq[];
+}
+
+export interface CreateInvoiceItemReq {
+  product_id: string;
+  quantity: number;
+  price_type: PRODUCT_PRICE_TYPE;
+  amount_paid_tiktok: number;
+  amount_paid_shopee: number;
+  amount_paid_transfer: number;
+}
+
+export interface GetAllInvoicesQuery {
+  store_id: string;
+  customer?: string;
+  created_at_lte?: string | undefined;
+  created_at_gte?: string | undefined;
+  page?: number;
+	limit?: number;
+  order_by?: string;
+  asc?: boolean;
+}
+
+export interface GetAllInvoiceResponse {
+	data: Invoice[];
+	meta?: PaginationMeta;
+}
+
+export interface GetAllInvoiceItemsQuery {
+  page?: number;
+	limit?: number;
+  order_by?: string;
+  asc?: boolean;
+}
+
+export interface GetAllInvoiceItemsResponse {
+	data: InvoiceItem[];
+	meta?: PaginationMeta;
 }

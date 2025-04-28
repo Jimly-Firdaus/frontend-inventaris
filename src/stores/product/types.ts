@@ -7,6 +7,7 @@ export interface GetAllProductsQuery {
 	limit?: number;
 	order_by?: string;
 	asc?: boolean;
+  store_id?: string;
 }
 
 export interface GetAllProductsFilter {
@@ -18,9 +19,12 @@ export interface GetAllProductsFilter {
 export interface GetAllProductsResponseData {
 	id: string;
   name: string;
+  product_name?: string;
   buy_price?: string | undefined;
   wholesale_sell_price?: string | undefined;
   retail_sell_price?: string | undefined;
+  retail_store_stock?: number;
+  wholesale_store_stock?: number;
   stock?: number;
   updated_at: string;
 }
@@ -33,6 +37,8 @@ export interface GetAllProductsResponse {
 export interface CreateProductRequest {
 	name: string;
   stock: number;
+  wholesale_sell_price?: number;
+  retail_sell_price?: number;
 }
 
 export interface UpdateProductRequest {
@@ -123,5 +129,40 @@ export interface GetAllOutboundsResponseData {
 
 export interface GetAllOutboundsResponse {
 	data: GetAllOutboundsResponseData[];
+	meta?: PaginationMeta;
+}
+
+export interface CreateExpenseInsightReq {
+  period: string;
+  expedition: number;
+  operational: number;
+}
+
+export interface GetExpenseInsightResponse {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  period: string;
+  expedition: number;
+  operational: number;
+}
+
+export interface GetInboundsInsightQuery {
+  period: string;
+  page?: number;
+	limit?: number;
+  order_by?: string;
+  asc?: boolean;
+}
+
+export interface InboundsInsight {
+  product_id: string;
+  product: string;
+  product_buy_price: number;
+  quantity: number;
+}
+
+export interface GetInboundsInsightResponse {
+  data: InboundsInsight[];
 	meta?: PaginationMeta;
 }

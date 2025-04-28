@@ -4,47 +4,52 @@ import AddNewUserAccountModal from "src/components/Modal/AddNewUserAccountModal.
 import BackButton from "src/components/Button/BackButton.vue";
 import UserDataTable from "src/components/Table/UserDataTable.vue";
 import { USER_ROLE } from "src/constants/user";
-import AddNewOutboundModal from "src/components/Modal/AddNewOutboundModal.vue";
-import OutboundTable from "src/components/Table/OutboundTable.vue";
-import type { GetAllOutboundsQuery } from "src/stores/product/types";
+import AddInvoiceModal from "src/components/Modal/AddInvoiceModal.vue";
+import SalesTable from "src/components/Table/SalesTable.vue";
+import StoreProductsTable from "src/components/Table/StoreProductsTable.vue";
+import type { GetAllProductsQuery } from "src/stores/product/types";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
 import { useRouter } from "vue-router";
 import StoreInsight from "src/components/Store/StoreInsight.vue";
 import { AxiosError } from "axios";
+import BaseCalendar from "src/components/BaseComponents/BaseCalendar.vue";
+import { DateTime } from "luxon";
+import type { GetAllInvoicesQuery } from "src/stores/store/types";
 
 const props = defineProps({
   storeId: {
     type: String,
-    required: true,
   },
   storeName: {
     type: String,
-    required: true,
   },
 });
 
 const $q = useQuasar();
 const store = useStore();
 const router = useRouter();
-const outbounds = computed(() => {
-  if (store.auth.userRole == USER_ROLE.OWNER)
-    return (
-      store.products.outbounds?.filter(
-        (o) => o.store_name == props.storeName,
-      ) ?? []
-    );
-  else return store.products.outbounds ?? [];
+
+const invoices = computed(() => store.stores.invoices);
+
+const storeManagers = computed(
+  () => store.auth.storeManagers[props.storeId ?? ""],
+);
+
+const storeProducts = computed(() => store.stores.storeProducts);
+
+const filter = ref({
+  username: "",
+  customerName: "",
+  productName: "",
 });
 
-const storeManagers = computed(() => store.auth.storeManagers[props.storeId]);
-
-const usernameFilter = ref("");
+const selectedTimeframe = ref("");
 
 const filteredStoreManagers = computed(() => {
-  if (usernameFilter.value.length > 0)
+  if (filter.value.username.length > 0)
     return (
       storeManagers.value?.filter((sm) =>
-        sm.username.includes(usernameFilter.value),
+        sm.username.includes(filter.value.username),
       ) ?? []
     );
   else return storeManagers.value ?? [];
@@ -52,22 +57,27 @@ const filteredStoreManagers = computed(() => {
 
 const showConfirmationModal = ref(false);
 const showAddNewStoreManagerModal = ref(false);
-const showAddNewOutboundModal = ref(false);
+const showAddInvoiceModal = ref(false);
 
-const page = ref(1);
+const page = ref({
+  salesPage: 1,
+  productsPage: 1,
+});
 
 const currentTab = ref("user");
 
 const onConfirmDeleteStore = async () => {
   try {
-    await store.stores.deleteStore(props.storeId);
-    await router.replace({ query: {} });
+    if (props.storeId) {
+      await store.stores.deleteStore(props.storeId);
+      await router.replace({ query: {} });
 
-    $q.notify({
-      message: "Berhasil menghapus toko!",
-      color: "primary",
-      classes: "q-notify-font",
-    });
+      $q.notify({
+        message: "Berhasil menghapus toko!",
+        color: "primary",
+        classes: "q-notify-font",
+      });
+    }
   } catch (err: unknown) {
     console.error(err);
     if (err instanceof AxiosError && err.response?.data?.message) {
@@ -87,38 +97,94 @@ const onConfirmDeleteStore = async () => {
 };
 
 const refreshData = async () => {
-  const req: GetAllOutboundsQuery = {
-    page: page.value,
-    limit: 10,
-  };
-  if (props.storeId) {
-    req.store_id = props.storeId;
+  if (currentTab.value == "products") {
+    const req: GetAllProductsQuery = {
+      name: filter.value.productName,
+      page: page.value.productsPage,
+      limit: 10,
+    };
+    if (props.storeId) {
+      req.store_id = props.storeId;
+      await store.stores.getAllStoreProducts(req);
+    }
   }
-  await store.products.getAllOutbounds(req);
 };
 
-watch(page, async () => {
-  await refreshData();
+watch(
+  [() => filter.value.productName, () => page.value.productsPage],
+  async () => {
+    await refreshData();
+  },
+  { deep: true },
+);
+
+watch([() => filter.value.customerName, () => page.value.salesPage, selectedTimeframe], async () => {
+  let req: GetAllInvoicesQuery = {
+    store_id: store.auth.user?.store_id ?? props.storeId ?? "",
+    page: page.value.salesPage,
+    limit: 10,
+    order_by: "created_at",
+    asc: false,
+    customer: filter.value.customerName,
+  };
+  if (selectedTimeframe.value) {
+    const customDates = selectedTimeframe.value.split(" - ");
+    if (customDates[0] && customDates[1]) {
+      const customStart = DateTime.fromFormat(
+        customDates[0].trim(),
+        "dd LLL, yyyy",
+      ).toISO();
+      const customEnd = DateTime.fromFormat(
+        customDates[1].trim(),
+        "dd LLL, yyyy",
+      ).toISO();
+
+      req = {
+        ...req,
+        created_at_gte: customStart!,
+        created_at_lte: customEnd!,
+      };
+    }
+  }
+  await store.stores.getAllInvoices(req);
 });
+
+watch(currentTab, async () => {
+  if (currentTab.value == "products") {
+    await refreshData();
+  }
+})
 
 onMounted(async () => {
   $q.loading.show({
     message: "Loading...",
   });
-  if (!storeManagers.value && store.auth.userRole == USER_ROLE.OWNER)
+  if (
+    !storeManagers.value &&
+    store.auth.userRole == USER_ROLE.OWNER &&
+    props.storeId
+  )
     await store.auth.getAllStoreUsers(props.storeId);
-  else currentTab.value = "outbound";
+  else currentTab.value = "sales";
 
-  const req: GetAllOutboundsQuery = {
+  const req: GetAllProductsQuery = {
     page: 1,
     limit: 10,
   };
   if (props.storeId) {
     req.store_id = props.storeId;
+    await store.stores.getAllStoreProducts(req);
   }
-  await store.products.getAllOutbounds(req);
 
-  await store.products.getAllProducts();
+  const invoiceReq: GetAllInvoicesQuery = {
+    page: 1,
+    limit: 10,
+    order_by: "created_at",
+    asc: false,
+    store_id: store.auth.user?.store_id ?? props.storeId ?? "",
+  };
+  await store.stores.getAllInvoices(invoiceReq);
+
   $q.loading.hide();
 });
 </script>
@@ -151,8 +217,9 @@ onMounted(async () => {
         class="tw-my-4"
       >
         <q-tab no-caps class="tab-content" name="user" label="User" />
-        <q-tab no-caps class="tab-content" name="outbound" label="Penjualan" />
-        <q-tab no-caps class="tab-content" name="insight" label="Insight" />
+        <q-tab no-caps class="tab-content" name="sales" label="Penjualan" />
+        <q-tab no-caps class="tab-content" name="products" label="Barang" />
+        <!-- <q-tab no-caps class="tab-content" name="insight" label="Insight" /> -->
       </q-tabs>
 
       <q-card
@@ -179,7 +246,7 @@ onMounted(async () => {
           />
         </div>
         <q-input
-          v-model="usernameFilter"
+          v-model="filter.username"
           outlined
           label="Cari Username"
           class="tw-mt-4 text-body-medium tw-px-2"
@@ -191,7 +258,7 @@ onMounted(async () => {
     </template>
 
     <q-card
-      v-if="currentTab == 'outbound'"
+      v-if="currentTab == 'sales'"
       flat
       bordered
       class="tw-border-2 tw-mt-8 tw-pb-2 card-container"
@@ -203,43 +270,93 @@ onMounted(async () => {
         <span
           class="text-grey-10 tw-font-bold text-body-large"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-          >Informasi Transaksi Toko</span
+          >Informasi Penjualan Toko</span
         >
         <q-space />
         <q-btn
           no-caps
-          :label="$q.screen.lt.sm ? '' : 'Tambah Transaksi'"
+          :label="$q.screen.lt.sm ? '' : 'Tambah Invoice'"
           icon="add"
-          @click="showAddNewOutboundModal = true"
+          @click="showAddInvoiceModal = true"
           :size="$q.screen.lt.sm ? 'md' : 'lg'"
           class="tw-rounded-3xl"
           color="primary"
         />
       </div>
 
-      <OutboundTable
-        :outbounds="outbounds"
-        :total-pages="store.products.outboundsMeta?.total_page ?? 0"
-        :total-data="store.products.outboundsMeta?.total_item ?? 0"
+      <div
+        class="tw-my-4 tw-flex tw-flex-col md:tw-flex-row md:tw-items-center tw-gap-x-4 tw-gap-y-4 tw-px-2"
+      >
+        <q-input
+          v-model="filter.customerName"
+          outlined
+          label="Cari Nama Pembeli"
+          class="text-body-medium tw-w-full tw-max-w-[500px]"
+          :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+        />
+        <BaseCalendar v-model:selected-timeframe="selectedTimeframe" />
+      </div>
+
+      <SalesTable
+        :invoices="invoices"
+        :total-pages="store.stores.invoicesMeta?.total_page ?? 0"
+        :total-data="store.stores.invoicesMeta?.total_item ?? 0"
         :rows-per-page="10"
-        v-model="page"
-        :is-editable="store.auth.userRole == USER_ROLE.OWNER"
+        v-model="page.salesPage"
       />
     </q-card>
 
-    <StoreInsight v-if="currentTab == 'insight'" :store-id="props.storeId" />
+    <q-card
+      v-if="currentTab == 'products'"
+      flat
+      bordered
+      class="tw-border-2 tw-mt-8 tw-pb-2 card-container"
+    >
+      <div
+        class="tw-flex tw-items-center tw-p-4"
+        :class="$q.screen.lt.sm ? 'text-mobile tw-mb-2' : 'tw-mb-4'"
+      >
+        <span
+          class="text-grey-10 tw-font-bold text-body-large"
+          :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+          >Informasi Barang dalam Toko</span
+        >
+        <q-space />
+      </div>
 
-    <AddNewUserAccountModal
-      v-if="showAddNewStoreManagerModal"
-      v-model="showAddNewStoreManagerModal"
-      :user-role="USER_ROLE.STORE_MANAGER"
+      <q-input
+        v-model="filter.productName"
+        outlined
+        label="Cari Barang"
+        class="tw-mt-4 text-body-medium tw-px-2"
+        :class="$q.screen.lt.sm ? 'text-mobile tw-mb-4' : 'tw-mb-12'"
+      />
+      <StoreProductsTable
+        :products="storeProducts"
+        :total-pages="store.stores.storeProductsMeta?.total_page ?? 0"
+        :total-data="store.stores.storeProductsMeta?.total_item ?? 0"
+        :rows-per-page="10"
+        v-model="page.productsPage"
+      />
+    </q-card>
+
+    <StoreInsight
+      v-if="currentTab == 'insight' && props.storeId"
       :store-id="props.storeId"
-      :store-name="props.storeName"
     />
-    <AddNewOutboundModal
-      v-model="showAddNewOutboundModal"
-      :store-id="props.storeId"
-      :store-name="props.storeName"
+
+    <template v-if="props.storeId && props.storeName">
+      <AddNewUserAccountModal
+        v-if="showAddNewStoreManagerModal"
+        v-model="showAddNewStoreManagerModal"
+        :user-role="USER_ROLE.STORE_MANAGER"
+        :store-id="props.storeId"
+        :store-name="props.storeName"
+      />
+    </template>
+    <AddInvoiceModal
+      v-model="showAddInvoiceModal"
+      :store-id="store.auth.user?.store_id ?? props.storeId ?? ''"
     />
     <ConfirmationModal
       copy-text="Apakah Anda yakin ingin menghapus toko ini?"
