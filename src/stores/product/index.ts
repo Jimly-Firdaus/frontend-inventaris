@@ -1,4 +1,3 @@
-// import { api } from "boot/axios";
 import { defineStore } from "pinia";
 import type {
   GetAllProductsResponseData,
@@ -74,7 +73,6 @@ export const useProductsStore = defineStore("products", () => {
         );
 
         await api.patch(`/products/${productId}`, updates);
-        // ensure required fields are explicitly included to avoid TS err
         products.value[idx] = {
           ...current,
           id: current.id,

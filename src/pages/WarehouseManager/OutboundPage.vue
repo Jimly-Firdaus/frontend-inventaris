@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useStore } from "src/stores";
-// import { USER_ROLE } from "src/constants/user";
 import type { GetAllOutboundsQuery } from "src/stores/product/types";
 import AddNewOutboundModal from "src/components/Modal/AddNewOutboundModal.vue";
 import OutboundTable from "src/components/Table/OutboundTable.vue";

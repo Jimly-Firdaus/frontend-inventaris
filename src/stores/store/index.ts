@@ -17,7 +17,6 @@ import type {
   GetAllInvoiceItemsQuery,
   GetAllInvoiceItemsResponse,
 } from "./types";
-// import { PRODUCT_PRICE_TYPE } from "src/constants/price";
 import type { AxiosResponse } from "axios";
 import type {
   GetAllProductsQuery,
@@ -180,8 +179,6 @@ export const useStoresStore = defineStore("stores", () => {
   };
 
   const getInsight = async (req: GetOutboundInsightQuery) => {
-    // if (storeInsights.value && storeInsights.value[req.store_id]) return storeInsights.value[req.store_id];
-
     const res: AxiosResponse<{ data: OutboundInsight }> = await api.get(
       "/outbounds/insight",
       {
