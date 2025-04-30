@@ -268,7 +268,13 @@ onMounted(async () => {
           class="insight-table tw-max-w-[600px] tw-w-full"
         >
           <template v-slot:body="props">
-            <q-tr :props="props" :class="props.row.name == 'Total Modal' ? 'tw-font-bold' : ''">
+            <q-tr
+              :props="props"
+              :class="[
+                props.row.name === 'Total Modal' ? 'tw-font-bold' : '',
+                props.rowIndex === insightRows.length - 1 ? 'bg-grey-10 text-white' : '',
+              ]"
+            >
               <q-td key="column_name" :props="props">
                 {{ props.row.name }}
                 <q-btn
