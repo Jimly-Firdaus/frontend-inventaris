@@ -7,6 +7,7 @@ import type {
 import StoreProductsTable from "src/components/Table/StoreProductsTable.vue";
 import { formatWithThousandSeparator } from "src/util/number";
 import { AxiosError } from "axios";
+import type { QTableProps } from "quasar";
 
 const $q = useQuasar();
 const store = useStore();
@@ -30,6 +31,40 @@ const totalExpense = computed(
     Number(totalExpeditionCost.value) +
     totalCapital.value,
 );
+
+const insightTableColumns: QTableProps["columns"] = [
+  {
+    name: "column_name",
+    align: "left",
+    label: "",
+    field: "column_name",
+  },
+  {
+    name: "total",
+    align: "right",
+    label: "",
+    field: "total",
+  },
+];
+
+const insightRows = computed(() => [
+  {
+    name: "Total Modal Barang",
+    total: totalCapital.value,
+  },
+  {
+    name: "Total Operasional",
+    total: totalOperationalCost.value,
+  },
+  {
+    name: "Total Ekspedisi",
+    total: totalExpeditionCost.value,
+  },
+  {
+    name: "Total Modal",
+    total: totalExpense.value,
+  },
+]);
 
 const isEditing = ref(false);
 
@@ -171,7 +206,7 @@ onMounted(async () => {
       <span
         class="text-grey-10 tw-font-bold"
         :class="$q.screen.lt.sm ? 'text-h6' : 'text-h4'"
-        >Insight Pengeluaran Modal</span
+        >Insight Modal</span
       >
       <q-space />
       <q-btn
@@ -220,94 +255,79 @@ onMounted(async () => {
         />
       </div>
       <div class="tw-flex tw-gap-x-4 tw-gap-y-3 tw-flex-wrap">
-        <q-card
-          class="tw-p-3 tw-rounded-3xl tw-w-full tw-max-w-[400px] bg-black text-grey-1"
+        <q-table
+          :rows="insightRows"
+          :columns="insightTableColumns"
+          dense
+          flat
+          hide-pagination
+          virtual-scroll
+          bordered
+          hide-header
+          separator="cell"
+          class="insight-table tw-max-w-[600px] tw-w-full"
         >
-          <p class="tw-mb-1 tw-font-bold">Total Pengeluaran:</p>
-          <p
-            class="tw-font-extrabold"
-            :class="$q.screen.lt.sm ? 'tw-text-xl' : 'tw-text-2xl'"
-          >
-            {{ formatWithThousandSeparator(totalExpense) }}
-          </p>
-        </q-card>
-        <q-card class="tw-p-3 tw-rounded-3xl tw-w-full tw-max-w-[400px]">
-          <p class="tw-mb-0">Total Biaya Operasional:</p>
-          <p
-            v-if="!isEditing"
-            class="tw-font-bold"
-            :class="$q.screen.lt.sm ? 'tw-text-xl' : 'tw-text-2xl'"
-          >
-            {{ formatWithThousandSeparator(totalOperationalCost) }}
-          </p>
-          <q-input
-            v-else
-            v-model="totalUpdated.operationalCost"
-            outlined
-            label="Biaya Operasional"
-            lazy-rules
-            :rules="[
-              (val: string) =>
-                parseInt(val) >= 0 || 'Biaya operasional tidak boleh negatif!',
-            ]"
-            class="text-body-medium tw-mt-5"
-            :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-            mask="###,###,###,###,###,###,###,###"
-            reverse-fill-mask
-          />
-          <q-btn
-            v-if="!isEditing"
-            dense
-            no-caps
-            label="Ubah Data"
-            color="primary"
-            class="tw-px-3 tw-rounded-xl"
-            @click="isEditing = true"
-          />
-        </q-card>
-        <q-card class="tw-p-3 tw-rounded-3xl tw-w-full tw-max-w-[400px]">
-          <p class="tw-mb-0">Total Biaya Ekspedisi:</p>
-          <p
-            v-if="!isEditing"
-            class="tw-font-bold"
-            :class="$q.screen.lt.sm ? 'tw-text-xl' : 'tw-text-2xl'"
-          >
-            {{ formatWithThousandSeparator(totalExpeditionCost) }}
-          </p>
-          <q-input
-            v-else
-            v-model="totalUpdated.expeditionCost"
-            outlined
-            label="Biaya Ekspedisi"
-            lazy-rules
-            :rules="[
-              (val: string) =>
-                parseInt(val) >= 0 || 'Biaya ekspedisi tidak boleh negatif!',
-            ]"
-            class="text-body-medium tw-mt-5"
-            :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-            mask="###,###,###,###,###,###,###,###"
-            reverse-fill-mask
-          />
-          <q-btn
-            v-if="!isEditing"
-            dense
-            no-caps
-            label="Ubah Data"
-            color="primary"
-            class="tw-px-3 tw-rounded-xl"
-            @click="isEditing = true"
-          />
-        </q-card>
-        <q-card class="tw-p-3 tw-rounded-3xl tw-w-full tw-max-w-[400px]">
-          <p class="tw-mb-0">Total Modal Barang:</p>
-          <p
-            class="tw-font-bold"
-            :class="$q.screen.lt.sm ? 'tw-text-xl' : 'tw-text-2xl'"
-          >
-            {{ formatWithThousandSeparator(totalCapital) }}
-          </p>
-        </q-card>
+          <template v-slot:body="props">
+            <q-tr :props="props" :class="props.row.name == 'Total Modal' ? 'tw-font-bold' : ''">
+              <q-td key="column_name" :props="props">
+                {{ props.row.name }}
+                <q-btn
+                  v-if="
+                    !isEditing &&
+                    ['Total Operasional', 'Total Ekspedisi'].includes(
+                      props.row.name,
+                    )
+                  "
+                  flat
+                  dense
+                  no-caps
+                  icon="edit"
+                  color="primary"
+                  class="tw-px-3 tw-rounded-xl tw-ml-2"
+                  @click="isEditing = true"
+                />
+              </q-td>
+              <q-td key="total" :props="props">
+                <template
+                  v-if="
+                    ['Total Operasional', 'Total Ekspedisi'].includes(
+                      props.row.name,
+                    )
+                  "
+                >
+                  <template v-if="!isEditing">
+                    {{ formatWithThousandSeparator(Number(props.row.total)) }}
+                  </template>
+                  <q-input
+                    v-else
+                    v-model="totalUpdated.operationalCost"
+                    outlined
+                    label="Biaya Operasional"
+                    lazy-rules
+                    :rules="[
+                      (val: string) =>
+                        parseInt(val) >= 0 ||
+                        'Biaya operasional tidak boleh negatif!',
+                    ]"
+                    class="text-body-medium tw-mt-5"
+                    :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+                    mask="###,###,###,###,###,###,###,###"
+                    reverse-fill-mask
+                  />
+                </template>
+                <template v-else>
+                  {{ formatWithThousandSeparator(Number(props.row.total)) }}
+                </template>
+              </q-td>
+            </q-tr>
+          </template>
+          <template #no-data>
+            <div class="full-width row flex-center q-gutter-sm q-pa-xl">
+              <span class="text-h6"> Tidak ada data </span>
+              <q-icon size="2em" name="sentiment_dissatisfied" />
+            </div>
+          </template>
+        </q-table>
       </div>
     </div>
 
@@ -329,4 +349,20 @@ onMounted(async () => {
     />
   </q-page>
 </template>
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.insight-table {
+  :deep(.q-table td) {
+    font-size: 18px;
+    @media (max-width: 600px) {
+      font-size: 16px;
+    }
+  }
+  :deep(.q-tr) {
+    th:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+    }
+  }
+}
+</style>

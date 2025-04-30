@@ -143,7 +143,9 @@ watch(
         const customEnd = DateTime.fromFormat(
           customDates[1].trim(),
           "dd LLL, yyyy",
-        ).toISO();
+        )
+          .endOf("day")
+          .toISO({ suppressMilliseconds: true });
 
         req = {
           ...req,
