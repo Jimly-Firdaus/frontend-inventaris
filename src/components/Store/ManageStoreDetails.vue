@@ -118,42 +118,49 @@ watch(
   { deep: true },
 );
 
-watch([() => filter.value.customerName, () => page.value.salesPage, selectedTimeframe], async () => {
-  let req: GetAllInvoicesQuery = {
-    store_id: store.auth.user?.store_id ?? props.storeId ?? "",
-    page: page.value.salesPage,
-    limit: 10,
-    order_by: "created_at",
-    asc: false,
-    customer: filter.value.customerName,
-  };
-  if (selectedTimeframe.value) {
-    const customDates = selectedTimeframe.value.split(" - ");
-    if (customDates[0] && customDates[1]) {
-      const customStart = DateTime.fromFormat(
-        customDates[0].trim(),
-        "dd LLL, yyyy",
-      ).toISO();
-      const customEnd = DateTime.fromFormat(
-        customDates[1].trim(),
-        "dd LLL, yyyy",
-      ).toISO();
+watch(
+  [
+    () => filter.value.customerName,
+    () => page.value.salesPage,
+    selectedTimeframe,
+  ],
+  async () => {
+    let req: GetAllInvoicesQuery = {
+      store_id: store.auth.user?.store_id ?? props.storeId ?? "",
+      page: page.value.salesPage,
+      limit: 10,
+      order_by: "created_at",
+      asc: false,
+      customer: filter.value.customerName,
+    };
+    if (selectedTimeframe.value) {
+      const customDates = selectedTimeframe.value.split(" - ");
+      if (customDates[0] && customDates[1]) {
+        const customStart = DateTime.fromFormat(
+          customDates[0].trim(),
+          "dd LLL, yyyy",
+        ).toISO();
+        const customEnd = DateTime.fromFormat(
+          customDates[1].trim(),
+          "dd LLL, yyyy",
+        ).toISO();
 
-      req = {
-        ...req,
-        created_at_gte: customStart!,
-        created_at_lte: customEnd!,
-      };
+        req = {
+          ...req,
+          created_at_gte: customStart!,
+          created_at_lte: customEnd!,
+        };
+      }
     }
-  }
-  await store.stores.getAllInvoices(req);
-});
+    await store.stores.getAllInvoices(req);
+  },
+);
 
 watch(currentTab, async () => {
   if (currentTab.value == "products") {
     await refreshData();
   }
-})
+});
 
 onMounted(async () => {
   $q.loading.show({
@@ -355,6 +362,7 @@ onMounted(async () => {
       />
     </template>
     <AddInvoiceModal
+      v-if="showAddInvoiceModal"
       v-model="showAddInvoiceModal"
       :store-id="store.auth.user?.store_id ?? props.storeId ?? ''"
       :customer-name="filter.customerName"
