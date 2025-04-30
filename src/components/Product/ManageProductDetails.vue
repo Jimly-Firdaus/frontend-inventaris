@@ -45,17 +45,27 @@ const onSaveProductChanges = async () => {
     const req = {
       name: productPrice.value.name,
       buy_price:
-        Number(productPrice.value.buyPrice) === 0
+        Number(productPrice.value.buyPrice.toString().replaceAll(",", "")) === 0
           ? undefined
-          : Number(productPrice.value.buyPrice),
+          : Number(productPrice.value.buyPrice.toString().replaceAll(",", "")),
       wholesale_sell_price:
-        Number(productPrice.value.wholesaleSellPrice) === 0
+        Number(
+          productPrice.value.wholesaleSellPrice.toString().replaceAll(",", ""),
+        ) === 0
           ? undefined
-          : Number(productPrice.value.wholesaleSellPrice),
+          : Number(
+              productPrice.value.wholesaleSellPrice
+                .toString()
+                .replaceAll(",", ""),
+            ),
       retail_sell_price:
-        Number(productPrice.value.retailSellPrice) === 0
+        Number(
+          productPrice.value.retailSellPrice.toString().replaceAll(",", ""),
+        ) === 0
           ? undefined
-          : Number(productPrice.value.retailSellPrice),
+          : Number(
+              productPrice.value.retailSellPrice.toString().replaceAll(",", ""),
+            ),
     } as UpdateProductRequest;
 
     await store.products.updateProduct(props.productId, req);
@@ -184,7 +194,8 @@ onMounted(async () => {
             v-model="productPrice.buyPrice"
             class="tw-ml-2 text-body-medium"
             :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-            type="number"
+            mask="###,###,###,###,###,###,###,###"
+            reverse-fill-mask
           />
         </div>
       </q-card-section>
@@ -200,7 +211,8 @@ onMounted(async () => {
             v-model="productPrice.wholesaleSellPrice"
             class="tw-ml-2 text-body-medium"
             :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-            type="number"
+            mask="###,###,###,###,###,###,###,###"
+            reverse-fill-mask
           />
         </div>
       </q-card-section>
@@ -216,7 +228,8 @@ onMounted(async () => {
             v-model="productPrice.retailSellPrice"
             class="tw-ml-2 text-body-medium"
             :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-            type="number"
+            mask="###,###,###,###,###,###,###,###"
+            reverse-fill-mask
           />
         </div>
       </q-card-section>

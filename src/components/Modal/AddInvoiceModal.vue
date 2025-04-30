@@ -103,10 +103,20 @@ const onAddNewInvoice = async () => {
         product_id: selectedProduct.value.value,
         price_type: selectedPriceType.value.value as PRODUCT_PRICE_TYPE,
         quantity: Number(invoiceItemFields.value.quantity),
-        amount_paid_tiktok: Number(invoiceItemFields.value.amount_paid_tiktok),
-        amount_paid_shopee: Number(invoiceItemFields.value.amount_paid_shopee),
+        amount_paid_tiktok: Number(
+          invoiceItemFields.value.amount_paid_tiktok
+            .toString()
+            .replaceAll(",", ""),
+        ),
+        amount_paid_shopee: Number(
+          invoiceItemFields.value.amount_paid_shopee
+            .toString()
+            .replaceAll(",", ""),
+        ),
         amount_paid_transfer: Number(
-          invoiceItemFields.value.amount_paid_transfer,
+          invoiceItemFields.value.amount_paid_transfer
+            .toString()
+            .replaceAll(",", ""),
         ),
       });
 
@@ -247,7 +257,8 @@ const onAddNewInvoice = async () => {
           ]"
           class="text-body-medium"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-          type="number"
+          mask="###,###,###,###,###,###,###,###"
+          reverse-fill-mask
         />
         <q-input
           v-model="invoiceItemFields.amount_paid_shopee"
@@ -261,7 +272,8 @@ const onAddNewInvoice = async () => {
           ]"
           class="text-body-medium"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-          type="number"
+          mask="###,###,###,###,###,###,###,###"
+          reverse-fill-mask
         />
         <q-input
           v-model="invoiceItemFields.amount_paid_transfer"
@@ -275,7 +287,8 @@ const onAddNewInvoice = async () => {
           ]"
           class="text-body-medium"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-          type="number"
+          mask="###,###,###,###,###,###,###,###"
+          reverse-fill-mask
         />
       </q-card-section>
       <q-card-section class="row justify-center tw-gap-x-4">

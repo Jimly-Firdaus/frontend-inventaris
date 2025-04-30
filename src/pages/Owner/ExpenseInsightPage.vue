@@ -75,8 +75,12 @@ const onSaveChanges = async () => {
 
   const req: CreateExpenseInsightReq = {
     period: selectedPeriodTimestamp.value,
-    expedition: totalUpdated.value.expeditionCost,
-    operational: totalUpdated.value.operationalCost,
+    expedition: Number(
+      totalUpdated.value.expeditionCost.toString().replaceAll(",", ""),
+    ),
+    operational: Number(
+      totalUpdated.value.operationalCost.toString().replaceAll(",", ""),
+    ),
   };
 
   try {
@@ -248,7 +252,8 @@ onMounted(async () => {
             ]"
             class="text-body-medium tw-mt-5"
             :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-            type="number"
+            mask="###,###,###,###,###,###,###,###"
+            reverse-fill-mask
           />
           <q-btn
             v-if="!isEditing"
@@ -281,7 +286,8 @@ onMounted(async () => {
             ]"
             class="text-body-medium tw-mt-5"
             :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-            type="number"
+            mask="###,###,###,###,###,###,###,###"
+            reverse-fill-mask
           />
           <q-btn
             v-if="!isEditing"

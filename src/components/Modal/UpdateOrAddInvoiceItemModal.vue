@@ -59,12 +59,21 @@ const allowUpdate = computed(
   () =>
     (props.invoiceItem &&
       (invoiceItemFields.value.quantity != props.invoiceItem.quantity ||
-        invoiceItemFields.value.amount_paid_tiktok !=
-          props.invoiceItem.amount_paid_tiktok ||
-        invoiceItemFields.value.amount_paid_shopee !=
-          props.invoiceItem.amount_paid_shopee ||
-        invoiceItemFields.value.amount_paid_transfer !=
-          props.invoiceItem.amount_paid_transfer)) ||
+        Number(
+          invoiceItemFields.value.amount_paid_tiktok
+            .toString()
+            .replaceAll(",", ""),
+        ) != props.invoiceItem.amount_paid_tiktok ||
+        Number(
+          invoiceItemFields.value.amount_paid_shopee
+            .toString()
+            .replaceAll(",", ""),
+        ) != props.invoiceItem.amount_paid_shopee ||
+        Number(
+          invoiceItemFields.value.amount_paid_transfer
+            .toString()
+            .replaceAll(",", ""),
+        ) != props.invoiceItem.amount_paid_transfer)) ||
     (!props.isUpdate && selectedProduct.value && selectedPriceType.value),
 );
 
@@ -103,10 +112,10 @@ const onAddNewInvoiceItem = async () => {
         product_id: selectedProduct.value.value,
         price_type: selectedPriceType.value.value as PRODUCT_PRICE_TYPE,
         quantity: Number(invoiceItemFields.value.quantity),
-        amount_paid_tiktok: Number(invoiceItemFields.value.amount_paid_tiktok),
-        amount_paid_shopee: Number(invoiceItemFields.value.amount_paid_shopee),
+        amount_paid_tiktok: Number(invoiceItemFields.value.amount_paid_tiktok.toString().replaceAll(",", "")),
+        amount_paid_shopee: Number(invoiceItemFields.value.amount_paid_shopee.toString().replaceAll(",", "")),
         amount_paid_transfer: Number(
-          invoiceItemFields.value.amount_paid_transfer,
+          invoiceItemFields.value.amount_paid_transfer.toString().replaceAll(",", ""),
         ),
       });
 
@@ -143,10 +152,10 @@ const onUpdateInvoiceItem = async () => {
       const updatedInvoiceItem = props.invoiceItem;
       Object.assign(updatedInvoiceItem, {
         quantity: Number(invoiceItemFields.value.quantity),
-        amount_paid_tiktok: Number(invoiceItemFields.value.amount_paid_tiktok),
-        amount_paid_shopee: Number(invoiceItemFields.value.amount_paid_shopee),
+        amount_paid_tiktok: Number(invoiceItemFields.value.amount_paid_tiktok.toString().replaceAll(",", "")),
+        amount_paid_shopee: Number(invoiceItemFields.value.amount_paid_shopee.toString().replaceAll(",", "")),
         amount_paid_transfer: Number(
-          invoiceItemFields.value.amount_paid_transfer,
+          invoiceItemFields.value.amount_paid_transfer.toString().replaceAll(",", ""),
         ),
       });
       await store.stores.updateInvoiceItem(
@@ -259,7 +268,8 @@ onMounted(() => {
           ]"
           class="text-body-medium"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-          type="number"
+          mask="###,###,###,###,###,###,###,###"
+          reverse-fill-mask
         />
         <q-input
           v-model="invoiceItemFields.amount_paid_shopee"
@@ -273,7 +283,8 @@ onMounted(() => {
           ]"
           class="text-body-medium"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-          type="number"
+          mask="###,###,###,###,###,###,###,###"
+          reverse-fill-mask
         />
         <q-input
           v-model="invoiceItemFields.amount_paid_transfer"
@@ -287,7 +298,8 @@ onMounted(() => {
           ]"
           class="text-body-medium"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-          type="number"
+          mask="###,###,###,###,###,###,###,###"
+          reverse-fill-mask
         />
       </q-card-section>
       <q-card-section class="row justify-center tw-gap-x-4">
