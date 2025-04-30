@@ -357,6 +357,8 @@ onMounted(async () => {
     <AddInvoiceModal
       v-model="showAddInvoiceModal"
       :store-id="store.auth.user?.store_id ?? props.storeId ?? ''"
+      :customer-name="filter.customerName"
+      :timeframe="selectedTimeframe"
     />
     <ConfirmationModal
       copy-text="Apakah Anda yakin ingin menghapus toko ini?"
