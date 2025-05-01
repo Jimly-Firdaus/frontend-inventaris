@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { useStore } from "src/stores";
-import type {
-  GetOutboundInsightQuery,
-  OutboundInsightDataItem,
-} from "src/stores/store/types";
+import type { GetSalesInsightQuery } from "src/stores/product/types";
 import { DateTime } from "luxon";
 import BaseCalendar from "src/components/BaseComponents/BaseCalendar.vue";
 import type { QTableProps } from "quasar";
@@ -30,11 +27,11 @@ const availableStores = computed(() => [
   })),
 ]);
 
-const salesInsight = computed(() => store.products.inboundsInsight);
+const salesInsight = computed(() => store.products.salesInsight);
 
-const totalSales = ref(100000);
-const totalPaid = ref(95000);
-const totalRemaining = ref(5000);
+const totalSales = computed(() => store.products.salesInsightAmount.total);
+const totalPaid = computed(() => store.products.salesInsightAmount.paid);
+const totalRemaining = computed(() => totalSales.value - totalPaid.value);
 
 const page = ref(1);
 
@@ -74,20 +71,31 @@ const nameFilter = ref("");
 const isLoading = ref(false);
 
 watch(
-  [selectedTimeframe],
-  async () => {
+  [selectedTimeframe, page, nameFilter, selectedStore],
+  async ([newTimeframe, , , newStore], [oldTimeframe, , , oldStore]) => {
+    const timeframeChanged = newTimeframe !== oldTimeframe;
+    const storeChanged = newStore?.value !== oldStore?.value;
+    if (timeframeChanged || storeChanged) {
+      page.value = 1;
+      nameFilter.value = "";
+    }
+
     $q.loading.show({
       message: "Loading...",
     });
     isLoading.value = true;
-    // let req: GetOutboundInsightQuery = {
-    //   store_id: props.storeId,
-    //   period:
-    //     (selectedInterval.value?.value as INSIGHT_INTERVAL) ??
-    //     INSIGHT_INTERVAL.ONE_DAY,
-    //   from: "",
-    //   to: "",
-    // };
+    const storeId = props.storeId
+      ? props.storeId
+      : selectedStore.value?.value === ""
+        ? undefined
+        : selectedStore.value?.value;
+
+    let req: GetSalesInsightQuery = {
+      store_id: storeId,
+      page: page.value,
+      limit: 10,
+      product_name: nameFilter.value,
+    };
     if (selectedTimeframe.value) {
       const customDates = selectedTimeframe.value.split(" - ");
       if (customDates[0] && customDates[1]) {
@@ -102,45 +110,46 @@ watch(
           .endOf("day")
           .toISO({ suppressMilliseconds: true });
 
-        // req = {
-        //   ...req,
-        //   from: customStart!,
-        //   to: customEnd!,
-        // };
+        req = {
+          ...req,
+          created_at_gte: customStart!,
+          created_at_lte: customEnd!,
+        };
       }
-      // await store.stores.getInsight(req);
+      await store.products.getSalesInsight(req);
     }
-    // selectedDate.value = dateOptions.value?.[dateOptions.value.length - 1];
     isLoading.value = false;
     $q.loading.hide();
   },
   { deep: true },
 );
 
-watch(page, () => {
-  console.log("Updated page");
-});
-
 onMounted(async () => {
   $q.loading.show({
     message: "Loading...",
   });
   const now = DateTime.now().endOf("day").toISO({ suppressMilliseconds: true });
-  const sevenDaysAgo = DateTime.now()
-    .minus({ days: 7 })
+  const startOfMonth = DateTime.now()
+    .startOf("month")
     .startOf("day")
     .toISO({ suppressMilliseconds: true });
   await store.stores.getAllStores();
   selectedStore.value = availableStores.value[0];
 
-  // const req: GetOutboundInsightQuery = {
-  //   store_id: props.storeId,
-  //   period: INSIGHT_INTERVAL.ONE_DAY,
-  //   from: sevenDaysAgo,
-  //   to: now,
-  // };
-  // await store.stores.getInsight(req);
-  // items.value = insights.value?.data[0]?.items ?? [];
+  const storeId = props.storeId
+    ? props.storeId
+    : selectedStore.value?.value === ""
+      ? undefined
+      : selectedStore.value?.value;
+
+  const req: GetSalesInsightQuery = {
+    store_id: storeId,
+    created_at_gte: startOfMonth,
+    created_at_lte: now,
+    page: page.value,
+    limit: 10,
+  };
+  await store.products.getSalesInsight(req);
   $q.loading.hide();
 });
 </script>
@@ -154,6 +163,7 @@ onMounted(async () => {
         <BaseCalendar
           v-model:selected-timeframe="selectedTimeframe"
           use-default
+          monthly-default
         />
 
         <template v-if="store.auth.userRole == USER_ROLE.OWNER">
@@ -231,8 +241,8 @@ onMounted(async () => {
 
     <StoreProductsTable
       :products="salesInsight"
-      :total-pages="store.products.inboundsInsightMeta?.total_page ?? 0"
-      :total-data="store.products.inboundsInsightMeta?.total_item ?? 0"
+      :total-pages="store.products.salesInsightMeta?.total_page ?? 0"
+      :total-data="store.products.salesInsightMeta?.total_item ?? 0"
       :rows-per-page="10"
       v-model="page"
       insight-view

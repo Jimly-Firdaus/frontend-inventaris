@@ -18,6 +18,9 @@ import type {
   GetInboundsInsightQuery,
   GetInboundsInsightResponse,
   InboundsInsight,
+  GetSalesInsightQuery,
+  GetSalesInsightResponse,
+  ProductSalesInsight,
 } from "./types";
 import type { AxiosResponse } from "axios";
 import type { PaginationMeta } from "../store/types";
@@ -41,6 +44,13 @@ export const useProductsStore = defineStore("products", () => {
   const inboundsInsight = ref<InboundsInsight[]>([]);
   const inboundsInsightMeta = ref<PaginationMeta>();
   const inboundsInsightTotalCapital = ref(0);
+
+  const salesInsight = ref<ProductSalesInsight[]>([]);
+  const salesInsightMeta = ref<PaginationMeta>();
+  const salesInsightAmount = ref<{ total: number; paid: number }>({
+    total: 0,
+    paid: 0,
+  });
 
   const getAllProducts = async (payload?: GetAllProductsQuery) => {
     const res: AxiosResponse<{ data: GetAllProductsResponse }> = await api.get(
@@ -187,6 +197,22 @@ export const useProductsStore = defineStore("products", () => {
     inboundsInsightTotalCapital.value = Number(res.data.data.total ?? 0);
   };
 
+  const getSalesInsight = async (payload: GetSalesInsightQuery) => {
+    const res: AxiosResponse<{ data: GetSalesInsightResponse }> = await api.get(
+      "/invoices/insight",
+      {
+        params: payload,
+      },
+    );
+
+    salesInsight.value = res.data.data.items ?? [];
+    salesInsightMeta.value = res.data.data.meta;
+    Object.assign(salesInsightAmount.value, {
+      total: res.data.data.total,
+      paid: res.data.data.paid,
+    });
+  };
+
   return {
     products,
     productsMeta,
@@ -197,6 +223,9 @@ export const useProductsStore = defineStore("products", () => {
     inboundsInsight,
     inboundsInsightMeta,
     inboundsInsightTotalCapital,
+    salesInsight,
+    salesInsightMeta,
+    salesInsightAmount,
 
     getAllProducts,
     createNewProduct,
@@ -216,5 +245,6 @@ export const useProductsStore = defineStore("products", () => {
     createExpenseInsight,
     getExpenseInsight,
     getInboundsInsight,
+    getSalesInsight,
   };
 });
