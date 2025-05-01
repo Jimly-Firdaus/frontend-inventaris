@@ -1,11 +1,17 @@
 <script setup lang="ts">
-import type { GetAllProductsResponseData, InboundsInsight } from "src/stores/product/types";
+import type {
+  GetAllProductsResponseData,
+  InboundsInsight,
+  ProductSalesInsight,
+} from "src/stores/product/types";
 import type { QTableProps } from "quasar";
 import { formatWithThousandSeparator } from "src/util/number";
 
 const props = defineProps({
   products: {
-    type: Array as PropType<GetAllProductsResponseData[] | InboundsInsight[]>,
+    type: Array as PropType<
+      GetAllProductsResponseData[] | InboundsInsight[] | ProductSalesInsight[]
+    >,
     required: true,
   },
   totalPages: {
@@ -21,6 +27,7 @@ const props = defineProps({
   isEditable: Boolean,
   nameFilter: String,
   insightView: Boolean,
+  salesInsightView: Boolean,
 });
 
 const page = defineModel<number>({ required: true });
@@ -88,26 +95,46 @@ const columns = computed(() => [
           {{ props.row.product_name ?? props.row.name ?? props.row.product }}
         </q-td>
         <template v-if="!insightView">
-          <q-td key="retail_quantity" :props="props">
-            {{ props.row.retail_quantity ?? "0" }}
-          </q-td>
-          <q-td key="wholesale_quantity" :props="props">
-            {{ props.row.wholesale_quantity ?? "0" }}
-          </q-td>
+          <template v-if="salesInsightView">
+            <q-td key="retail_quantity" :props="props">
+              {{ props.row.retail_quantity ?? "0" }}
+            </q-td>
+            <q-td key="wholesale_quantity" :props="props">
+              {{ props.row.wholesale_quantity ?? "0" }}
+            </q-td>
+          </template>
+          <template v-else>
+            <q-td key="retail_quantity" :props="props">
+              {{ props.row.retail_quantity ?? "0" }}
+            </q-td>
+            <q-td key="wholesale_quantity" :props="props">
+              {{ props.row.wholesale_quantity ?? "0" }}
+            </q-td>
+          </template>
         </template>
         <template v-else>
           <q-td key="quantity" :props="props">
             {{ props.row.quantity ?? "0" }}
           </q-td>
           <q-td key="buy_price" :props="props">
-            {{ formatWithThousandSeparator(props.row.product_buy_price) ?? "0" }}
+            {{
+              formatWithThousandSeparator(props.row.product_buy_price) ?? "0"
+            }}
           </q-td>
         </template>
       </q-tr>
     </template>
     <template #no-data>
       <div class="full-width row flex-center q-gutter-sm q-pa-xl">
-        <span class="text-h6"> {{ insightView ? "Tidak ada pemasukan barang." : "Tidak ada produk di toko ini." }} </span>
+        <span class="text-h6">
+          {{
+            insightView
+              ? salesInsightView
+                ? "Tidak ada penjualan barang"
+                : "Tidak ada pemasukan barang."
+              : "Tidak ada produk di toko ini."
+          }}
+        </span>
         <q-icon size="2em" name="sentiment_dissatisfied" />
       </div>
     </template>

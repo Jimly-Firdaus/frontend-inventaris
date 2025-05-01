@@ -87,10 +87,9 @@ export interface Invoice {
   store_id: string;
   customer: string;
   items?: InvoiceItem[];
-  // created_by: string;
   created_at: string;
-  // updated_by: string;
-  // updated_at: string;
+  total: number;
+  paid: number;
 }
 
 export interface InvoiceItem {

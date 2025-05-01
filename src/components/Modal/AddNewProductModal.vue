@@ -22,6 +22,12 @@ const onAddNewProduct = async () => {
   try {
     if (newProduct.value) {
       newProduct.value.stock = Number(newProduct.value.stock);
+      newProduct.value.wholesale_sell_price = Number(
+        newProduct.value.wholesale_sell_price?.toString().replaceAll(",", ""),
+      );
+      newProduct.value.retail_sell_price = Number(
+        newProduct.value.retail_sell_price?.toString().replaceAll(",", ""),
+      );
       await store.products.createNewProduct(newProduct.value);
       await store.products.getAllProducts();
       modelValue.value = false;
@@ -83,13 +89,15 @@ const onAddNewProduct = async () => {
           v-model="newProduct.wholesale_sell_price"
           outlined
           label="Harga Grosir"
-          type="number"
+          mask="###,###,###,###,###,###,###,###"
+          reverse-fill-mask
         />
         <q-input
           v-model="newProduct.retail_sell_price"
           outlined
           label="Harga Eceran"
-          type="number"
+          mask="###,###,###,###,###,###,###,###"
+          reverse-fill-mask
         />
       </q-card-section>
       <q-card-section class="row justify-center tw-gap-x-4">

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useStore } from "src/stores";
-// import { QTableProps } from "quasar";
 import InboundTable from "src/components/Table/InboundTable.vue";
 import OutboundTable from "src/components/Table/OutboundTable.vue";
 import { USER_ROLE } from "src/constants/user";

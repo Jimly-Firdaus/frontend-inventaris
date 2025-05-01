@@ -1,7 +1,7 @@
 export enum USER_ROLE {
   OWNER = "owner",
   WAREHOUSE_MANAGER = "warehouse",
-  STORE_MANAGER = "store"
+  STORE_MANAGER = "store",
 }
 
 export const TABS_AVAILABLE_BY_USER_ROLE = {
@@ -28,8 +28,8 @@ export const TABS_AVAILABLE_BY_USER_ROLE = {
     },
     {
       id: 5,
-      tabLabel: "Insight Modal",
-      routeName: "ExpenseInsightPage",
+      tabLabel: "Insight",
+      routeName: "InsightPage",
     },
   ],
   [USER_ROLE.WAREHOUSE_MANAGER]: [
@@ -60,5 +60,5 @@ export const TABS_AVAILABLE_BY_USER_ROLE = {
       tabLabel: "Transaksi",
       routeName: "ManageStoresPage",
     },
-  ]
-}
+  ],
+};

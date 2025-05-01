@@ -3,15 +3,22 @@ import { useQuasar } from "quasar";
 import { useStore } from "src/stores";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
 import { AxiosError } from "axios";
-import type { CreateInvoiceItemReq, CreateInvoiceReq } from "src/stores/store/types";
+import type {
+  CreateInvoiceItemReq,
+  CreateInvoiceReq,
+} from "src/stores/store/types";
 import type { GetAllProductsQuery } from "src/stores/product/types";
 import {
   PRODUCT_PRICE_TYPE,
   PRODUCT_PRICE_TYPE_LABEL,
 } from "src/constants/price";
+import type { GetAllInvoicesQuery } from "src/stores/store/types";
+import { DateTime } from "luxon";
 
 const props = defineProps({
   storeId: String,
+  customerName: String,
+  timeframe: String,
 });
 
 const $q = useQuasar();
@@ -39,7 +46,7 @@ const newInvoice = ref<CreateInvoiceReq>({
   store_id: "",
   customer: "",
   items: [],
-})
+});
 
 const newInvoiceItem = ref<CreateInvoiceItemReq>({
   product_id: "",
@@ -61,7 +68,9 @@ const invoiceItemFields = ref({
 
 const allowAddNewInvoice = computed(
   () =>
-    (newInvoice.value.customer.trim().length && selectedProduct.value && selectedPriceType.value)
+    newInvoice.value.customer.trim().length &&
+    selectedProduct.value &&
+    selectedPriceType.value,
 );
 
 const filterProductName = (
@@ -89,27 +98,62 @@ const filterProductName = (
 
 const onAddNewInvoice = async () => {
   try {
-    if (
-      selectedProduct.value &&
-      selectedPriceType.value
-    ) {
+    if (selectedProduct.value && selectedPriceType.value) {
       Object.assign(newInvoiceItem.value, {
         product_id: selectedProduct.value.value,
         price_type: selectedPriceType.value.value as PRODUCT_PRICE_TYPE,
         quantity: Number(invoiceItemFields.value.quantity),
-        amount_paid_tiktok: Number(invoiceItemFields.value.amount_paid_tiktok),
-        amount_paid_shopee: Number(invoiceItemFields.value.amount_paid_shopee),
+        amount_paid_tiktok: Number(
+          invoiceItemFields.value.amount_paid_tiktok
+            .toString()
+            .replaceAll(",", ""),
+        ),
+        amount_paid_shopee: Number(
+          invoiceItemFields.value.amount_paid_shopee
+            .toString()
+            .replaceAll(",", ""),
+        ),
         amount_paid_transfer: Number(
-          invoiceItemFields.value.amount_paid_transfer,
+          invoiceItemFields.value.amount_paid_transfer
+            .toString()
+            .replaceAll(",", ""),
         ),
       });
 
       Object.assign(newInvoice.value, {
         store_id: props.storeId,
-        items: [newInvoiceItem.value]
-      })
+        items: [newInvoiceItem.value],
+      });
 
       await store.stores.addInvoice(newInvoice.value);
+      let invoiceReq: GetAllInvoicesQuery = {
+        page: 1,
+        limit: 10,
+        order_by: "created_at",
+        asc: false,
+        store_id: store.auth.user?.store_id ?? props.storeId ?? "",
+        customer: props.customerName ?? "",
+      };
+      if (props.timeframe) {
+        const customDates = props.timeframe.split(" - ");
+        if (customDates[0] && customDates[1]) {
+          const customStart = DateTime.fromFormat(
+            customDates[0].trim(),
+            "dd LLL, yyyy",
+          ).toISO();
+          const customEnd = DateTime.fromFormat(
+            customDates[1].trim(),
+            "dd LLL, yyyy",
+          ).toISO();
+
+          invoiceReq = {
+            ...invoiceReq,
+            created_at_gte: customStart!,
+            created_at_lte: customEnd!,
+          };
+        }
+      }
+      await store.stores.getAllInvoices(invoiceReq);
       modelValue.value = false;
 
       $q.notify({
@@ -153,38 +197,40 @@ const onAddNewInvoice = async () => {
           outlined
           label="Nama Pembeli"
           lazy-rules
-          :rules="[(val: string) => !!val || 'Nama pembeli tidak boleh kosong!']"
+          :rules="[
+            (val: string) => !!val || 'Nama pembeli tidak boleh kosong!',
+          ]"
           class="text-body-medium tw-mt-5"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
         />
         <q-select
-            filled
-            v-model="selectedProduct"
-            use-input
-            hide-selected
-            fill-input
-            input-debounce="500"
-            :options="options"
-            @filter="filterProductName"
-            label="Nama Barang"
-            style="padding-bottom: 24px"
-          >
-            <template v-slot:no-option>
-              <q-item>
-                <q-item-section class="text-grey">
-                  Tidak ada hasil
-                </q-item-section>
-              </q-item>
-            </template>
-          </q-select>
-          <q-select
-            filled
-            v-model="selectedPriceType"
-            :options="priceTypeOpts"
-            label="Tipe Harga Jual"
-            class="tw-w-[150px] text-body-small selector"
-            :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-          />
+          filled
+          v-model="selectedProduct"
+          use-input
+          hide-selected
+          fill-input
+          input-debounce="500"
+          :options="options"
+          @filter="filterProductName"
+          label="Nama Barang"
+          style="padding-bottom: 24px"
+        >
+          <template v-slot:no-option>
+            <q-item>
+              <q-item-section class="text-grey">
+                Tidak ada hasil
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
+        <q-select
+          filled
+          v-model="selectedPriceType"
+          :options="priceTypeOpts"
+          label="Tipe Harga Jual"
+          class="tw-w-[150px] text-body-small selector"
+          :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+        />
         <q-input
           v-model="invoiceItemFields.quantity"
           outlined
@@ -211,7 +257,8 @@ const onAddNewInvoice = async () => {
           ]"
           class="text-body-medium"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-          type="number"
+          mask="###,###,###,###,###,###,###,###"
+          reverse-fill-mask
         />
         <q-input
           v-model="invoiceItemFields.amount_paid_shopee"
@@ -225,7 +272,8 @@ const onAddNewInvoice = async () => {
           ]"
           class="text-body-medium"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-          type="number"
+          mask="###,###,###,###,###,###,###,###"
+          reverse-fill-mask
         />
         <q-input
           v-model="invoiceItemFields.amount_paid_transfer"
@@ -239,7 +287,8 @@ const onAddNewInvoice = async () => {
           ]"
           class="text-body-medium"
           :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-          type="number"
+          mask="###,###,###,###,###,###,###,###"
+          reverse-fill-mask
         />
       </q-card-section>
       <q-card-section class="row justify-center tw-gap-x-4">
