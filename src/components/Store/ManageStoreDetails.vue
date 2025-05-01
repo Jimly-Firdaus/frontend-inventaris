@@ -10,7 +10,7 @@ import StoreProductsTable from "src/components/Table/StoreProductsTable.vue";
 import type { GetAllProductsQuery } from "src/stores/product/types";
 import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
 import { useRouter } from "vue-router";
-import StoreInsight from "src/components/Store/StoreInsight.vue";
+import SalesInsight from "src/components/Store/SalesInsight.vue";
 import { AxiosError } from "axios";
 import BaseCalendar from "src/components/BaseComponents/BaseCalendar.vue";
 import { DateTime } from "luxon";
@@ -218,53 +218,54 @@ onMounted(async () => {
         />
       </div>
       <q-separator size="1px" class="tw-mb-10 tw-mt-2" color="primary" />
-
-      <q-tabs
-        v-if="store.auth.userRole == USER_ROLE.OWNER"
-        v-model="currentTab"
-        align="left"
-        class="tw-my-4"
-      >
-        <q-tab no-caps class="tab-content" name="user" label="User" />
-        <q-tab no-caps class="tab-content" name="sales" label="Penjualan" />
-        <q-tab no-caps class="tab-content" name="products" label="Barang" />
-        <!-- <q-tab no-caps class="tab-content" name="insight" label="Insight" /> -->
-      </q-tabs>
-
-      <q-card
-        v-if="currentTab == 'user'"
-        flat
-        bordered
-        class="tw-border-2 card-container"
-      >
-        <div class="tw-flex tw-items-center tw-p-4">
-          <span
-            class="text-grey-10 tw-font-bold text-body-large"
-            :class="$q.screen.lt.sm ? 'text-mobile' : ''"
-            >Informasi User Toko</span
-          >
-          <q-space />
-          <q-btn
-            no-caps
-            :label="$q.screen.lt.sm ? '' : 'Tambah User'"
-            icon="add"
-            @click="showAddNewStoreManagerModal = true"
-            :size="$q.screen.lt.sm ? 'md' : 'lg'"
-            class="tw-rounded-3xl"
-            color="primary"
-          />
-        </div>
-        <q-input
-          v-model="filter.username"
-          outlined
-          label="Cari Username"
-          class="tw-mt-4 text-body-medium tw-px-2"
-          :class="$q.screen.lt.sm ? 'text-mobile tw-mb-4' : 'tw-mb-12'"
-        />
-
-        <UserDataTable :user-data="filteredStoreManagers" />
-      </q-card>
     </template>
+
+    <q-tabs v-model="currentTab" align="left" class="tw-my-4">
+      <template v-if="store.auth.userRole == USER_ROLE.OWNER">
+        <q-tab no-caps class="tab-content" name="user" label="User" />
+      </template>
+      <q-tab no-caps class="tab-content" name="sales" label="Penjualan" />
+      <template v-if="store.auth.userRole == USER_ROLE.OWNER">
+        <q-tab no-caps class="tab-content" name="products" label="Barang" />
+      </template>
+      <template v-if="store.auth.userRole != USER_ROLE.OWNER">
+        <q-tab no-caps class="tab-content" name="insight" label="Insight" />
+      </template>
+    </q-tabs>
+
+    <q-card
+      v-if="currentTab == 'user' && store.auth.userRole == USER_ROLE.OWNER"
+      flat
+      bordered
+      class="tw-border-2 card-container tw-mt-8"
+    >
+      <div class="tw-flex tw-items-center tw-p-4">
+        <span
+          class="text-grey-10 tw-font-bold text-body-large"
+          :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+          >Informasi User Toko</span
+        >
+        <q-space />
+        <q-btn
+          no-caps
+          :label="$q.screen.lt.sm ? '' : 'Tambah User'"
+          icon="add"
+          @click="showAddNewStoreManagerModal = true"
+          :size="$q.screen.lt.sm ? 'md' : 'lg'"
+          class="tw-rounded-3xl"
+          color="primary"
+        />
+      </div>
+      <q-input
+        v-model="filter.username"
+        outlined
+        label="Cari Username"
+        class="tw-mt-4 text-body-medium tw-px-2"
+        :class="$q.screen.lt.sm ? 'text-mobile tw-mb-4' : 'tw-mb-12'"
+      />
+
+      <UserDataTable :user-data="filteredStoreManagers" />
+    </q-card>
 
     <q-card
       v-if="currentTab == 'sales'"
@@ -316,7 +317,7 @@ onMounted(async () => {
     </q-card>
 
     <q-card
-      v-if="currentTab == 'products'"
+      v-if="currentTab == 'products' && store.auth.userRole == USER_ROLE.OWNER"
       flat
       bordered
       class="tw-border-2 tw-mt-8 tw-pb-2 card-container"
@@ -349,9 +350,12 @@ onMounted(async () => {
       />
     </q-card>
 
-    <StoreInsight
-      v-if="currentTab == 'insight' && props.storeId"
-      :store-id="props.storeId"
+    <SalesInsight
+      v-if="
+        currentTab == 'insight' && (props.storeId || store.auth.user?.store_id)
+      "
+      :store-id="props.storeId ?? store.auth.user?.store_id ?? ''"
+      class="tw-mt-8"
     />
 
     <template v-if="props.storeId && props.storeName">

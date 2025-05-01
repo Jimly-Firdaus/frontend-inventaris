@@ -168,3 +168,10 @@ export interface GetInboundsInsightResponse {
   meta?: PaginationMeta;
   total: number;
 }
+
+export interface ProductSalesInsight {
+  product_id: string;
+  product: string;
+  product_buy_price: number;
+  quantity: number;
+}

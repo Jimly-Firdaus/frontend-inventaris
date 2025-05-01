@@ -11,7 +11,7 @@ const routes: RouteRecordRaw[] = [
         name: "ManageStoresPage",
         path: "/manage/stores",
         meta: {
-          role: [USER_ROLE.OWNER, USER_ROLE.STORE_MANAGER]
+          role: [USER_ROLE.OWNER, USER_ROLE.STORE_MANAGER],
         },
         component: () => import("pages/Owner/ManageStoresPage.vue"),
       },
@@ -19,7 +19,7 @@ const routes: RouteRecordRaw[] = [
         name: "TransactionsPage",
         path: "/transactions",
         meta: {
-          role: [USER_ROLE.OWNER]
+          role: [USER_ROLE.OWNER],
         },
         component: () => import("pages/Owner/TransactionsPage.vue"),
       },
@@ -27,17 +27,17 @@ const routes: RouteRecordRaw[] = [
         name: "ManageWarehouseAccountPage",
         path: "/manage/warehouse-account",
         meta: {
-          role: [USER_ROLE.OWNER]
+          role: [USER_ROLE.OWNER],
         },
         component: () => import("pages/Owner/ManageWarehouseAccountPage.vue"),
       },
       {
-        name: "ExpenseInsightPage",
+        name: "InsightPage",
         path: "/insight",
         meta: {
-          role: [USER_ROLE.OWNER]
+          role: [USER_ROLE.OWNER],
         },
-        component: () => import("pages/Owner/ExpenseInsightPage.vue"),
+        component: () => import("pages/Owner/InsightPage.vue"),
       },
 
       // warehouse manager route
@@ -45,7 +45,7 @@ const routes: RouteRecordRaw[] = [
         name: "ManageProductsPage",
         path: "/manage/products",
         meta: {
-          role: [USER_ROLE.OWNER, USER_ROLE.WAREHOUSE_MANAGER]
+          role: [USER_ROLE.OWNER, USER_ROLE.WAREHOUSE_MANAGER],
         },
         component: () => import("pages/ManageProductsPage.vue"),
       },
@@ -53,7 +53,7 @@ const routes: RouteRecordRaw[] = [
         name: "OutboundPage",
         path: "/outbounds",
         meta: {
-          role: [USER_ROLE.WAREHOUSE_MANAGER]
+          role: [USER_ROLE.WAREHOUSE_MANAGER],
         },
         component: () => import("pages/WarehouseManager/OutboundPage.vue"),
       },
