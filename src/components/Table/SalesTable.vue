@@ -58,6 +58,20 @@ const invoiceColumns: QTableProps["columns"] = [
           : -1,
   },
   {
+    name: "total",
+    align: "left",
+    label: "Total Harga",
+    field: "total",
+    sortable: true,
+  },
+  {
+    name: "total_remaining_payment_amount",
+    align: "left",
+    label: "Sisa Pembayaran",
+    field: "total_remaining_payment_amount",
+    sortable: true,
+  },
+  {
     name: "delete_invoice",
     align: "left",
     label: "",
@@ -84,6 +98,12 @@ const invoiceItemsColumns: QTableProps["columns"] = [
     align: "left",
     label: "Harga Jual",
     field: "price_type",
+  },
+  {
+    name: "total_price",
+    align: "left",
+    label: "Total Harga",
+    field: "total_price",
   },
   {
     name: "amount_paid_tiktok",
@@ -253,6 +273,7 @@ onMounted(async () => {
           onExpandInvoice(props.row.id);
           props.expand = !props.expand;
         "
+        :key="props.row.id"
       >
         <q-td auto-width>
           <q-btn
@@ -283,6 +304,16 @@ onMounted(async () => {
             )
           }}
         </q-td>
+        <q-td key="total" :props="props">
+          {{ formatWithThousandSeparator(props.row.total) }}
+        </q-td>
+        <q-td key="total_remaining_payment_amount" :props="props">
+          {{
+            formatWithThousandSeparator(
+              Number(props.row.total) - Number(props.row.paid),
+            )
+          }}
+        </q-td>
         <q-td key="delete_invoice" :props="props">
           <q-btn
             dense
@@ -300,7 +331,12 @@ onMounted(async () => {
           />
         </q-td>
       </q-tr>
-      <q-tr v-if="props.row.items" v-show="props.expand" class="bg-grey-4">
+      <q-tr
+        v-if="props.row.items"
+        v-show="props.expand"
+        class="bg-grey-4"
+        :key="`expanded-${props.row.id}`"
+      >
         <q-td colspan="100%">
           <div class="q-gutter-md tw-w-full">
             <q-table
@@ -314,7 +350,7 @@ onMounted(async () => {
               :loading="isLoadingInvoiceItemsTable"
             >
               <template v-slot:body="itemProps">
-                <q-tr :props="itemProps">
+                <q-tr :props="itemProps" :key="itemProps.row.id">
                   <q-td key="product_name" :props="itemProps">
                     {{ itemProps.row.product_name }}
                   </q-td>
@@ -326,6 +362,14 @@ onMounted(async () => {
                       PRODUCT_PRICE_TYPE_LABEL[
                         itemProps.row.price_type as PRODUCT_PRICE_TYPE
                       ]
+                    }}
+                  </q-td>
+                  <q-td key="total_price" :props="itemProps">
+                    {{
+                      formatWithThousandSeparator(
+                        Number(itemProps.row.quantity) *
+                          Number(itemProps.row.price),
+                      )
                     }}
                   </q-td>
                   <q-td key="amount_paid_tiktok" :props="itemProps">

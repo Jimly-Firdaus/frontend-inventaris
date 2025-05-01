@@ -88,6 +88,8 @@ export interface Invoice {
   customer: string;
   items?: InvoiceItem[];
   created_at: string;
+  total: number;
+  paid: number;
 }
 
 export interface InvoiceItem {
