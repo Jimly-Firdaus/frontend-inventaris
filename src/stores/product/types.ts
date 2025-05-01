@@ -169,9 +169,29 @@ export interface GetInboundsInsightResponse {
   total: number;
 }
 
+export interface GetSalesInsightQuery {
+  store_id?: string | undefined;
+  created_at_lte?: string | undefined;
+  created_at_gte?: string | undefined;
+  product_name?: string;
+  page?: number;
+  limit?: number;
+  order_by?: string;
+  asc?: boolean;
+}
+
+export interface GetSalesInsightResponse {
+  items: ProductSalesInsight[];
+  meta?: PaginationMeta;
+  total: number;
+  paid: number;
+}
+
 export interface ProductSalesInsight {
-  product_id: string;
-  product: string;
-  product_buy_price: number;
-  quantity: number;
+  product_name: string;
+  total_sold: number;
+  total_retail_sold: number;
+  total_wholesale_sold: number;
+  total_retail_revenue: number;
+  total_wholesale_revenue: number;
 }

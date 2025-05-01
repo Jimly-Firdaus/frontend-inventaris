@@ -66,7 +66,7 @@ const insightColumns: QTableProps["columns"] = [
   {
     name: "buy_price",
     align: "left",
-    label: "Modal",
+    label: props.salesInsightView ? "Total" : "Modal",
     field: "buy_price",
   },
 ];
@@ -95,30 +95,29 @@ const columns = computed(() => [
           {{ props.row.product_name ?? props.row.name ?? props.row.product }}
         </q-td>
         <template v-if="!insightView">
-          <template v-if="salesInsightView">
-            <q-td key="retail_quantity" :props="props">
-              {{ props.row.retail_quantity ?? "0" }}
-            </q-td>
-            <q-td key="wholesale_quantity" :props="props">
-              {{ props.row.wholesale_quantity ?? "0" }}
-            </q-td>
-          </template>
-          <template v-else>
-            <q-td key="retail_quantity" :props="props">
-              {{ props.row.retail_quantity ?? "0" }}
-            </q-td>
-            <q-td key="wholesale_quantity" :props="props">
-              {{ props.row.wholesale_quantity ?? "0" }}
-            </q-td>
-          </template>
+          <q-td key="retail_quantity" :props="props">
+            {{ props.row.retail_quantity ?? "0" }}
+          </q-td>
+          <q-td key="wholesale_quantity" :props="props">
+            {{ props.row.wholesale_quantity ?? "0" }}
+          </q-td>
         </template>
         <template v-else>
           <q-td key="quantity" :props="props">
-            {{ props.row.quantity ?? "0" }}
+            {{
+              salesInsightView
+                ? props.row.total_sold
+                : (props.row.quantity ?? "0")
+            }}
           </q-td>
           <q-td key="buy_price" :props="props">
             {{
-              formatWithThousandSeparator(props.row.product_buy_price) ?? "0"
+              formatWithThousandSeparator(
+                salesInsightView
+                  ? Number(props.row.total_retail_revenue) +
+                      Number(props.row.total_wholesale_revenue)
+                  : props.row.product_buy_price,
+              ) ?? "0"
             }}
           </q-td>
         </template>

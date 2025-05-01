@@ -4,10 +4,12 @@ import { DateTime } from "luxon";
 const props = defineProps<{
   selectedTimeframe: string;
   useDefault?: boolean;
+  monthlyDefault?: boolean;
 }>();
 
 const now = DateTime.now().toFormat("yyyy/MM/dd");
 const sevenDaysAgo = DateTime.now().minus({ days: 7 }).toFormat("yyyy/MM/dd");
+const startOfMonth = DateTime.now().startOf("month").toFormat("yyyy/MM/dd");
 
 const _selectedTimeframe = defineModel<string>("selectedTimeframe");
 const timeframe = ref<{ from: string; to: string } | null>(null);
@@ -36,7 +38,7 @@ watch(timeframe, (val) => {
 onMounted(() => {
   if (props.useDefault) {
     timeframe.value = {
-      from: sevenDaysAgo,
+      from: props.monthlyDefault ? startOfMonth : sevenDaysAgo,
       to: now,
     };
   }
