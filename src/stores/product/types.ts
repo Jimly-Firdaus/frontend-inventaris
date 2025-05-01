@@ -148,6 +148,7 @@ export interface GetExpenseInsightResponse {
 }
 
 export interface GetInboundsInsightQuery {
+  product_name?: string;
   period: string;
   page?: number;
   limit?: number;

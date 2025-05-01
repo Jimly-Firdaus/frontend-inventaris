@@ -77,7 +77,7 @@ const months = [
   { label: "Februari", value: 2 },
   { label: "Maret", value: 3 },
   { label: "April", value: 4 },
-  { label: "May", value: 5 },
+  { label: "Mei", value: 5 },
   { label: "Juni", value: 6 },
   { label: "Juli", value: 7 },
   { label: "Agustus", value: 8 },
@@ -102,6 +102,8 @@ const selectedPeriod = computed(
 const selectedPeriodTimestamp = computed(
   () => `${selectedPeriod.value}T00:00:00.000Z`,
 );
+
+const nameFilter = ref("");
 
 const onSaveChanges = async () => {
   $q.loading.show({
@@ -176,11 +178,12 @@ watch(
   { deep: true },
 );
 
-watch(page, async () => {
+watch([page, nameFilter], async () => {
   const req: GetInboundsInsightQuery = {
     period: selectedPeriod.value,
     page: page.value,
     limit: 10,
+    product_name: nameFilter.value,
   };
 
   await store.products.getInboundsInsight(req);
@@ -272,7 +275,9 @@ onMounted(async () => {
               :props="props"
               :class="[
                 props.row.name === 'Total Modal' ? 'tw-font-bold' : '',
-                props.rowIndex === insightRows.length - 1 ? 'bg-grey-10 text-white' : '',
+                props.rowIndex === insightRows.length - 1
+                  ? 'bg-grey-10 text-white'
+                  : '',
               ]"
             >
               <q-td key="column_name" :props="props">
@@ -345,6 +350,16 @@ onMounted(async () => {
     >
       Detail Data Barang Masuk
     </p>
+
+    <q-input
+      v-model="nameFilter"
+      outlined
+      label="Cari Barang"
+      class="tw-mt-4 text-body-medium"
+      :class="$q.screen.lt.sm ? 'text-mobile tw-mb-4' : 'tw-mb-12'"
+      debounce="500"
+    />
+    
     <StoreProductsTable
       :products="inboundsInsight"
       :total-pages="store.products.inboundsInsightMeta?.total_page ?? 0"
