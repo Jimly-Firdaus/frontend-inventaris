@@ -11,6 +11,18 @@ const outbounds = computed(() => store.products.outbounds ?? []);
 const showAddNewOutboundModal = ref(false);
 const page = ref(1);
 
+watch(page, async () => {
+  $q.loading.show({
+    message: "Loading...",
+  });
+  const req: GetAllOutboundsQuery = {
+    page: page.value,
+    limit: 10,
+  };
+  await store.products.getAllOutbounds(req);
+  $q.loading.hide();
+});
+
 onMounted(async () => {
   $q.loading.show({
     message: "Loading...",
