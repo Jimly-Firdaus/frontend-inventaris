@@ -57,8 +57,8 @@ const onDeleteUserAccount = (userId: string) => {
   showConfirmationModal.value = true;
 };
 
-const onConfirmDelete = () => {
-  store.auth.deleteUser(selectedUserAccountId.value);
+const onConfirmDelete = async () => {
+  await store.auth.deleteUser(selectedUserAccountId.value);
   selectedUserAccountId.value = "";
 
   $q.notify({

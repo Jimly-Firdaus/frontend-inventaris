@@ -83,7 +83,9 @@ export const useAuthStore = defineStore("auth", () => {
     storeManagersMeta.value[storeId] = res.data.data.meta;
   };
 
-  const deleteUser = (userId: string) => {
+  const deleteUser = async (userId: string) => {
+    await api.delete(`/users/${userId}`);
+
     users.value = users.value.filter((u) => u.id != userId);
   };
 
