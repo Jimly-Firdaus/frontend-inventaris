@@ -20,6 +20,7 @@
     "apexcharts": "^4.5.0",
     "axios": "^1.2.1",
     "inventory-app": "file:",
+    "lodash": "^4.17.21",
     "luxon": "^3.6.1",
     "pinia": "^3.0.1",
     "quasar": "^2.16.0",

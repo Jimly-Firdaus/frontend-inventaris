@@ -229,7 +229,10 @@ onMounted(async () => {
       :total-data="store.products.inboundsMeta?.total_item ?? 0"
       :rows-per-page="10"
       v-model="page"
-      :is-editable="store.auth.userRole == USER_ROLE.OWNER || store.auth.userRole == USER_ROLE.WAREHOUSE_MANAGER"
+      :is-editable="
+        store.auth.userRole == USER_ROLE.OWNER ||
+        store.auth.userRole == USER_ROLE.WAREHOUSE_MANAGER
+      "
     />
     <OutboundTable
       v-else

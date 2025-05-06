@@ -128,6 +128,12 @@ export const useProductsStore = defineStore("products", () => {
     });
   };
 
+  const deleteInbound = async (inboundId: string) => {
+    await api.delete(`/inbounds/${inboundId}`);
+
+    inbounds.value = inbounds.value.filter((i) => i.id != inboundId);
+  };
+
   const createProductOutbound = async (payload: CreateOutboundRequest) => {
     await api.post("/outbounds", payload);
   };
@@ -166,6 +172,12 @@ export const useProductsStore = defineStore("products", () => {
     await api.patch(`/outbounds/${outboundId}`, {
       quantity: quantity,
     });
+  };
+
+  const deleteOutbound = async (outboundId: string) => {
+    await api.delete(`/outbounds/${outboundId}`);
+
+    outbounds.value = outbounds.value.filter((o) => o.id != outboundId);
   };
 
   const createExpenseInsight = async (payload: CreateExpenseInsightReq) => {
@@ -235,11 +247,13 @@ export const useProductsStore = defineStore("products", () => {
     createProductInbound,
     getAllInbounds,
     updateInbound,
+    deleteInbound,
 
     createProductOutbound,
     getAllOutbounds,
     getAllOutboundsByStoreId,
     updateOutbound,
+    deleteOutbound,
 
     expenseInsight,
     createExpenseInsight,

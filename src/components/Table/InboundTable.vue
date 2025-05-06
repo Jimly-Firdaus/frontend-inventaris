@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import type { QTableProps } from "quasar";
+import { type QTableProps, useQuasar } from "quasar";
 import type { GetAllInboundsResponseData } from "src/stores/product/types";
 import { DateTime } from "luxon";
 import UpdateProductStockModal from "src/components/Modal/UpdateProductStockModal.vue";
+import ConfirmationModal from "src/components/Modal/ConfirmationModal.vue";
+import { useStore } from "src/stores";
+import { AxiosError } from "axios";
 
 const props = defineProps({
   inbounds: {
@@ -21,6 +24,9 @@ const props = defineProps({
   loading: Boolean,
   isEditable: Boolean,
 });
+
+const $q = useQuasar();
+const store = useStore();
 
 const page = defineModel<number>({ required: true });
 
@@ -74,15 +80,62 @@ const columns: QTableProps["columns"] = [
           ? 1
           : -1,
   },
+  {
+    name: "delete",
+    label: "",
+    field: "delete",
+    sortable: false,
+  },
 ];
 
 const showUpdateProductStockModal = ref(false);
 const selectedInboundId = ref("");
 const selectedInboundQuantity = ref(0);
+
+const showConfirmationModal = ref(false);
+
 const onUpdateInbound = (inboundId: string, quantity: number) => {
   selectedInboundId.value = inboundId;
   selectedInboundQuantity.value = quantity;
   showUpdateProductStockModal.value = true;
+};
+
+const onDeleteInbound = (inboundId: string) => {
+  selectedInboundId.value = inboundId;
+  showConfirmationModal.value = true;
+};
+
+const onConfirmDelete = async () => {
+  try {
+    await store.products.deleteInbound(selectedInboundId.value);
+    selectedInboundId.value = "";
+
+    $q.notify({
+      message: "Berhasil membatalkan pemasukan barang!",
+      color: "primary",
+      classes: "q-notify-font",
+    });
+  } catch (err: unknown) {
+    if (err instanceof AxiosError && err.response?.data?.message) {
+      $q.notify({
+        message: `Terjadi kesalahan saat membatalkan pemasukan barang: ${err.response.data.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    } else if (err instanceof Error) {
+      $q.notify({
+        message: `Terjadi kesalahan saat membatalkan pemasukan barang: ${err.message}`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    } else {
+      $q.notify({
+        message: `Terjadi kesalahan saat membatalkan pemasukan barang`,
+        color: "negative",
+        classes: "q-notify-font",
+      });
+    }
+  }
 };
 </script>
 <template>
@@ -132,6 +185,18 @@ const onUpdateInbound = (inboundId: string, quantity: number) => {
             )
           }}
         </q-td>
+        <q-td key="delete" :props="props">
+          <q-btn
+            dense
+            outline
+            unelevated
+            no-caps
+            icon="delete_forever"
+            :size="$q.screen.lt.sm ? 'sm' : 'md'"
+            @click="onDeleteInbound(props.row.id)"
+            :label="$q.screen.lt.sm ? '' : 'Hapus'"
+          />
+        </q-td>
       </q-tr>
     </template>
     <template #no-data>
@@ -175,6 +240,12 @@ const onUpdateInbound = (inboundId: string, quantity: number) => {
     :id="selectedInboundId"
     :current-quantity="selectedInboundQuantity"
     is-inbound
+  />
+  <ConfirmationModal
+    copy-text="Apakah Anda yakin ingin membatalkan pemasukan barang ini?"
+    v-model="showConfirmationModal"
+    is-warning
+    @continue="onConfirmDelete"
   />
 </template>
 <style scoped lang="scss">
