@@ -35,6 +35,8 @@ const productPrice = ref({
   buyPrice: "",
   wholesaleSellPrice: "",
   retailSellPrice: "",
+  flashSaleWholesaleSellPrice: "",
+  flashSaleRetailSellPrice: "",
 });
 
 const onSaveProductChanges = async () => {
@@ -65,6 +67,30 @@ const onSaveProductChanges = async () => {
           ? undefined
           : Number(
               productPrice.value.retailSellPrice.toString().replaceAll(",", ""),
+            ),
+      flash_sale_wholesale_sell_price:
+        Number(
+          productPrice.value.flashSaleWholesaleSellPrice
+            .toString()
+            .replaceAll(",", ""),
+        ) === 0
+          ? undefined
+          : Number(
+              productPrice.value.flashSaleWholesaleSellPrice
+                .toString()
+                .replaceAll(",", ""),
+            ),
+      flash_sale_retail_sell_price:
+        Number(
+          productPrice.value.flashSaleRetailSellPrice
+            .toString()
+            .replaceAll(",", ""),
+        ) === 0
+          ? undefined
+          : Number(
+              productPrice.value.flashSaleRetailSellPrice
+                .toString()
+                .replaceAll(",", ""),
             ),
     } as UpdateProductRequest;
 
@@ -142,6 +168,10 @@ onMounted(async () => {
     buyPrice: selectedProduct.value?.buy_price ?? "",
     wholesaleSellPrice: selectedProduct.value?.wholesale_sell_price ?? "",
     retailSellPrice: selectedProduct.value?.retail_sell_price ?? "",
+    flashSaleWholesaleSellPrice:
+      selectedProduct.value?.flash_sale_wholesale_sell_price ?? "",
+    flashSaleRetailSellPrice:
+      selectedProduct.value?.flash_sale_retail_sell_price ?? "",
   };
 });
 </script>
@@ -226,6 +256,40 @@ onMounted(async () => {
             dense
             outlined
             v-model="productPrice.retailSellPrice"
+            class="tw-ml-2 text-body-medium"
+            :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+            mask="###,###,###,###,###,###,###,###"
+            reverse-fill-mask
+          />
+        </div>
+      </q-card-section>
+      <q-card-section>
+        <div
+          class="tw-flex tw-items-center text-body-medium"
+          :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+        >
+          Harga Flash Sale Grosir Barang:
+          <q-input
+            dense
+            outlined
+            v-model="productPrice.flashSaleWholesaleSellPrice"
+            class="tw-ml-2 text-body-medium"
+            :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+            mask="###,###,###,###,###,###,###,###"
+            reverse-fill-mask
+          />
+        </div>
+      </q-card-section>
+      <q-card-section>
+        <div
+          class="tw-flex tw-items-center text-body-medium"
+          :class="$q.screen.lt.sm ? 'text-mobile' : ''"
+        >
+          Harga Flash Sale Eceran Barang:
+          <q-input
+            dense
+            outlined
+            v-model="productPrice.flashSaleRetailSellPrice"
             class="tw-ml-2 text-body-medium"
             :class="$q.screen.lt.sm ? 'text-mobile' : ''"
             mask="###,###,###,###,###,###,###,###"

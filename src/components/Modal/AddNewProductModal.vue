@@ -28,6 +28,12 @@ const onAddNewProduct = async () => {
       newProduct.value.retail_sell_price = Number(
         newProduct.value.retail_sell_price?.toString().replaceAll(",", ""),
       );
+      newProduct.value.flash_sale_wholesale_sell_price = Number(
+        newProduct.value.flash_sale_wholesale_sell_price?.toString().replaceAll(",", ""),
+      );
+      newProduct.value.flash_sale_retail_sell_price = Number(
+        newProduct.value.flash_sale_retail_sell_price?.toString().replaceAll(",", ""),
+      );
       await store.products.createNewProduct(newProduct.value);
       await store.products.getAllProducts();
       modelValue.value = false;
@@ -96,6 +102,20 @@ const onAddNewProduct = async () => {
           v-model="newProduct.retail_sell_price"
           outlined
           label="Harga Eceran"
+          mask="###,###,###,###,###,###,###,###"
+          reverse-fill-mask
+        />
+        <q-input
+          v-model="newProduct.flash_sale_wholesale_sell_price"
+          outlined
+          label="Harga Flash Sale Grosir"
+          mask="###,###,###,###,###,###,###,###"
+          reverse-fill-mask
+        />
+        <q-input
+          v-model="newProduct.flash_sale_retail_sell_price"
+          outlined
+          label="Harga Flash Sale Eceran"
           mask="###,###,###,###,###,###,###,###"
           reverse-fill-mask
         />
