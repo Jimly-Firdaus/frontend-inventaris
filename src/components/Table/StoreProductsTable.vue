@@ -54,6 +54,18 @@ const nonInsightColumns: QTableProps["columns"] = [
     label: "Grosir",
     field: "wholesale_quantity",
   },
+  {
+    name: "flash_sale_retail_quantity",
+    align: "left",
+    label: "Flash Sale Eceran",
+    field: "flash_sale_retail_quantity",
+  },
+  {
+    name: "flash_sale_wholesale_quantity",
+    align: "left",
+    label: "Flash Sale Grosir",
+    field: "flash_sale_wholesale_quantity",
+  },
 ];
 
 const insightColumns: QTableProps["columns"] = [
@@ -101,6 +113,12 @@ const columns = computed(() => [
           <q-td key="wholesale_quantity" :props="props">
             {{ props.row.wholesale_quantity ?? "0" }}
           </q-td>
+          <q-td key="flash_sale_retail_quantity" :props="props">
+            {{ props.row.flash_sale_retail_quantity ?? "0" }}
+          </q-td>
+          <q-td key="flash_sale_wholesale_quantity" :props="props">
+            {{ props.row.flash_sale_wholesale_quantity ?? "0" }}
+          </q-td>
         </template>
         <template v-else>
           <q-td key="quantity" :props="props">
@@ -115,7 +133,9 @@ const columns = computed(() => [
               formatWithThousandSeparator(
                 salesInsightView
                   ? Number(props.row.total_retail_revenue) +
-                      Number(props.row.total_wholesale_revenue)
+                      Number(props.row.total_wholesale_revenue) +
+                      Number(props.row.total_flash_sale_wholesale_revenue) +
+                      Number(props.row.total_flash_sale_retail_revenue)
                   : props.row.product_buy_price,
               ) ?? "0"
             }}
@@ -129,7 +149,7 @@ const columns = computed(() => [
           {{
             insightView
               ? salesInsightView
-                ? "Tidak ada penjualan barang"
+                ? "Tidak ada penjualan barang."
                 : "Tidak ada pemasukan barang."
               : "Tidak ada produk di toko ini."
           }}

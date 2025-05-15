@@ -23,6 +23,10 @@ export interface GetAllProductsResponseData {
   buy_price?: string | undefined;
   wholesale_sell_price?: string | undefined;
   retail_sell_price?: string | undefined;
+  flash_sale_wholesale_sell_price?: string | undefined;
+  flash_sale_retail_sell_price?: string | undefined;
+  flash_sale_wholesale_store_stock?: number;
+  flash_sale_retail_store_stock?: number;
   retail_store_stock?: number;
   wholesale_store_stock?: number;
   stock?: number;
@@ -39,6 +43,8 @@ export interface CreateProductRequest {
   stock: number;
   wholesale_sell_price?: number;
   retail_sell_price?: number;
+  flash_sale_wholesale_sell_price?: number;
+  flash_sale_retail_sell_price?: number;
 }
 
 export interface UpdateProductRequest {
@@ -46,6 +52,8 @@ export interface UpdateProductRequest {
   buy_price?: number;
   wholesale_sell_price?: number;
   retail_sell_price?: number;
+  flash_sale_wholesale_sell_price?: number;
+  flash_sale_retail_sell_price?: number;
 }
 
 export interface CreateInboundData {
@@ -192,6 +200,10 @@ export interface ProductSalesInsight {
   total_sold: number;
   total_retail_sold: number;
   total_wholesale_sold: number;
+  total_flash_sale_retail_sold: number;
+  total_flash_sale_wholesale_sold: number;
   total_retail_revenue: number;
   total_wholesale_revenue: number;
+  total_flash_sale_retail_revenue: number;
+  total_flash_sale_wholesale_revenue: number;
 }

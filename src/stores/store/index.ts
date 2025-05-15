@@ -100,10 +100,15 @@ export const useStoresStore = defineStore("stores", () => {
     invoiceId: string,
     updatedFields: Partial<InvoiceItem>,
   ) => {
-    await api.patch(
-      `/invoices/${invoiceId}/items/${invoiceItemId}`,
-      updatedFields,
-    );
+    try {
+      await api.patch(
+        `/invoices/${invoiceId}/items/${invoiceItemId}`,
+        updatedFields,
+      );
+    } catch (error) {
+      console.error("Failed to update invoice item:", error);
+      throw error;
+    }
 
     if (updatedFields?.quantity == 0) {
       deleteInvoiceItem(invoiceItemId);

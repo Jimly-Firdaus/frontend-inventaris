@@ -60,6 +60,18 @@ const storeManagerExtraColumns: QTableProps["columns"] = [
     label: "Grosir",
     field: "wholesale_store_stock",
   },
+  {
+    name: "flash_sale_wholesale_store_stock",
+    align: "left",
+    label: "Flash Sale Grosir",
+    field: "flash_sale_wholesale_store_stock",
+  },
+  {
+    name: "flash_sale_retail_store_stock",
+    align: "left",
+    label: "Flash Sale Eceran",
+    field: "flash_sale_retail_store_stock",
+  },
 ];
 
 const actionsColumn: QTableProps["columns"] = [
@@ -74,6 +86,18 @@ const actionsColumn: QTableProps["columns"] = [
     align: "left",
     label: "Harga Eceran",
     field: "retail_sell_price",
+  },
+  {
+    name: "flash_sale_wholesale_sell_price",
+    align: "left",
+    label: "Harga Flash Sale Grosir",
+    field: "flash_sale_wholesale_sell_price",
+  },
+  {
+    name: "flash_sale_retail_sell_price",
+    align: "left",
+    label: "Harga Flash Sale Eceran",
+    field: "flash_sale_retail_sell_price",
   },
   {
     name: "action",
@@ -257,6 +281,20 @@ onMounted(async () => {
                   ? formatWithThousandSeparator(props.row.retail_sell_price)
                   : undefined
               }}</q-td>
+              <q-td key="flash_sale_wholesale_sell_price" :props="props">{{
+                props.row.flash_sale_wholesale_sell_price
+                  ? formatWithThousandSeparator(
+                      props.row.flash_sale_wholesale_sell_price,
+                    )
+                  : undefined
+              }}</q-td>
+              <q-td key="flash_sale_retail_sell_price" :props="props">{{
+                props.row.flash_sale_retail_sell_price
+                  ? formatWithThousandSeparator(
+                      props.row.flash_sale_retail_sell_price,
+                    )
+                  : undefined
+              }}</q-td>
               <q-td key="action" :props="props">
                 <q-btn
                   dense
@@ -276,6 +314,12 @@ onMounted(async () => {
               </q-td>
               <q-td key="wholesale_store_stock" :props="props">
                 {{ props.row.wholesale_store_stock ?? "0" }}
+              </q-td>
+              <q-td key="flash_sale_wholesale_store_stock" :props="props">
+                {{ props.row.flash_sale_wholesale_store_stock ?? "0" }}
+              </q-td>
+              <q-td key="flash_sale_retail_store_stock" :props="props">
+                {{ props.row.flash_sale_retail_store_stock ?? "0" }}
               </q-td>
               <q-td key="action" :props="props">
                 <q-btn

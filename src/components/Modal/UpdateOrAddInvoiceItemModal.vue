@@ -9,6 +9,7 @@ import {
   PRODUCT_PRICE_TYPE,
   PRODUCT_PRICE_TYPE_LABEL,
 } from "src/constants/price";
+import { cloneDeep } from "lodash";
 
 const props = defineProps({
   invoiceItem: Object as PropType<InvoiceItem | undefined>,
@@ -112,10 +113,20 @@ const onAddNewInvoiceItem = async () => {
         product_id: selectedProduct.value.value,
         price_type: selectedPriceType.value.value as PRODUCT_PRICE_TYPE,
         quantity: Number(invoiceItemFields.value.quantity),
-        amount_paid_tiktok: Number(invoiceItemFields.value.amount_paid_tiktok.toString().replaceAll(",", "")),
-        amount_paid_shopee: Number(invoiceItemFields.value.amount_paid_shopee.toString().replaceAll(",", "")),
+        amount_paid_tiktok: Number(
+          invoiceItemFields.value.amount_paid_tiktok
+            .toString()
+            .replaceAll(",", ""),
+        ),
+        amount_paid_shopee: Number(
+          invoiceItemFields.value.amount_paid_shopee
+            .toString()
+            .replaceAll(",", ""),
+        ),
         amount_paid_transfer: Number(
-          invoiceItemFields.value.amount_paid_transfer.toString().replaceAll(",", ""),
+          invoiceItemFields.value.amount_paid_transfer
+            .toString()
+            .replaceAll(",", ""),
         ),
       });
 
@@ -149,13 +160,23 @@ const onAddNewInvoiceItem = async () => {
 const onUpdateInvoiceItem = async () => {
   try {
     if (props.invoiceItem) {
-      const updatedInvoiceItem = props.invoiceItem;
+      const updatedInvoiceItem = cloneDeep(props.invoiceItem);
       Object.assign(updatedInvoiceItem, {
         quantity: Number(invoiceItemFields.value.quantity),
-        amount_paid_tiktok: Number(invoiceItemFields.value.amount_paid_tiktok.toString().replaceAll(",", "")),
-        amount_paid_shopee: Number(invoiceItemFields.value.amount_paid_shopee.toString().replaceAll(",", "")),
+        amount_paid_tiktok: Number(
+          invoiceItemFields.value.amount_paid_tiktok
+            .toString()
+            .replaceAll(",", ""),
+        ),
+        amount_paid_shopee: Number(
+          invoiceItemFields.value.amount_paid_shopee
+            .toString()
+            .replaceAll(",", ""),
+        ),
         amount_paid_transfer: Number(
-          invoiceItemFields.value.amount_paid_transfer.toString().replaceAll(",", ""),
+          invoiceItemFields.value.amount_paid_transfer
+            .toString()
+            .replaceAll(",", ""),
         ),
       });
       await store.stores.updateInvoiceItem(

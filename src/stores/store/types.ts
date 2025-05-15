@@ -68,9 +68,13 @@ export interface OutboundInsightData {
   total_sold: number;
   total_retail_sold: number;
   total_wholesale_sold: number;
+  total_flash_sale_wholesale_sold: number;
+  total_flash_sale_retail_sold: number;
   total_revenue: string;
   total_retail_revenue: string;
   total_wholesale_revenue: string;
+  total_flash_sale_wholesale_revenue: string;
+  total_flash_sale_retail_revenue: string;
   items: OutboundInsightDataItem[];
 }
 
